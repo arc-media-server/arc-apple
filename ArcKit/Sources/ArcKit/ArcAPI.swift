@@ -14,6 +14,7 @@ public struct APIError: Error, LocalizedError, Sendable {
 
 /// Arc answered with something this app couldn't read.
 public struct UnexpectedAnswer: Error, LocalizedError, Sendable {
+    public init() {}
     public var errorDescription: String? { "unexpected answer from the server" }
 }
 
