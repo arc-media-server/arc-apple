@@ -1,4 +1,5 @@
 import AVFoundation
+import AVKit
 import UIKit
 
 /// Apple's own player (AVPlayer) behind the engine interface, drawing into an AVPlayerLayer.
@@ -35,9 +36,9 @@ final class AVPlayerEngine: PlaybackEngine {
         loadTask = Task { [weak self] in
             // Match Content: the TV switches to the title's dynamic range and frame rate before
             // the picture starts, as Apple's own player does. A custom layer has to ask for it.
-            _ = try? await asset.load(.tracks)
+            let criteria = try? await asset.load(.preferredDisplayCriteria)
             guard let self, !Task.isCancelled else { return }
-            self.applyDisplayCriteria(asset.preferredDisplayCriteria)
+            self.applyDisplayCriteria(criteria)
             self.attach(AVPlayerItem(asset: asset))
         }
     }
