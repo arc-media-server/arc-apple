@@ -42,9 +42,19 @@ The start of Arc for Apple TV, following the Android TV app's screens and rules.
 
 ## Checks
 
-- `swift test --package-path ArcKit`: 14 tests (addresses, models, Home rows, the client against a
-  stand-in server), all passing on Linux with Swift 6.2.
-- The tvOS app is built by the macOS workflow (results in the PR).
+- `swift test --package-path ArcKit`: 15 tests, all passing on Linux (Swift 6.2) and macOS
+  (Xcode 16.4). They cover addresses, models, Home rows and the client against a stand-in server.
+- `LiveServerTests`: a whole visit against a scratch Arc built from arc-media-server#325. It
+  covers:
+  - TV code sign-in approved as the admin, then a wrong and a right PIN;
+  - Home's rows, a show's seasons;
+  - a direct play through a cast link (a ranged read, 206);
+  - a converted stream part-way in, with its playlist and first segment through a cast link;
+  - progress and the keepalive.
+
+  It found that Arc refused players' "try again converted" requests (422), which #325 fixes.
+- The tvOS app builds for the Apple TV (`xcodebuild`, Xcode 16.4, tvOS 18.5 SDK, unsigned) in
+  the macOS workflow.
 - **Not yet run on an Apple TV or in the simulator.** That needs a Mac, or TestFlight with an
   Apple Developer account.
 
