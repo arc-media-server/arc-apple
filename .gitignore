@@ -8,3 +8,5 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 *.dSYM
+Arc.xcodeproj/
+ArcTV/Info.plist
