@@ -1,0 +1,65 @@
+/* Every user-facing string in the Apple TV app. Keys group by screen. */
+
+"common.ok" = "OK";
+"common.cancel" = "Cancel";
+"common.retry" = "Try Again";
+"common.close" = "Close";
+"common.unreachable" = "Arc couldn't be reached. Check the server is running and on the same network.";
+
+"server.title" = "Connect to your Arc server";
+"server.body" = "Enter the address you use to open Arc in a browser.";
+"server.hint" = "e.g. 192.168.1.20 or arc.example.com";
+"server.port_note" = "Port 8099 is used unless you type another. Add https:// for an address away from home.";
+"server.connect" = "Connect";
+"server.checking" = "Connecting…";
+"server.invalid" = "That doesn't look like an address. Try something like 192.168.1.20.";
+"server.not_arc" = "That address answered, but it isn't an Arc server.";
+"server.unreachable" = "Nothing answered at that address. Check it, and that the Apple TV is on the same network.";
+
+"signin.title" = "Sign in to Arc";
+"signin.step_open" = "On your phone or computer, open Arc and choose Link a Device in the profile menu.";
+"signin.step_link" = "Or go to %@";
+"signin.step_code" = "Enter this code:";
+"signin.waiting" = "Waiting for you to enter the code…";
+"signin.expired" = "That code ran out, so here's a new one.";
+"signin.new_code" = "Get a New Code";
+"signin.change_server" = "Use Another Server";
+"signin.server" = "Server: %@";
+"signin.failed" = "Signing in didn't work. Try a new code.";
+
+"profiles.title" = "Who's watching?";
+"profiles.locked" = "Has a PIN";
+"profiles.pin_title" = "Enter %@'s PIN";
+"profiles.pin_hint" = "PIN";
+"profiles.wrong_pin" = "That PIN isn't right.";
+"profiles.needs_password" = "The admin profile needs its PIN or the household password. Pick it in Arc in a browser, or set a PIN for it.";
+"profiles.sign_out" = "Sign Out";
+
+"home.empty_title" = "Nothing here yet";
+"home.empty_body" = "Add a library in Arc in a browser, and what you add will appear here.";
+"home.failed_title" = "Home couldn't load";
+
+"row.continue" = "Continue Watching";
+"row.next_up" = "Up Next";
+"row.watchlist" = "Watchlist";
+"row.recent" = "Recently Added in %@";
+"row.seasonal_romance" = "Romance for Valentine's Day";
+"row.seasonal_horror" = "Horror for Halloween";
+"row.seasonal_christmas" = "Christmas Films";
+"row.collection" = "Collection";
+"row.playlist" = "Playlist";
+
+"card.episode" = "S%1$d · E%2$d · %3$@";
+"card.episode_short" = "%1$d. %2$@";
+"card.new_episodes" = "Season %1$d · %2$d new";
+
+"details.play" = "Play";
+"details.resume" = "Resume";
+"details.from_beginning" = "Play from Beginning";
+"details.play_episode" = "Play S%1$d E%2$d";
+"details.resume_episode" = "Resume S%1$d E%2$d";
+"details.season" = "Season %d";
+"details.runtime" = "%1$dh %2$dm";
+
+"player.failed_title" = "This can't play right now";
+"player.failed" = "Arc couldn't start this title. Try again, or check the Dashboard in Arc for why.";
