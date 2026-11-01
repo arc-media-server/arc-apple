@@ -266,12 +266,15 @@ public struct PlaybackRequest: Codable, Sendable {
     public var startMs: Int64
     public var fileId: Int64?
     public var audioStream: Int?
+    /// A picture subtitle track to draw into the picture (Arc converts the video to do it).
+    public var burnSubtitle: String?
 
-    public init(caps: PlayerCaps, startMs: Int64 = 0, fileId: Int64? = nil, audioStream: Int? = nil) {
+    public init(caps: PlayerCaps, startMs: Int64 = 0, fileId: Int64? = nil, audioStream: Int? = nil, burnSubtitle: String? = nil) {
         self.caps = caps
         self.startMs = startMs
         self.fileId = fileId
         self.audioStream = audioStream
+        self.burnSubtitle = burnSubtitle
     }
 }
 
@@ -292,6 +295,16 @@ public struct SubtitleTrack: Codable, Sendable, Hashable, Identifiable {
     @Default<Defaults.False> public var forced: Bool
     /// A picture format (Blu-ray, DVD): Arc can only burn these in.
     @Default<Defaults.False> public var image: Bool
+    @Default<Defaults.False> public var hearingImpaired: Bool
+
+    public init(id: String, language: String? = nil, title: String? = nil, forced: Bool = false, image: Bool = false, hearingImpaired: Bool = false) {
+        self.id = id
+        self.language = language
+        self.title = title
+        self.forced = forced
+        self.image = image
+        self.hearingImpaired = hearingImpaired
+    }
 }
 
 public struct Marker: Codable, Sendable, Hashable {
@@ -299,6 +312,12 @@ public struct Marker: Codable, Sendable, Hashable {
     public let kind: String
     public let startMs: Int64
     public let endMs: Int64
+
+    public init(kind: String, startMs: Int64, endMs: Int64) {
+        self.kind = kind
+        self.startMs = startMs
+        self.endMs = endMs
+    }
 }
 
 public struct PlaybackPlan: Codable, Sendable {

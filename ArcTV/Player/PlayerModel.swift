@@ -17,11 +17,34 @@ final class PlayerModel {
     private(set) var ended = false
     var durationMs: Int64 { plan.map { $0.durationMs > 0 ? $0.durationMs : item.durationMs } ?? item.durationMs }
 
+    /// The subtitles on screen (nil: off), and their lines when they're text.
+    private(set) var subtitle: SubtitleTrack?
+    private var cues: [SubtitleCue] = []
+    /// The episode that follows, for Up Next (found when an episode starts).
+    private(set) var next: Item?
+    /// The profile's playback preferences (Auto-Play, auto-skip, subtitles).
+    private(set) var prefs: Prefs?
+    var subtitleTracks: [SubtitleTrack] { plan?.subtitleTracks ?? [] }
+    var audioTracks: [AudioTrack] { plan?.audioTracks ?? [] }
+    var audioStream: Int { plan?.audioStream ?? -1 }
+    /// The line of subtitles showing now.
+    var caption: String? { cues.isEmpty ? nil : cue(at: positionMs, in: cues)?.text }
+    /// The intro, recap or credits playing now (for Skip).
+    var marker: Marker? { plan.flatMap { activeMarker($0.markers, at: positionMs) } }
+    /// Whether the Up Next card is due.
+    var upNextDue: Bool { next != nil && !loading && showsUpNext(markers: plan?.markers ?? [], positionMs: positionMs, durationMs: durationMs) }
+
     let engine: PlaybackEngine
     private let api: ArcAPI
     private var plan: PlaybackPlan?
     private var caps: PlayerCaps
     private var retried = false
+    /// The viewer's audio track and picture subtitles to draw in (asked of Arc on every load).
+    private var audioChoice: Int?
+    private var burn: String?
+    /// Subtitles were chosen (by the profile's preferences or the viewer): don't choose again.
+    private var subtitlesSettled = false
+    private var skipped: Set<Int64> = []
     private var loops: [Task<Void, Never>] = []
     private var startTask: Task<Void, Never>?
     private var lastReport = Date.distantPast
@@ -40,6 +63,7 @@ final class PlayerModel {
 
     func start() {
         load(at: positionMs)
+        Task { [weak self] in await self?.loadExtras() }
         loops = [
             Task { [weak self] in
                 while !Task.isCancelled {
@@ -65,9 +89,10 @@ final class PlayerModel {
         startTask = Task {
             if let old { await api.stopTranscode(old) }
             do {
-                let p = try await api.startPlayback(itemId: item.id, request: PlaybackRequest(caps: caps, startMs: fileMs))
+                let p = try await api.startPlayback(itemId: item.id, request: PlaybackRequest(caps: caps, startMs: fileMs, fileId: plan.flatMap { $0.fileId > 0 ? $0.fileId : nil }, audioStream: audioChoice, burnSubtitle: burn))
                 guard !Task.isCancelled else { return }
                 plan = p
+                settleSubtitles()
                 log.info("playing by \(p.method)" + (p.reasons.isEmpty ? "" : " (\(p.reasons.joined(separator: ", ")))"))
                 // Apple's player fetches a converted stream's pieces itself, without the app's
                 // header: a cast link carries its own token. An older Arc without them gets the header.
@@ -93,6 +118,89 @@ final class PlayerModel {
                 log.warn("playback failed to start: \(type(of: error))")
                 fail(L("player.failed"))
             }
+        }
+    }
+
+    /// The profile's preferences and the next episode, alongside starting the stream.
+    private func loadExtras() async {
+        do {
+            prefs = try await api.prefs()
+            settleSubtitles()
+        } catch {
+            log.debug("preferences unavailable in the player: \(type(of: error))")
+        }
+        if item.isEpisode {
+            do { next = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
+        }
+    }
+
+    /// Turns on the subtitles the profile's preferences ask for, once both are known.
+    private func settleSubtitles() {
+        guard !subtitlesSettled, let prefs, let plan else { return }
+        subtitlesSettled = true
+        let audioLanguage = plan.audioTracks.first { $0.index == plan.audioStream }?.language
+        guard let pick = ArcKit.chooseSubtitle(plan.subtitleTracks, preferred: prefs.subtitleLanguage, audioLanguage: audioLanguage, mode: prefs.subtitleMode) else { return }
+        log.debug("subtitles on by the profile's preferences (\(pick.image ? "picture" : "text"))")
+        show(pick)
+    }
+
+    /// The viewer chose subtitles (nil: Off). Remembered in the profile, as the web player does.
+    func chooseSubtitle(_ track: SubtitleTrack?) {
+        subtitlesSettled = true
+        show(track)
+        if let remembered = rememberedSubtitleLanguage(track, mode: prefs?.subtitleMode ?? "") {
+            savePref("subtitle_language", remembered)
+        }
+    }
+
+    private func show(_ track: SubtitleTrack?) {
+        subtitle = track
+        cues = []
+        if let track, track.image {
+            // Picture subtitles can only be drawn in by Arc, which converts the video to do it.
+            guard burn != track.id else { return }
+            burn = track.id
+            load(at: positionMs)
+            return
+        }
+        if burn != nil {
+            burn = nil
+            load(at: positionMs)
+        }
+        guard let track, let fileId = plan?.fileId else { return }
+        let api = self.api, id = item.id
+        Task { [weak self] in
+            do {
+                let lines = try await api.subtitleCues(itemId: id, track: track.id, fileId: fileId)
+                guard let self, self.subtitle?.id == track.id else { return }
+                self.cues = lines
+                self.log.debug("subtitles loaded: \(lines.count) lines")
+            } catch {
+                ArcLog.shared.warn("subtitles failed to load: \(type(of: error))")
+            }
+        }
+    }
+
+    /// The viewer chose an audio track: Arc may need to repackage or convert for it.
+    func chooseAudio(_ index: Int) {
+        guard index != audioStream else { return }
+        audioChoice = index
+        log.info("audio track changed")
+        load(at: positionMs)
+        if let language = audioTracks.first(where: { $0.index == index })?.language { savePref("audio_language", language) }
+    }
+
+    /// Jumps to the end of the intro, recap or credits.
+    func skipMarker() {
+        guard let m = marker else { return }
+        skipped.insert(m.startMs)
+        seek(by: m.endMs - positionMs)
+    }
+
+    private func savePref(_ key: String, _ value: String) {
+        let api = self.api
+        Task {
+            do { try await api.updatePrefs([key: .string(value)]) } catch { ArcLog.shared.warn("saving the preference \(key) failed: \(type(of: error))") }
         }
     }
 
@@ -136,6 +244,11 @@ final class PlayerModel {
         positionMs = PlaybackClock.filePosition(p, playerMs: Int64(engine.currentSeconds * 1000))
         playing = engine.isPlaying
         if playing && Date().timeIntervalSince(lastReport) >= 10 { report("playing") }
+        // Skip Intros Automatically: intros and recaps, each once (not credits, which carry Up Next).
+        if prefs?.autoSkip == true, let m = marker, m.kind != "credits", !skipped.contains(m.startMs), playing {
+            log.debug("skipping the \(m.kind) automatically")
+            skipMarker()
+        }
     }
 
     func togglePlay() {

@@ -645,6 +645,40 @@
   },
   "status": 200
  },
+ "GET items/00d0c71cd06a27a19ac9d7cc1211a534/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 7,
+   "id": "442fbb64595eb6821a71db8958d2f1c4",
+   "images": {
+    "primary": "/api/items/442fbb64595eb6821a71db8958d2f1c4/images/primary?v=0793fa071b65ced6f67fbc7b",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Mal must choose which crew members to save when one is gravely wounded and two others are kidnapped. Simon finds an uneasy haven in a remote village, but River's uncanny perceptions jeopardize the Tams' temporary safety.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-11-08",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "safe",
+   "stream_url": "/api/items/442fbb64595eb6821a71db8958d2f1c4/stream",
+   "title": "Safe",
+   "tmdb_id": 1048597,
+   "tvdb_id": 297995,
+   "user_data": {
+    "played": false
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
  "GET items/0250e2ce34a04457248776120c727955": {
   "body": {
    "added_at": 1793464922,
@@ -832,6 +866,42 @@
   },
   "status": 200
  },
+ "GET items/0250e2ce34a04457248776120c727955/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 5,
+   "id": "5102c68eefbe9ff1c3324e55abd8f979",
+   "images": {
+    "primary": "/api/items/5102c68eefbe9ff1c3324e55abd8f979/images/primary?v=68961ff94cf1b37c65238696",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "After Serenity suffers a catastrophe that leaves her crew with only hours of oxygen, flashbacks show how Mal and Zo\u00eb acquired Serenity and assembled their motley band.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-10-25",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "out of gas",
+   "stream_url": "/api/items/5102c68eefbe9ff1c3324e55abd8f979/stream",
+   "title": "Out of Gas",
+   "tmdb_id": 1048600,
+   "tvdb_id": 297993,
+   "user_data": {
+    "last_played_at": 1793488280,
+    "play_count": 1,
+    "played": true
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
  "GET items/055af1c498fa92cc7deb13751a5754af": {
   "body": {
    "added_at": 1793464922,
@@ -948,6 +1018,40 @@
    "title": "Desert Journey",
    "tmdb_id": 5124230,
    "tvdb_id": 9885759,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
+ "GET items/055af1c498fa92cc7deb13751a5754af/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 20,
+   "id": "307e03c812623a9b2b023ca34613e6c1",
+   "images": {
+    "primary": "/api/items/307e03c812623a9b2b023ca34613e6c1/images/primary?v=3a6f453331feae7bfd80d3e2",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus and Elinalise reach Rapan and soon reunite with Paul, only to learn that a deadly labyrinth has claimed both Zenith and Roxy. The fruits of Rudeus's studies offer a last, faint hope to reach his mother and his mentor in time.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-06-03",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "into the labyrinth",
+   "stream_url": "/api/items/307e03c812623a9b2b023ca34613e6c1/stream",
+   "title": "Into the Labyrinth",
+   "tmdb_id": 5124232,
+   "tvdb_id": 9885760,
    "user_data": {
     "played": false
    },
@@ -1093,6 +1197,40 @@
   },
   "status": 200
  },
+ "GET items/0a04f62558fbc1e4f50d67c7ab100dad/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 10,
+   "id": "888aeb4ea8e235583f61cdec49d6f9bc",
+   "images": {
+    "primary": "/api/items/888aeb4ea8e235583f61cdec49d6f9bc/images/primary?v=c2eb3e7e2de754e40abbc75b",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus settles into a new routine at the university. But as time passes, Silent Fitz is increasingly in his thoughts. What does he really feel for his enigmatic classmate? And how far will he pry into a friend's secrets to find out?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-09-11",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "these feelings",
+   "stream_url": "/api/items/888aeb4ea8e235583f61cdec49d6f9bc/stream",
+   "title": "These Feelings",
+   "tmdb_id": 4573341,
+   "tvdb_id": 9862492,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/0add3461c691d3c7e30429bac319bc82": {
   "body": {
    "added_at": 1793464922,
@@ -1230,6 +1368,40 @@
    "title": "Norn and Aisha",
    "tmdb_id": 5124227,
    "tvdb_id": 9885756,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
+ "GET items/0add3461c691d3c7e30429bac319bc82/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 17,
+   "id": "67fcc77b2eee7a87e786dab74cf17c08",
+   "images": {
+    "primary": "/api/items/67fcc77b2eee7a87e786dab74cf17c08/images/primary?v=0703a9b1c1cf422c2caf2391",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Norn shuts herself in her dorm room and refuses to attend classes. Haunted by the specter of his past life, Rudeus sets out to solve his sister's problems, only to discover that he is the cause.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-05-06",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "my older brother's feelings",
+   "stream_url": "/api/items/67fcc77b2eee7a87e786dab74cf17c08/stream",
+   "title": "My Older Brother's Feelings",
+   "tmdb_id": 5124228,
+   "tvdb_id": 9885757,
    "user_data": {
     "played": false
    },
@@ -1382,6 +1554,40 @@
   },
   "status": 200
  },
+ "GET items/18610c388f534f8f053b56035341d2f7/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 7,
+   "id": "c11333ed835373f9e47dae9decee826b",
+   "images": {
+    "primary": "/api/items/c11333ed835373f9e47dae9decee826b/images/primary?v=290096a71af2fe56e77750b5",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Eris\u2019s 10th birthday is fast approaching, and her grandfather has invited nobles from across the kingdom to a dance party to celebrate. There\u2019s just one problem: Eris can\u2019t dance, and she\u2019s quickly losing patience with her lessons.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-02-22",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "what lies beyond effort",
+   "stream_url": "/api/items/c11333ed835373f9e47dae9decee826b/stream",
+   "title": "What Lies Beyond Effort",
+   "tmdb_id": 2696389,
+   "tvdb_id": 8145559,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/1988a3c74ea673a388513e7679ba2838": {
   "body": {
    "added_at": 1793464922,
@@ -1526,6 +1732,40 @@
   },
   "status": 200
  },
+ "GET items/1988a3c74ea673a388513e7679ba2838/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 12,
+   "id": "9a9157a391a5fa93c8648fe60d246269",
+   "images": {
+    "primary": "/api/items/9a9157a391a5fa93c8648fe60d246269/images/primary?v=e7c0a686e109bfeb02b7cdcd",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus's strange guest recounts his future and reveals the cause of all his misfortunes.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-09-14",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "end and a beginning",
+   "stream_url": "/api/items/9a9157a391a5fa93c8648fe60d246269/stream",
+   "title": "An End and a Beginning",
+   "tmdb_id": 7478566,
+   "tvdb_id": 11872052,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/213c2ba078592c4c3ce7fc8a2d196d20": {
   "body": {
    "added_at": 1793464922,
@@ -1656,6 +1896,40 @@
    "title": "A Friend",
    "tmdb_id": 2602035,
    "tvdb_id": 8109809,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/213c2ba078592c4c3ce7fc8a2d196d20/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 4,
+   "id": "968fd9282145286fc34a0af8d7de692d",
+   "images": {
+    "primary": "/api/items/968fd9282145286fc34a0af8d7de692d/images/primary?v=09c572986ba562478d93154d",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "The Greyrat family is overjoyed when Zenith announces that she\u2019s pregnant with a second child, but the mood takes a dour turn when Lilia reveals that she is also pregnant and Paul is the father. Will this be the end of Rudy\u2019s happy family?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-02-01",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "emergency family meeting",
+   "stream_url": "/api/items/968fd9282145286fc34a0af8d7de692d/stream",
+   "title": "Emergency Family Meeting",
+   "tmdb_id": 2673976,
+   "tvdb_id": 8117854,
    "user_data": {
     "played": false
    },
@@ -2534,6 +2808,40 @@
   },
   "status": 200
  },
+ "GET items/262d7db848d660101b13f7dc295dfe50/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 1,
+   "id": "6b6abe9469291ea25d01796dbed9930b",
+   "images": {
+    "primary": "/api/items/6b6abe9469291ea25d01796dbed9930b/images/primary?v=33b488a1990365deeae899b9",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus journeys to the harsh northlands in search of his lost mother. Or at least, that's what he tells himself. The scars of his parting from Eris run deep, and getting back on his feet may not be so easy.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-07-10",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "brokenhearted mage",
+   "stream_url": "/api/items/6b6abe9469291ea25d01796dbed9930b/stream",
+   "title": "The Brokenhearted Mage",
+   "tmdb_id": 4472785,
+   "tvdb_id": 9862482,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/26e974041415ad084665b3694b8e8391": {
   "body": {
    "added_at": 1793464922,
@@ -2715,6 +3023,40 @@
   },
   "status": 200
  },
+ "GET items/26e974041415ad084665b3694b8e8391/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 2,
+   "id": "7a60c4db9a94ce4e61b6e1eb3d523b03",
+   "images": {
+    "primary": "/api/items/7a60c4db9a94ce4e61b6e1eb3d523b03/images/primary?v=c93d44512d564a9f6fda61bc",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "The mass-teleportation in Fittoa places Princess Ariel Anemoi Asura in mortal peril\u2014then drops a powerful new bodyguard into her lap! While Rudeus and Eris journeyed home, a deadly drama was playing out in the halls of power.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-07-03",
+   "runtime_min": 24,
+   "season_number": 0,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "guardian fitz",
+   "stream_url": "/api/items/7a60c4db9a94ce4e61b6e1eb3d523b03/stream",
+   "title": "Guardian Fitz",
+   "tmdb_id": 4556476,
+   "tvdb_id": 9810899,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/27457a8f74d482b6d512a5e76db8706a": {
   "body": {
    "added_at": 1793464922,
@@ -2887,6 +3229,40 @@
   },
   "status": 200
  },
+ "GET items/27457a8f74d482b6d512a5e76db8706a/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 7,
+   "id": "bee67869fcf7ba1d5332eaf03dfa643f",
+   "images": {
+    "primary": "/api/items/bee67869fcf7ba1d5332eaf03dfa643f/images/primary?v=fe88e03bb9f873b2555f2bd3",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Following a successful summoning experiment, Nanahoshi offers Rudeus a reward.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-08-10",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "phase four",
+   "stream_url": "/api/items/bee67869fcf7ba1d5332eaf03dfa643f/stream",
+   "title": "Phase Four",
+   "tmdb_id": 7478548,
+   "tvdb_id": 11872047,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/2b8ae917c52167ff5244fd654c7753b4": {
   "body": {
    "added_at": 1793464922,
@@ -3022,6 +3398,40 @@
   },
   "status": 200
  },
+ "GET items/2b8ae917c52167ff5244fd654c7753b4/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 13,
+   "id": "5bdefc77a7ea54f9cf2e0f407c40b490",
+   "images": {
+    "primary": "/api/items/5bdefc77a7ea54f9cf2e0f407c40b490/images/primary?v=fe5a5eb003c0906ccc19a0c3",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Newly cured and brimming with confidence, Rudeus resolves to marry Sylphie. Just one problem: he has no idea how marriage works in this world. And when friends tell him any newlywed needs a house, he winds up with a haunted mansion.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-04-08",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "my dream home",
+   "stream_url": "/api/items/5bdefc77a7ea54f9cf2e0f407c40b490/stream",
+   "title": "My Dream Home",
+   "tmdb_id": 5012879,
+   "tvdb_id": 9885753,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/2c218f16c45c0494dc82d7aa3000df26": {
   "body": {
    "added_at": 1793464922,
@@ -3086,6 +3496,33 @@
     "played": false
    },
    "year": 2024
+  },
+  "status": 200
+ },
+ "GET items/2c218f16c45c0494dc82d7aa3000df26/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 4,
+   "id": "bada351eaa2a75c293c82e9133c1bd08",
+   "images": {
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "season_number": 0,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "episode 4",
+   "stream_url": "/api/items/bada351eaa2a75c293c82e9133c1bd08/stream",
+   "title": "Episode 4",
+   "user_data": {
+    "played": false
+   }
   },
   "status": 200
  },
@@ -3217,6 +3654,40 @@
   },
   "status": 200
  },
+ "GET items/307e03c812623a9b2b023ca34613e6c1/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 21,
+   "id": "4933032628cad94708e3223107fa1177",
+   "images": {
+    "primary": "/api/items/4933032628cad94708e3223107fa1177/images/primary?v=4482f7bcf913b6795803f792",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "With Roxy's rescue, the search for Zenith resumes in earnest. Rudeus reconnects with his mentor amid the perils of the labyrinth. But why does she seem a little more awkward around him than before?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-06-10",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "magic circle to the sixth stratum",
+   "stream_url": "/api/items/4933032628cad94708e3223107fa1177/stream",
+   "title": "Magic Circle to the Sixth Stratum",
+   "tmdb_id": 5124233,
+   "tvdb_id": 9885761,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/31c12b506c02c9c519ef57f5cb3f5888": {
   "body": {
    "added_at": 1793464922,
@@ -3306,6 +3777,40 @@
    "title": "The Diary",
    "tmdb_id": 7478568,
    "tvdb_id": 11872053,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/31c12b506c02c9c519ef57f5cb3f5888/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 14,
+   "id": "5f6a9d6526861b24693da641da2f7e37",
+   "images": {
+    "primary": "/api/items/5f6a9d6526861b24693da641da2f7e37/images/primary?v=8a30592738a0a44b31c0e6f3",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Having read one possible future, Rudeus takes action to avoid it and protect the people he loves.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-09-28",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "resolve",
+   "stream_url": "/api/items/5f6a9d6526861b24693da641da2f7e37/stream",
+   "title": "Resolve",
+   "tmdb_id": 7478569,
+   "tvdb_id": 11872054,
    "user_data": {
     "played": false
    },
@@ -3492,6 +3997,40 @@
   },
   "status": 200
  },
+ "GET items/35ca0361390767def5084ea2e6f6fad1/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 11,
+   "id": "1988a3c74ea673a388513e7679ba2838",
+   "images": {
+    "primary": "/api/items/1988a3c74ea673a388513e7679ba2838/images/primary?v=2b145b568212d7f0244d3ca8",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus receives a puzzling message in his dreams. But before he can act on it, a strange visitor appears.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-09-07",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "turning point 4",
+   "stream_url": "/api/items/1988a3c74ea673a388513e7679ba2838/stream",
+   "title": "Turning Point 4",
+   "tmdb_id": 7478563,
+   "tvdb_id": 11872051,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/3854406fdcbe4d24e27a2f435a17d04e": {
   "body": {
    "added_at": 1793464922,
@@ -3637,6 +4176,40 @@
   },
   "status": 200
  },
+ "GET items/3854406fdcbe4d24e27a2f435a17d04e/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 3,
+   "id": "213c2ba078592c4c3ce7fc8a2d196d20",
+   "images": {
+    "primary": "/api/items/213c2ba078592c4c3ce7fc8a2d196d20/images/primary?v=dd1d7e459429cbe555a0f763",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudy begins to explore the village and rescues a green-haired child from a group of bullies. The two grow close practicing magic, but is there more to Rudy\u2019s new friend than he thinks?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-01-25",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "friend",
+   "stream_url": "/api/items/213c2ba078592c4c3ce7fc8a2d196d20/stream",
+   "title": "A Friend",
+   "tmdb_id": 2602035,
+   "tvdb_id": 8109809,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/3894969dcf07a323212e15668e8ec5ae": {
   "body": {
    "added_at": 1793464922,
@@ -3774,6 +4347,40 @@
    "title": "Letter of Invitation",
    "tmdb_id": 4573330,
    "tvdb_id": 9862485,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/3894969dcf07a323212e15668e8ec5ae/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 5,
+   "id": "f786dd84071058c09735395d9e397cb6",
+   "images": {
+    "primary": "/api/items/f786dd84071058c09735395d9e397cb6/images/primary?v=0720b1e5650a2048b65f8318",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Following the Man-God's advice, Rudeus enrolls in school. He reunites with an old friend and meets potential new enemies, but will he find what he seeks? And what does the future hold for him and the enigmatic \"Silent Fitz\"?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-08-07",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "ranoa university of magic",
+   "stream_url": "/api/items/f786dd84071058c09735395d9e397cb6/stream",
+   "title": "Ranoa University of Magic",
+   "tmdb_id": 4573332,
+   "tvdb_id": 9862486,
    "user_data": {
     "played": false
    },
@@ -3953,6 +4560,40 @@
    "title": "The Birth of My Little Sister, the Maid",
    "tmdb_id": 3308232,
    "tvdb_id": 8722593,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/39056682e3c2c13363ba7026a9913146/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 21,
+   "id": "613989d9b4a7d0f7ef022330e4d007d4",
+   "images": {
+    "primary": "/api/items/613989d9b4a7d0f7ef022330e4d007d4/images/primary?v=c072e9dde305b16084d84c41",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus, Eris, and Ruijerd are nearing the end of their journey, but a chance encounter in a snowy mountain pass threatens to put a premature end to their adventures.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-12-06",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "turning point 2",
+   "stream_url": "/api/items/613989d9b4a7d0f7ef022330e4d007d4/stream",
+   "title": "Turning Point 2",
+   "tmdb_id": 3308233,
+   "tvdb_id": 8722594,
    "user_data": {
     "played": false
    },
@@ -4162,6 +4803,42 @@
   },
   "status": 200
  },
+ "GET items/3faeb74c89d43e632e5c45eca797649d/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 2,
+   "id": "84c4b5dac63cf7448c0ebb583f9ef09e",
+   "images": {
+    "primary": "/api/items/84c4b5dac63cf7448c0ebb583f9ef09e/images/primary?v=7e7f00fc87c9be3cca361031",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Serenity is pulled in by a Tohoku-class cruiser while investigating a spaceship that was attacked by Reavers. Simon and River must hide to prevent capture, while something is wrong with the lone survivor of the attacked spaceship.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-09-27",
+   "runtime_min": 45,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "bushwhacked",
+   "stream_url": "/api/items/84c4b5dac63cf7448c0ebb583f9ef09e/stream",
+   "title": "Bushwhacked",
+   "tmdb_id": 1048595,
+   "tvdb_id": 297990,
+   "user_data": {
+    "last_played_at": 1793481304,
+    "play_count": 1,
+    "played": true
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
  "GET items/40133282a3319d2e612698bdd9e030c1": {
   "body": {
    "added_at": 1793464922,
@@ -4279,6 +4956,42 @@
    "tvdb_id": 297991,
    "user_data": {
     "last_played_at": 1793487976,
+    "play_count": 1,
+    "played": true
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
+ "GET items/40133282a3319d2e612698bdd9e030c1/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 4,
+   "id": "0250e2ce34a04457248776120c727955",
+   "images": {
+    "primary": "/api/items/0250e2ce34a04457248776120c727955/images/primary?v=238e8aa225c0d37fd0d10d45",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Returning to a planet where he ran into some serious trouble years ago, Jayne discovers that he's become a local folk legend. Mal decides to use this entertaining distraction to complete a job, but some unfinished business may derail his plans.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-10-18",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "jaynestown",
+   "stream_url": "/api/items/0250e2ce34a04457248776120c727955/stream",
+   "title": "Jaynestown",
+   "tmdb_id": 1048599,
+   "tvdb_id": 297992,
+   "user_data": {
+    "last_played_at": 1793488254,
     "play_count": 1,
     "played": true
    },
@@ -4455,6 +5168,40 @@
   },
   "status": 200
  },
+ "GET items/442fbb64595eb6821a71db8958d2f1c4/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 8,
+   "id": "5ca6bc787a7af9a0659e826e9bf516ad",
+   "images": {
+    "primary": "/api/items/5ca6bc787a7af9a0659e826e9bf516ad/images/primary?v=84e62b53dd5fa7f7b3a096b4",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Hard up for cash, Serenity takes on a job from Simon: help him get a thorough diagnostic of River in return for the opportunity to loot the vast medical stores of an Alliance hospital on central world Ariel. But River's pursuers are hot on their trail, and they receive some unexpected inside help.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-11-15",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "ariel",
+   "stream_url": "/api/items/5ca6bc787a7af9a0659e826e9bf516ad/stream",
+   "title": "Ariel",
+   "tmdb_id": 1048601,
+   "tvdb_id": 297996,
+   "user_data": {
+    "played": false
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
  "GET items/4933032628cad94708e3223107fa1177": {
   "body": {
    "added_at": 1793464922,
@@ -4569,6 +5316,40 @@
    "title": "Magic Circle to the Sixth Stratum",
    "tmdb_id": 5124233,
    "tvdb_id": 9885761,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
+ "GET items/4933032628cad94708e3223107fa1177/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 22,
+   "id": "e2f5d46ca2e6592fde04e9d647387bc9",
+   "images": {
+    "primary": "/api/items/e2f5d46ca2e6592fde04e9d647387bc9/images/primary?v=51fd170bed63c0dc536a5be8",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "The rescue party reaches the heart of the Teleporter Labyrinth and confronts its guardian. But when the monster shrugs off Rudeus's magic, they realize they may have bitten off more than they can chew.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-06-17",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "parents",
+   "stream_url": "/api/items/e2f5d46ca2e6592fde04e9d647387bc9/stream",
+   "title": "Parents",
+   "tmdb_id": 5124235,
+   "tvdb_id": 9885762,
    "user_data": {
     "played": false
    },
@@ -4727,6 +5508,40 @@
    "title": "The Forest in the Dead of Night",
    "tmdb_id": 4556433,
    "tvdb_id": 9862483,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/4a2c477b0dd33ed18c8cbf60e81242ba/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 3,
+   "id": "c3f07c3c611608f0a8f5cd9543ea5421",
+   "images": {
+    "primary": "/api/items/c3f07c3c611608f0a8f5cd9543ea5421/images/primary?v=ef6faefdef6fe6bff874febf",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Things seem to be looking up for Rudeus. And when Sara asks him on a date, he decides to forget his heartbreak and start a new romance. But putting the past behind him may be easier said than done.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-07-24",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "abrupt approach",
+   "stream_url": "/api/items/c3f07c3c611608f0a8f5cd9543ea5421/stream",
+   "title": "Abrupt Approach",
+   "tmdb_id": 4573329,
+   "tvdb_id": 9862484,
    "user_data": {
     "played": false
    },
@@ -4961,6 +5776,40 @@
   },
   "status": 200
  },
+ "GET items/4bfe82f70a2ac2e11fd901b876c5efe0/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 9,
+   "id": "7da8906d9d62d53b67fb7018eb7c9d7e",
+   "images": {
+    "primary": "/api/items/7da8906d9d62d53b67fb7018eb7c9d7e/images/primary?v=24140a2c3cafaaa1cf021b0d",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudy and Eris find themselves stranded in the wilds of the Demon Continent. Their only chance to survive seems to lie in Ruijerd, a warrior of the infamous Superd tribe of demons, but can he be trusted?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-03-08",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "chance encounter",
+   "stream_url": "/api/items/7da8906d9d62d53b67fb7018eb7c9d7e/stream",
+   "title": "A Chance Encounter",
+   "tmdb_id": 2696391,
+   "tvdb_id": 8145561,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/5102c68eefbe9ff1c3324e55abd8f979": {
   "body": {
    "added_at": 1793464922,
@@ -5087,6 +5936,42 @@
   },
   "status": 200
  },
+ "GET items/5102c68eefbe9ff1c3324e55abd8f979/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 6,
+   "id": "00d0c71cd06a27a19ac9d7cc1211a534",
+   "images": {
+    "primary": "/api/items/00d0c71cd06a27a19ac9d7cc1211a534/images/primary?v=728c711c355cc3329285f9d3",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Inara attends a formal society dance, only to find Malcolm there as well, attempting to set up a smuggling job. Mal comes to blows with Inara's conceited date and finds himself facing a duel with a renowned swordsman, and only one night to learn how to fence.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-11-01",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "shindig",
+   "stream_url": "/api/items/00d0c71cd06a27a19ac9d7cc1211a534/stream",
+   "title": "Shindig",
+   "tmdb_id": 1048596,
+   "tvdb_id": 297994,
+   "user_data": {
+    "last_played_at": 1793528302,
+    "play_count": 1,
+    "played": true
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
  "GET items/51b67862049dd539ccf9c0e7605e01c9": {
   "body": {
    "added_at": 1793464922,
@@ -5141,6 +6026,33 @@
    "sort_title": "episode 13",
    "stream_url": "/api/items/51b67862049dd539ccf9c0e7605e01c9/stream",
    "title": "Episode 13",
+   "user_data": {
+    "played": false
+   }
+  },
+  "status": 200
+ },
+ "GET items/51b67862049dd539ccf9c0e7605e01c9/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 14,
+   "id": "570a5d795de70a130740144921ec7801",
+   "images": {
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "episode 14",
+   "stream_url": "/api/items/570a5d795de70a130740144921ec7801/stream",
+   "title": "Episode 14",
    "user_data": {
     "played": false
    }
@@ -5326,6 +6238,40 @@
   },
   "status": 200
  },
+ "GET items/51e50505317bdcf4a9955c6f70e1c519/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 16,
+   "id": "0add3461c691d3c7e30429bac319bc82",
+   "images": {
+    "primary": "/api/items/0add3461c691d3c7e30429bac319bc82/images/primary?v=12b114e63bd29147b7bc3577",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus's sisters arrive with an unexpected chaperone. After catching up with an old friend, Rudeus decides it's time to send the girls to school. But convincing Norn and Aisha turns out to be more trouble than he bargained for.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-04-29",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "norn and aisha",
+   "stream_url": "/api/items/0add3461c691d3c7e30429bac319bc82/stream",
+   "title": "Norn and Aisha",
+   "tmdb_id": 5124227,
+   "tvdb_id": 9885756,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/570a5d795de70a130740144921ec7801": {
   "body": {
    "added_at": 1793464922,
@@ -5380,6 +6326,33 @@
    "sort_title": "episode 14",
    "stream_url": "/api/items/570a5d795de70a130740144921ec7801/stream",
    "title": "Episode 14",
+   "user_data": {
+    "played": false
+   }
+  },
+  "status": 200
+ },
+ "GET items/570a5d795de70a130740144921ec7801/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 20,
+   "id": "f60f42b775bc0d7e434726600d8f967c",
+   "images": {
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "episode 20",
+   "stream_url": "/api/items/f60f42b775bc0d7e434726600d8f967c/stream",
+   "title": "Episode 20",
    "user_data": {
     "played": false
    }
@@ -5516,6 +6489,40 @@
   },
   "status": 200
  },
+ "GET items/5bdefc77a7ea54f9cf2e0f407c40b490/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 14,
+   "id": "b978b034c86f94c335541e5bbb50c8b5",
+   "images": {
+    "primary": "/api/items/b978b034c86f94c335541e5bbb50c8b5/images/primary?v=7ad9bf718e27787643337346",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "The newlyweds have settled into their new home. Next, custom dictates they throw a party for everyone they know. Preparing to host a crowd won't be easy. And even if they pull it off, the big day has surprises in store.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-04-15",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "wedding reception",
+   "stream_url": "/api/items/b978b034c86f94c335541e5bbb50c8b5/stream",
+   "title": "Wedding Reception",
+   "tmdb_id": 5124217,
+   "tvdb_id": 9885754,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/5bf3396070cf7b6f14c79fc1931b1d8c": {
   "body": {
    "added_at": 1793464922,
@@ -5618,6 +6625,40 @@
    "title": "To You",
    "tmdb_id": 4573344,
    "tvdb_id": 9862493,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/5bf3396070cf7b6f14c79fc1931b1d8c/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 12,
+   "id": "2b8ae917c52167ff5244fd654c7753b4",
+   "images": {
+    "primary": "/api/items/2b8ae917c52167ff5244fd654c7753b4/images/primary?v=e8050a87fdc5871c9e10adf7",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Sylphiette reveals herself and Rudeus admits his feelings, but even that isn't enough to cure what ails him. After their heart-to-heart, Sylphiette sets out to end his problem once and for all.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-09-25",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "i want to tell you",
+   "stream_url": "/api/items/2b8ae917c52167ff5244fd654c7753b4/stream",
+   "title": "I Want to Tell You",
+   "tmdb_id": 4573390,
+   "tvdb_id": 9872689,
    "user_data": {
     "played": false
    },
@@ -6104,6 +7145,40 @@
   },
   "status": 200
  },
+ "GET items/5ca6bc787a7af9a0659e826e9bf516ad/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 9,
+   "id": "dc3304597749650bdae0b16400c06952",
+   "images": {
+    "primary": "/api/items/dc3304597749650bdae0b16400c06952/images/primary?v=846dd9013e69ab2f7a339e07",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Angered at Zo\u00eb's unshakable war connection to Mal, Wash demands a shot at a field assignment. Unfortunately, crime lord Niska chooses this moment to exact a brutal vengeance for Mal's failure to complete an earlier job.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-12-06",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "war stories",
+   "stream_url": "/api/items/dc3304597749650bdae0b16400c06952/stream",
+   "title": "War Stories",
+   "tmdb_id": 1048602,
+   "tvdb_id": 297997,
+   "user_data": {
+    "played": false
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
  "GET items/5dcaa7b17e1fb1d4a2bb3aade603f537": {
   "body": {
    "added_at": 1793464922,
@@ -6290,6 +7365,40 @@
   },
   "status": 200
  },
+ "GET items/5dcaa7b17e1fb1d4a2bb3aade603f537/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 5,
+   "id": "a3fccb661ac864a5c72c06b37bd8ff53",
+   "images": {
+    "primary": "/api/items/a3fccb661ac864a5c72c06b37bd8ff53/images/primary?v=3f78c1e1799b03b2c2095a98",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus attends Cliff and Elinalise's wedding and goes shopping for his sisters' birthday presents.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-07-27",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "celebrations",
+   "stream_url": "/api/items/a3fccb661ac864a5c72c06b37bd8ff53/stream",
+   "title": "Celebrations",
+   "tmdb_id": 7478545,
+   "tvdb_id": 11872045,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/5f4f997948c4b37ce8a9163908ea982b": {
   "body": {
    "added_at": 1793496112,
@@ -6452,6 +7561,10 @@
   },
   "status": 200
  },
+ "GET items/5f6a9d6526861b24693da641da2f7e37/next": {
+  "body": null,
+  "status": 204
+ },
  "GET items/613989d9b4a7d0f7ef022330e4d007d4": {
   "body": {
    "added_at": 1793464922,
@@ -6574,6 +7687,40 @@
   },
   "status": 200
  },
+ "GET items/613989d9b4a7d0f7ef022330e4d007d4/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 22,
+   "id": "b4a9a963595ff640628da2a27358f7d6",
+   "images": {
+    "primary": "/api/items/b4a9a963595ff640628da2a27358f7d6/images/primary?v=3dea84b204fd8dccceb631ae",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus and Eris finally return to Fittoa, but sudden goodbyes and unpleasant news make their homecoming bittersweet.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-12-13",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "dreams and reality",
+   "stream_url": "/api/items/b4a9a963595ff640628da2a27358f7d6/stream",
+   "title": "Dreams and Reality",
+   "tmdb_id": 3348336,
+   "tvdb_id": 8722595,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/6694a880707ac2c7afe7df316356dc6f": {
   "body": {
    "added_at": 1793464921,
@@ -6628,6 +7775,31 @@
    "sort_title": "episode 1",
    "stream_url": "/api/items/6694a880707ac2c7afe7df316356dc6f/stream",
    "title": "Episode 1",
+   "user_data": {
+    "played": false
+   }
+  },
+  "status": 200
+ },
+ "GET items/6694a880707ac2c7afe7df316356dc6f/next": {
+  "body": {
+   "added_at": 1793464921,
+   "episode_number": 2,
+   "id": "b486972e60c17432c028a72fae955e1e",
+   "images": {
+    "series_primary": "/api/items/0610e085a265521f14f47ce4dbab5d17/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "0610e085a265521f14f47ce4dbab5d17",
+   "season_number": 1,
+   "series_title": "Zzqx Imaginary Show",
+   "sort_title": "episode 2",
+   "stream_url": "/api/items/b486972e60c17432c028a72fae955e1e/stream",
+   "title": "Episode 2",
    "user_data": {
     "played": false
    }
@@ -7193,6 +8365,40 @@
   },
   "status": 200
  },
+ "GET items/67fcc77b2eee7a87e786dab74cf17c08/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 18,
+   "id": "eecd9680325ed91e07f204e9904be90d",
+   "images": {
+    "primary": "/api/items/eecd9680325ed91e07f204e9904be90d/images/primary?v=a606b85d4e3568d17aa2553a",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Life is looking up for Rudeus. His sisters are settling in, and he has plenty of time for friends and family... until an announcement from Sylphie and an unexpected letter upend his idyllic school life.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-05-13",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "turning point 3",
+   "stream_url": "/api/items/eecd9680325ed91e07f204e9904be90d/stream",
+   "title": "Turning Point 3",
+   "tmdb_id": 5124229,
+   "tvdb_id": 9885758,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/694b5ea22f7abbc2905ef5a27d41c810": {
   "body": {
    "added_at": 1793464922,
@@ -7351,6 +8557,40 @@
    "title": "Family Squabble",
    "tmdb_id": 3257432,
    "tvdb_id": 8722589,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/694b5ea22f7abbc2905ef5a27d41c810/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 17,
+   "id": "75e8edabc9baae85a9c752dedf09244a",
+   "images": {
+    "primary": "/api/items/75e8edabc9baae85a9c752dedf09244a/images/primary?v=d2a4d04899d0c59fb0a1f88a",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "In the aftermath of their disastrous reunion, Paul and Rudeus reflect on their actions and look for a way forward.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-11-08",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "reunion",
+   "stream_url": "/api/items/75e8edabc9baae85a9c752dedf09244a/stream",
+   "title": "Reunion",
+   "tmdb_id": 3257433,
+   "tvdb_id": 8722590,
    "user_data": {
     "played": false
    },
@@ -7523,6 +8763,40 @@
   },
   "status": 200
  },
+ "GET items/6b6abe9469291ea25d01796dbed9930b/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 2,
+   "id": "4a2c477b0dd33ed18c8cbf60e81242ba",
+   "images": {
+    "primary": "/api/items/4a2c477b0dd33ed18c8cbf60e81242ba/images/primary?v=edab42d2ff297dd4778f960c",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus doesn't want a new party, but he still grows closer to Counter Arrow as he settles into life as a northlands adventurer. When danger rears its head, he finds himself risking it all for his new friends.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-07-17",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "forest in the dead of night",
+   "stream_url": "/api/items/4a2c477b0dd33ed18c8cbf60e81242ba/stream",
+   "title": "The Forest in the Dead of Night",
+   "tmdb_id": 4556433,
+   "tvdb_id": 9862483,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/6c618d617784544a377f629f07457cd0": {
   "body": {
    "added_at": 1793464922,
@@ -7668,6 +8942,40 @@
    "title": "Jobless Reincarnation",
    "tmdb_id": 1956859,
    "tvdb_id": 7599811,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/6c618d617784544a377f629f07457cd0/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 2,
+   "id": "3854406fdcbe4d24e27a2f435a17d04e",
+   "images": {
+    "primary": "/api/items/3854406fdcbe4d24e27a2f435a17d04e/images/primary?v=b34a2b004cd8be835a013156",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudy begins training with his new magic tutor and learning swordsmanship from his father. He makes rapid progress, but traumatic memories from his past life leave him too afraid to go outside. Is his second chance already doomed to failure?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-01-18",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "master",
+   "stream_url": "/api/items/3854406fdcbe4d24e27a2f435a17d04e/stream",
+   "title": "Master",
+   "tmdb_id": 2602034,
+   "tvdb_id": 8109812,
    "user_data": {
     "played": false
    },
@@ -8070,6 +9378,40 @@
   },
   "status": 200
  },
+ "GET items/75e8edabc9baae85a9c752dedf09244a/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 18,
+   "id": "b95cd5ae6dad970265a4afefb0c02c55",
+   "images": {
+    "primary": "/api/items/b95cd5ae6dad970265a4afefb0c02c55/images/primary?v=f03e5ae1e0886639e42d8d0c",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "After setting out from Millishion, Rudeus, Eris, and Ruijerd board a ship back to the Central Continent. Meanwhile, Roxy arrives in Rikarisu, where she encounters some familiar faces.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-11-15",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "separate journeys",
+   "stream_url": "/api/items/b95cd5ae6dad970265a4afefb0c02c55/stream",
+   "title": "Separate Journeys",
+   "tmdb_id": 3308230,
+   "tvdb_id": 8722591,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/779318bc9670e0fa5c4c2b4151292140": {
   "body": {
    "added_at": 1793464922,
@@ -8263,6 +9605,40 @@
   },
   "status": 200
  },
+ "GET items/779318bc9670e0fa5c4c2b4151292140/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 10,
+   "id": "35ca0361390767def5084ea2e6f6fad1",
+   "images": {
+    "primary": "/api/items/35ca0361390767def5084ea2e6f6fad1/images/primary?v=1e95a14f840b0702c1305b31",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus and friends locate Kishirika, only to be captured along with her by the guards of a warlike Demon King.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-08-31",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "audience with an immortal demon king",
+   "stream_url": "/api/items/35ca0361390767def5084ea2e6f6fad1/stream",
+   "title": "An Audience with an Immortal Demon King",
+   "tmdb_id": 7478555,
+   "tvdb_id": 11872050,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/7a60c4db9a94ce4e61b6e1eb3d523b03": {
   "body": {
    "added_at": 1793464922,
@@ -8439,6 +9815,38 @@
     "played": false
    },
    "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/7a60c4db9a94ce4e61b6e1eb3d523b03/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 3,
+   "id": "2c218f16c45c0494dc82d7aa3000df26",
+   "images": {
+    "primary": "/api/items/2c218f16c45c0494dc82d7aa3000df26/images/primary?v=b96363293321c168ecf451c0",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-05-20",
+   "runtime_min": 24,
+   "season_number": 0,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "ten'i meikyuu hen: housou chokuzen special",
+   "stream_url": "/api/items/2c218f16c45c0494dc82d7aa3000df26/stream",
+   "title": "Ten'i Meikyuu Hen: Housou Chokuzen Special",
+   "tmdb_id": 5358677,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
   },
   "status": 200
  },
@@ -8628,6 +10036,40 @@
    "title": "Life Back at Home",
    "tmdb_id": 7431411,
    "tvdb_id": 11863961,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/7b3311b4aca2ce18e7c0425595bf2076/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 4,
+   "id": "5dcaa7b17e1fb1d4a2bb3aade603f537",
+   "images": {
+    "primary": "/api/items/5dcaa7b17e1fb1d4a2bb3aade603f537/images/primary?v=1fd74d9661f7251285d426d5",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Fearful of losing more loved ones, Rudeus begs Roxy to teach him a more potent form of magic.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-07-20",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "king-class water mage",
+   "stream_url": "/api/items/5dcaa7b17e1fb1d4a2bb3aade603f537/stream",
+   "title": "A King-Class Water Mage",
+   "tmdb_id": 7478540,
+   "tvdb_id": 11872044,
    "user_data": {
     "played": false
    },
@@ -8832,6 +10274,40 @@
   },
   "status": 200
  },
+ "GET items/7b841b1c966bd192d0af27a278cefefb/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 11,
+   "id": "9265b88fc40df5d9cbb231415a20ec24",
+   "images": {
+    "primary": "/api/items/9265b88fc40df5d9cbb231415a20ec24/images/primary?v=d17c0a3f49be079d9f0104e7",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "With their new money-making scheme in place, Dead End head out to track down a mysterious monster. Unfortunately, the job doesn\u2019t go as smoothly as they hope, and Rudy\u2019s plans may turn out to be a lot less safe than he thought.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-03-22",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "children and warriors",
+   "stream_url": "/api/items/9265b88fc40df5d9cbb231415a20ec24/stream",
+   "title": "Children and Warriors",
+   "tmdb_id": 2696394,
+   "tvdb_id": 8145563,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/7da8906d9d62d53b67fb7018eb7c9d7e": {
   "body": {
    "added_at": 1793464922,
@@ -8953,6 +10429,40 @@
    "title": "A Chance Encounter",
    "tmdb_id": 2696391,
    "tvdb_id": 8145561,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/7da8906d9d62d53b67fb7018eb7c9d7e/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 10,
+   "id": "7b841b1c966bd192d0af27a278cefefb",
+   "images": {
+    "primary": "/api/items/7b841b1c966bd192d0af27a278cefefb/images/primary?v=6f6461f7ca32e29e226e75ec",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus, Eris, and Ruijerd make it to a city. They need to earn money for their journey, and decide to register as adventurers, but Superd like Ruijerd aren\u2019t allowed inside. Rudeus has a plan, but how well will it hold up in practice?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-03-15",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "value of a life and the first job",
+   "stream_url": "/api/items/7b841b1c966bd192d0af27a278cefefb/stream",
+   "title": "The Value of a Life and the First Job",
+   "tmdb_id": 2696393,
+   "tvdb_id": 8145562,
    "user_data": {
     "played": false
    },
@@ -9112,6 +10622,40 @@
   },
   "status": 200
  },
+ "GET items/8112be9f678a014529a29a4471308878/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 6,
+   "id": "18610c388f534f8f053b56035341d2f7",
+   "images": {
+    "primary": "/api/items/18610c388f534f8f053b56035341d2f7/images/primary?v=a3c683bcea30959ed321b533",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudy is officially Eris\u2019s tutor, but she doesn\u2019t want to learn anything but magic. As Rudy struggles to get her interested in other subjects, he realizes that non-stop lessons are causing her stress and proposes a day off in the city.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-02-15",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "day off in roa",
+   "stream_url": "/api/items/18610c388f534f8f053b56035341d2f7/stream",
+   "title": "A Day Off in Roa",
+   "tmdb_id": 2696387,
+   "tvdb_id": 8145558,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/84c4b5dac63cf7448c0ebb583f9ef09e": {
   "body": {
    "added_at": 1793464922,
@@ -9229,6 +10773,42 @@
    "tvdb_id": 297990,
    "user_data": {
     "last_played_at": 1793481304,
+    "play_count": 1,
+    "played": true
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
+ "GET items/84c4b5dac63cf7448c0ebb583f9ef09e/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 3,
+   "id": "40133282a3319d2e612698bdd9e030c1",
+   "images": {
+    "primary": "/api/items/40133282a3319d2e612698bdd9e030c1/images/primary?v=4f0bcba7c004f009ec6de3f0",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "As an unexpected reward for an unpaid job, Mal finds himself married to a na\u00efve, subservient young woman named Saffron. The crew are amused at his discomfort and Book lectures him on propriety, but things aren't as smoothly straightforward as they thought them to be.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-10-04",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "our mrs. reynolds",
+   "stream_url": "/api/items/40133282a3319d2e612698bdd9e030c1/stream",
+   "title": "Our Mrs. Reynolds",
+   "tmdb_id": 1048598,
+   "tvdb_id": 297991,
+   "user_data": {
+    "last_played_at": 1793487976,
     "play_count": 1,
     "played": true
    },
@@ -9436,6 +11016,40 @@
   },
   "status": 200
  },
+ "GET items/888aeb4ea8e235583f61cdec49d6f9bc/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 11,
+   "id": "5bf3396070cf7b6f14c79fc1931b1d8c",
+   "images": {
+    "primary": "/api/items/5bf3396070cf7b6f14c79fc1931b1d8c/images/primary?v=3e6d5d7d9e97ffbbb6002ac3",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Ariel confronts Sylphiette with a choice: reveal herself to Rudeus or cut ties with him forever. Determined on one last push to jog Rudeus's memory, Sylphiette invites him on a forest expedition.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-09-18",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "to you",
+   "stream_url": "/api/items/5bf3396070cf7b6f14c79fc1931b1d8c/stream",
+   "title": "To You",
+   "tmdb_id": 4573344,
+   "tvdb_id": 9862493,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/899ba56e29c096419d89a3747cf5322e": {
   "body": {
    "added_at": 1793464922,
@@ -9554,6 +11168,10 @@
    "year": 2003
   },
   "status": 200
+ },
+ "GET items/899ba56e29c096419d89a3747cf5322e/next": {
+  "body": null,
+  "status": 204
  },
  "GET items/8c80a8c906bc66fe8120fa3983219182": {
   "body": {
@@ -9704,6 +11322,40 @@
    "title": "Slow Life in the Doldia Village",
    "tmdb_id": 3257431,
    "tvdb_id": 8722588,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/8c80a8c906bc66fe8120fa3983219182/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 16,
+   "id": "694b5ea22f7abbc2905ef5a27d41c810",
+   "images": {
+    "primary": "/api/items/694b5ea22f7abbc2905ef5a27d41c810/images/primary?v=5191becd29c91176f69d1468",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus, Eris, and Ruijerd arrive in the Holy Country of Millis, where Rudeus's thoughts turn to home. When the three split up for a day off, a chance encounter in an alley leads Rudeus to a shocking reunion.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-11-01",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "family squabble",
+   "stream_url": "/api/items/694b5ea22f7abbc2905ef5a27d41c810/stream",
+   "title": "Family Squabble",
+   "tmdb_id": 3257432,
+   "tvdb_id": 8722589,
    "user_data": {
     "played": false
    },
@@ -9869,6 +11521,40 @@
   },
   "status": 200
  },
+ "GET items/9265b88fc40df5d9cbb231415a20ec24/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 12,
+   "id": "9323e163f9074a911a62176ef3e76e37",
+   "images": {
+    "primary": "/api/items/9323e163f9074a911a62176ef3e76e37/images/primary?v=0f06646542dd9ee63c220804",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Dead End discovers that Ruijerd will have to pay a fortune in fees to leave the Demon Continent. As they struggle to find a way around this unexpected roadblock, Rudeus receives another vision.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-10-04",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "woman with the demon eyes",
+   "stream_url": "/api/items/9323e163f9074a911a62176ef3e76e37/stream",
+   "title": "The Woman with the Demon Eyes",
+   "tmdb_id": 3133431,
+   "tvdb_id": 8414424,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/9323e163f9074a911a62176ef3e76e37": {
   "body": {
    "added_at": 1793464922,
@@ -10013,6 +11699,40 @@
    "title": "The Woman with the Demon Eyes",
    "tmdb_id": 3133431,
    "tvdb_id": 8414424,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/9323e163f9074a911a62176ef3e76e37/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 13,
+   "id": "b62fe465965041e0a00c61dd6f327473",
+   "images": {
+    "primary": "/api/items/b62fe465965041e0a00c61dd6f327473/images/primary?v=fa4922ddaf5ec1325800336e",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Roxy arrives on the Demon Continent to begin her search for Paul's missing family. Meanwhile, Rudeus strikes a deal with smugglers to transport Ruijerd across the ocean.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-10-11",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "missed connections",
+   "stream_url": "/api/items/b62fe465965041e0a00c61dd6f327473/stream",
+   "title": "Missed Connections",
+   "tmdb_id": 3257429,
+   "tvdb_id": 8722586,
    "user_data": {
     "played": false
    },
@@ -10178,6 +11898,40 @@
    "title": "Burn Bright, Mad Dog",
    "tmdb_id": 7051940,
    "tvdb_id": 10569214,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/93586bf611b8ab54ccf6f6ca7a6ceea4/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 2,
+   "id": "a7041e56ea77f8abc94f7bcf8244ab2d",
+   "images": {
+    "primary": "/api/items/a7041e56ea77f8abc94f7bcf8244ab2d/images/primary?v=9e4c7a4919ac7308674fb801",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Nina continues to eye Eris as a rival, but training with masters of other styles sparks new discoveries.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-07-04",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "howl, mad dog",
+   "stream_url": "/api/items/a7041e56ea77f8abc94f7bcf8244ab2d/stream",
+   "title": "Howl, Mad Dog",
+   "tmdb_id": 7431410,
+   "tvdb_id": 11304523,
    "user_data": {
     "played": false
    },
@@ -10412,6 +12166,40 @@
   },
   "status": 200
  },
+ "GET items/968fd9282145286fc34a0af8d7de692d/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 5,
+   "id": "8112be9f678a014529a29a4471308878",
+   "images": {
+    "primary": "/api/items/8112be9f678a014529a29a4471308878/images/primary?v=c7e4fe8965d8bb8fdce493e4",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudy arrives in the city of Roa, where he\u2019s supposed to spend the next five years tutoring the daughter of the local lord. His student, however, is more than he bargained for, and he\u2019ll have to fight to start his first ever job, let alone keep it.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-02-08",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "young lady and violence",
+   "stream_url": "/api/items/8112be9f678a014529a29a4471308878/stream",
+   "title": "A Young Lady and Violence",
+   "tmdb_id": 2696386,
+   "tvdb_id": 8145557,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/9777b31e001d89d88077fbfaa8f8b192": {
   "body": {
    "added_at": 1793464922,
@@ -10623,6 +12411,40 @@
   },
   "status": 200
  },
+ "GET items/9777b31e001d89d88077fbfaa8f8b192/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 15,
+   "id": "8c80a8c906bc66fe8120fa3983219182",
+   "images": {
+    "primary": "/api/items/8c80a8c906bc66fe8120fa3983219182/images/primary?v=9be0e137422823a3f84aedc1",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Dead End decide to wait out the rainy season in the Doldia village. Eris befriends the chieftain's granddaughter, but her fondness for Ghislaine leads to unexpected conflict.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-10-25",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "slow life in the doldia village",
+   "stream_url": "/api/items/8c80a8c906bc66fe8120fa3983219182/stream",
+   "title": "Slow Life in the Doldia Village",
+   "tmdb_id": 3257431,
+   "tvdb_id": 8722588,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/98a011781e0b5888f3bfe286a9f0c49f": {
   "body": {
    "added_at": 1793464922,
@@ -10679,6 +12501,33 @@
    "title": "Episode 12",
    "user_data": {
     "last_played_at": 1793487990,
+    "played": false
+   }
+  },
+  "status": 200
+ },
+ "GET items/98a011781e0b5888f3bfe286a9f0c49f/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 13,
+   "id": "51b67862049dd539ccf9c0e7605e01c9",
+   "images": {
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "episode 13",
+   "stream_url": "/api/items/51b67862049dd539ccf9c0e7605e01c9/stream",
+   "title": "Episode 13",
+   "user_data": {
     "played": false
    }
   },
@@ -10765,6 +12614,40 @@
    "title": "An End and a Beginning",
    "tmdb_id": 7478566,
    "tvdb_id": 11872052,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/9a9157a391a5fa93c8648fe60d246269/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 13,
+   "id": "31c12b506c02c9c519ef57f5cb3f5888",
+   "images": {
+    "primary": "/api/items/31c12b506c02c9c519ef57f5cb3f5888/images/primary?v=15b0f5bae31570c41bcf2c0e",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "In a future that could have been, Rudeus crumbles under the weight of loss.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-09-21",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "diary",
+   "stream_url": "/api/items/31c12b506c02c9c519ef57f5cb3f5888/stream",
+   "title": "The Diary",
+   "tmdb_id": 7478568,
+   "tvdb_id": 11872053,
    "user_data": {
     "played": false
    },
@@ -10902,6 +12785,40 @@
    "title": "Celebrations",
    "tmdb_id": 7478545,
    "tvdb_id": 11872045,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/a3fccb661ac864a5c72c06b37bd8ff53/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 6,
+   "id": "27457a8f74d482b6d512a5e76db8706a",
+   "images": {
+    "primary": "/api/items/27457a8f74d482b6d512a5e76db8706a/images/primary?v=e181ee3d36ed4a81ba2344c5",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus accompanies Roxy on a bodyguard mission and runs into an unexpected face from his past.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-08-03",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "another domestic disaster?",
+   "stream_url": "/api/items/27457a8f74d482b6d512a5e76db8706a/stream",
+   "title": "Another Domestic Disaster?",
+   "tmdb_id": 7478547,
+   "tvdb_id": 11872046,
    "user_data": {
     "played": false
    },
@@ -11099,6 +13016,40 @@
    "title": "Howl, Mad Dog",
    "tmdb_id": 7431410,
    "tvdb_id": 11304523,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/a7041e56ea77f8abc94f7bcf8244ab2d/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 3,
+   "id": "7b3311b4aca2ce18e7c0425595bf2076",
+   "images": {
+    "primary": "/api/items/7b3311b4aca2ce18e7c0425595bf2076/images/primary?v=07484965e9fb5c5fe70341cd",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus starts a new life with Roxy and Sylphiette, but not all his friends approve of his second marriage.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-07-13",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "life back at home",
+   "stream_url": "/api/items/7b3311b4aca2ce18e7c0425595bf2076/stream",
+   "title": "Life Back at Home",
+   "tmdb_id": 7431411,
+   "tvdb_id": 11863961,
    "user_data": {
     "played": false
    },
@@ -11610,6 +13561,40 @@
   },
   "status": 200
  },
+ "GET items/a79160fc0ab2f6e68de67d44ac5e048c/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 9,
+   "id": "779318bc9670e0fa5c4c2b4151292140",
+   "images": {
+    "primary": "/api/items/779318bc9670e0fa5c4c2b4151292140/images/primary?v=e1de6242db877b0d64c992a2",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Nanahoshi contracts an ancient disease. Seeing her lose hope, Rudeus races to find help.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-08-24",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "lament",
+   "stream_url": "/api/items/779318bc9670e0fa5c4c2b4151292140/stream",
+   "title": "Lament",
+   "tmdb_id": 7478552,
+   "tvdb_id": 11872049,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/acb0d21821b616ac1eb4a90402dedd32": {
   "body": {
    "added_at": 1793464922,
@@ -11726,6 +13711,40 @@
    "title": "Let's Go Home",
    "tmdb_id": 5124236,
    "tvdb_id": 9885763,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
+ "GET items/acb0d21821b616ac1eb4a90402dedd32/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 24,
+   "id": "d859735bdf894a5770a12a488528767d",
+   "images": {
+    "primary": "/api/items/d859735bdf894a5770a12a488528767d/images/primary?v=71e9f55105215efcb302e84b",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus arrives home, frantic that something may have gone wrong in his absence. But the conversations waiting for him may become disasters in their own right. How can he introduce a new wife to a family still reeling from Paul's death?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-07-01",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "succession",
+   "stream_url": "/api/items/d859735bdf894a5770a12a488528767d/stream",
+   "title": "Succession",
+   "tmdb_id": 5124237,
+   "tvdb_id": 9885764,
    "user_data": {
     "played": false
    },
@@ -11925,6 +13944,34 @@
     "played": false
    },
    "year": 2002
+  },
+  "status": 200
+ },
+ "GET items/afbf84cbe3a54809a200a361e8ba5b06/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 12,
+   "id": "98a011781e0b5888f3bfe286a9f0c49f",
+   "images": {
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "episode 12",
+   "stream_url": "/api/items/98a011781e0b5888f3bfe286a9f0c49f/stream",
+   "title": "Episode 12",
+   "user_data": {
+    "last_played_at": 1793487990,
+    "played": false
+   }
   },
   "status": 200
  },
@@ -12133,6 +14180,31 @@
   },
   "status": 200
  },
+ "GET items/b486972e60c17432c028a72fae955e1e/next": {
+  "body": {
+   "added_at": 1793464921,
+   "episode_number": 3,
+   "id": "f75f82f71e8ac0cb804410fee3c5a138",
+   "images": {
+    "series_primary": "/api/items/0610e085a265521f14f47ce4dbab5d17/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "unmatched",
+   "parent_id": "0610e085a265521f14f47ce4dbab5d17",
+   "season_number": 1,
+   "series_title": "Zzqx Imaginary Show",
+   "sort_title": "episode 3",
+   "stream_url": "/api/items/f75f82f71e8ac0cb804410fee3c5a138/stream",
+   "title": "Episode 3",
+   "user_data": {
+    "played": false
+   }
+  },
+  "status": 200
+ },
  "GET items/b4a9a963595ff640628da2a27358f7d6": {
   "body": {
    "added_at": 1793464922,
@@ -12270,6 +14342,40 @@
    "title": "Dreams and Reality",
    "tmdb_id": 3348336,
    "tvdb_id": 8722595,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
+ "GET items/b4a9a963595ff640628da2a27358f7d6/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 23,
+   "id": "262d7db848d660101b13f7dc295dfe50",
+   "images": {
+    "primary": "/api/items/262d7db848d660101b13f7dc295dfe50/images/primary?v=1d7c8d8fbbb4661269fa76f5",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus sinks into depression following Eris's departure. As he struggles to get back on his feet, the many people he's met continue their own journeys.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-12-20",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "wake up and take a step",
+   "stream_url": "/api/items/262d7db848d660101b13f7dc295dfe50/stream",
+   "title": "Wake Up and Take a Step",
+   "tmdb_id": 3348337,
+   "tvdb_id": 8722596,
    "user_data": {
     "played": false
    },
@@ -12491,6 +14597,40 @@
   },
   "status": 200
  },
+ "GET items/b62fe465965041e0a00c61dd6f327473/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 14,
+   "id": "9777b31e001d89d88077fbfaa8f8b192",
+   "images": {
+    "primary": "/api/items/9777b31e001d89d88077fbfaa8f8b192/images/primary?v=de4d0ac7b4678142c64aafb6",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus finds himself imprisoned by the beast people in Doldia Village. Will Ruijerd and Eris arrive to clear his name before he loses patience and tries to fight his way to freedom?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-10-18",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "no such thing as a free lunch",
+   "stream_url": "/api/items/9777b31e001d89d88077fbfaa8f8b192/stream",
+   "title": "No Such Thing as a Free Lunch",
+   "tmdb_id": 3257430,
+   "tvdb_id": 8722587,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/b95cd5ae6dad970265a4afefb0c02c55": {
   "body": {
    "added_at": 1793464922,
@@ -12691,6 +14831,40 @@
   },
   "status": 200
  },
+ "GET items/b95cd5ae6dad970265a4afefb0c02c55/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 19,
+   "id": "f62713908ffbd29863663fef9ba1a993",
+   "images": {
+    "primary": "/api/items/f62713908ffbd29863663fef9ba1a993/images/primary?v=d68a6c8f0a66dced562e3a06",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Dead End finally arrives in the Shirone Kingdom on the Central Continent. Rudeus is anxious for a reunion with Roxy, but an unexpected vision from the Man-God means he may be in for more than he bargained for.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-11-22",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "route selection",
+   "stream_url": "/api/items/f62713908ffbd29863663fef9ba1a993/stream",
+   "title": "Route Selection",
+   "tmdb_id": 3308231,
+   "tvdb_id": 8722592,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/b978b034c86f94c335541e5bbb50c8b5": {
   "body": {
    "added_at": 1793464922,
@@ -12856,6 +15030,40 @@
   },
   "status": 200
  },
+ "GET items/b978b034c86f94c335541e5bbb50c8b5/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 15,
+   "id": "51e50505317bdcf4a9955c6f70e1c519",
+   "images": {
+    "primary": "/api/items/51e50505317bdcf4a9955c6f70e1c519/images/primary?v=b53f8fdb7035cc5c06251630",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus receives a letter from Paul. The letter explains that Norn and Aisha, Rudeus's younger sisters, have been sent to join Rudeus. Meanwhile Nanahoshi continues her research into summoning magic for a way to return to her original world.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-04-22",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "afar",
+   "stream_url": "/api/items/51e50505317bdcf4a9955c6f70e1c519/stream",
+   "title": "Afar",
+   "tmdb_id": 5124223,
+   "tvdb_id": 9885755,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/bada351eaa2a75c293c82e9133c1bd08": {
   "body": {
    "added_at": 1793464922,
@@ -12915,6 +15123,10 @@
    }
   },
   "status": 200
+ },
+ "GET items/bada351eaa2a75c293c82e9133c1bd08/next": {
+  "body": null,
+  "status": 204
  },
  "GET items/bbe7c3c5f15ce47b2acb026d7b74cd5a": {
   "body": {
@@ -13025,6 +15237,40 @@
    "title": "I Don't Want To Die",
    "tmdb_id": 4573334,
    "tvdb_id": 9862487,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/bbe7c3c5f15ce47b2acb026d7b74cd5a/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 7,
+   "id": "f1f8b8a415eac19735c7dc3ba998e94b",
+   "images": {
+    "primary": "/api/items/f1f8b8a415eac19735c7dc3ba998e94b/images/primary?v=693706c13abe889ee7cdbb2f",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "When Rudeus discovers that two of his new schoolmates have destroyed one of his precious figures, he swears revenge. But while he may be able to trounce schoolgirls in a fight, figuring out what to do with them next won't be so easy.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-08-21",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "kidnapping and confinement of beast girls",
+   "stream_url": "/api/items/f1f8b8a415eac19735c7dc3ba998e94b/stream",
+   "title": "The Kidnapping and Confinement of Beast Girls",
+   "tmdb_id": 4573335,
+   "tvdb_id": 9862488,
    "user_data": {
     "played": false
    },
@@ -13162,6 +15408,40 @@
    "title": "Phase Four",
    "tmdb_id": 7478548,
    "tvdb_id": 11872047,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
+ "GET items/bee67869fcf7ba1d5332eaf03dfa643f/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 8,
+   "id": "a79160fc0ab2f6e68de67d44ac5e048c",
+   "images": {
+    "primary": "/api/items/a79160fc0ab2f6e68de67d44ac5e048c/images/primary?v=f2dce1adab3868d8ed9a5936",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus seeks an audience with the hero Perugius, hoping to find a cure for his mother's condition.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-08-17",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "flying fortress",
+   "stream_url": "/api/items/a79160fc0ab2f6e68de67d44ac5e048c/stream",
+   "title": "The Flying Fortress",
+   "tmdb_id": 7478550,
+   "tvdb_id": 11872048,
    "user_data": {
     "played": false
    },
@@ -13355,6 +15635,40 @@
   },
   "status": 200
  },
+ "GET items/c11333ed835373f9e47dae9decee826b/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 8,
+   "id": "4bfe82f70a2ac2e11fd901b876c5efe0",
+   "images": {
+    "primary": "/api/items/4bfe82f70a2ac2e11fd901b876c5efe0/images/primary?v=60900d8e98744318ee2bd0ba",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudy reaches his 10th birthday, and Eris and her family plan a surprise party for him. Meanwhile, the strange orb hovering over the city remains a mystery as powerful entities across the world begin to take note of it.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-03-01",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "turning point 1",
+   "stream_url": "/api/items/4bfe82f70a2ac2e11fd901b876c5efe0/stream",
+   "title": "Turning Point 1",
+   "tmdb_id": 2696390,
+   "tvdb_id": 8145560,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/c3f07c3c611608f0a8f5cd9543ea5421": {
   "body": {
    "added_at": 1793464922,
@@ -13485,6 +15799,40 @@
    "title": "Abrupt Approach",
    "tmdb_id": 4573329,
    "tvdb_id": 9862484,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/c3f07c3c611608f0a8f5cd9543ea5421/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 4,
+   "id": "3894969dcf07a323212e15668e8ec5ae",
+   "images": {
+    "primary": "/api/items/3894969dcf07a323212e15668e8ec5ae/images/primary?v=3cb5eab5581cca0381b9c1ab",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "After two years of adventuring with Soldat, Rudeus is no closer to finding his mother or curing his impotence. But the sudden arrival of a seductive elf and an unexpected offer could send his life off in a whole new direction.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-07-31",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "letter of invitation",
+   "stream_url": "/api/items/3894969dcf07a323212e15668e8ec5ae/stream",
+   "title": "Letter of Invitation",
+   "tmdb_id": 4573330,
+   "tvdb_id": 9862485,
    "user_data": {
     "played": false
    },
@@ -13938,6 +16286,40 @@
   },
   "status": 200
  },
+ "GET items/d859735bdf894a5770a12a488528767d/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 1,
+   "id": "93586bf611b8ab54ccf6f6ca7a6ceea4",
+   "images": {
+    "primary": "/api/items/93586bf611b8ab54ccf6f6ca7a6ceea4/images/primary?v=97750b446834bab5bf8e7520",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Ghislaine takes Eris to train under the Sword God, but Eris's brash attitude angers the other disciples.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2026-07-04",
+   "runtime_min": 24,
+   "season_number": 3,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "burn bright, mad dog",
+   "stream_url": "/api/items/93586bf611b8ab54ccf6f6ca7a6ceea4/stream",
+   "title": "Burn Bright, Mad Dog",
+   "tmdb_id": 7051940,
+   "tvdb_id": 10569214,
+   "user_data": {
+    "played": false
+   },
+   "year": 2026
+  },
+  "status": 200
+ },
  "GET items/dc3304597749650bdae0b16400c06952": {
   "body": {
    "added_at": 1793464922,
@@ -14078,6 +16460,41 @@
    "tmdb_id": 1048602,
    "tvdb_id": 297997,
    "user_data": {
+    "played": false
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
+ "GET items/dc3304597749650bdae0b16400c06952/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 10,
+   "id": "dedf4b27f49df455d20561d21a0f1779",
+   "images": {
+    "primary": "/api/items/dedf4b27f49df455d20561d21a0f1779/images/primary?v=0c338c7c4a15fa07891fa5d2",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Serenity encounters a ruthlessly professional bounty hunter, Jubal Early, who will stop at nothing to retrieve River. But River, feeling unwelcome on the ship, takes a novel approach to escaping from the long arm of the Alliance.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-12-13",
+   "runtime_min": 46,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "objects in space",
+   "stream_url": "/api/items/dedf4b27f49df455d20561d21a0f1779/stream",
+   "title": "Objects in Space",
+   "tmdb_id": 1048606,
+   "tvdb_id": 297998,
+   "user_data": {
+    "last_played_at": 1793487987,
     "played": false
    },
    "year": 2002
@@ -14242,6 +16659,40 @@
   },
   "status": 200
  },
+ "GET items/dd358884e91fc2a49ebd0802af8f06a9/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 9,
+   "id": "0a04f62558fbc1e4f50d67c7ab100dad",
+   "images": {
+    "primary": "/api/items/0a04f62558fbc1e4f50d67c7ab100dad/images/primary?v=d8308cef5ca7c1218c07c361",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Investigating the mass teleportation leads Rudeus to seek out his most elusive classmate: the brilliant Silent Sevenstar. But when he calls at Silent's laboratory tower, he finds a familiar face that he didn't expect\u2014and doesn't welcome.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-09-04",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "white mask",
+   "stream_url": "/api/items/0a04f62558fbc1e4f50d67c7ab100dad/stream",
+   "title": "The White Mask",
+   "tmdb_id": 4573339,
+   "tvdb_id": 9862491,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/dedf4b27f49df455d20561d21a0f1779": {
   "body": {
    "added_at": 1793464922,
@@ -14327,6 +16778,40 @@
    "tvdb_id": 297998,
    "user_data": {
     "last_played_at": 1793487987,
+    "played": false
+   },
+   "year": 2002
+  },
+  "status": 200
+ },
+ "GET items/dedf4b27f49df455d20561d21a0f1779/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 11,
+   "id": "afbf84cbe3a54809a200a361e8ba5b06",
+   "images": {
+    "primary": "/api/items/afbf84cbe3a54809a200a361e8ba5b06/images/primary?v=99a0646455d0510b350901c7",
+    "series_backdrop": "/api/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab",
+    "series_logo": "/api/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885",
+    "series_primary": "/api/items/6da97472777382d43e7b4df51229863b/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Malcolm Reynolds is a veteran and the captain of Serenity. He and his crew are smuggling goods, but they need to pick up some passengers for extra money. However, not all the passengers are what they seem.",
+   "parent_id": "6da97472777382d43e7b4df51229863b",
+   "release_date": "2002-12-20",
+   "runtime_min": 88,
+   "season_number": 1,
+   "series_title": "Firefly",
+   "sort_title": "serenity",
+   "stream_url": "/api/items/afbf84cbe3a54809a200a361e8ba5b06/stream",
+   "title": "Serenity",
+   "tmdb_id": 1048593,
+   "tvdb_id": 297999,
+   "user_data": {
     "played": false
    },
    "year": 2002
@@ -14462,6 +16947,40 @@
    "title": "Parents",
    "tmdb_id": 5124235,
    "tvdb_id": 9885762,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
+ "GET items/e2f5d46ca2e6592fde04e9d647387bc9/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 23,
+   "id": "acb0d21821b616ac1eb4a90402dedd32",
+   "images": {
+    "primary": "/api/items/acb0d21821b616ac1eb4a90402dedd32/images/primary?v=500d15ee890c1ab1ad85c6a4",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Roxy makes a desperate move to pull Rudeus out of his depression. As the group journeys home, both of them must face their feelings and negotiate the consequences.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-06-24",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "let's go home",
+   "stream_url": "/api/items/acb0d21821b616ac1eb4a90402dedd32/stream",
+   "title": "Let's Go Home",
+   "tmdb_id": 5124236,
+   "tvdb_id": 9885763,
    "user_data": {
     "played": false
    },
@@ -14703,6 +17222,40 @@
   },
   "status": 200
  },
+ "GET items/eecd9680325ed91e07f204e9904be90d/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 19,
+   "id": "055af1c498fa92cc7deb13751a5754af",
+   "images": {
+    "primary": "/api/items/055af1c498fa92cc7deb13751a5754af/images/primary?v=c9a0c68ead063bd292f25182",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "With Nanahoshi's help, Rudeus gains a way to shorten his journey, but he and Elinalise will still need to hurry if they hope to return before Sylphie gives birth. Their first obstacle: the harsh desert of Begaritt and its monstrous denizens.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2024-05-27",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "desert journey",
+   "stream_url": "/api/items/055af1c498fa92cc7deb13751a5754af/stream",
+   "title": "Desert Journey",
+   "tmdb_id": 5124230,
+   "tvdb_id": 9885759,
+   "user_data": {
+    "played": false
+   },
+   "year": 2024
+  },
+  "status": 200
+ },
  "GET items/f1f8b8a415eac19735c7dc3ba998e94b": {
   "body": {
    "added_at": 1793464922,
@@ -14840,6 +17393,40 @@
   },
   "status": 200
  },
+ "GET items/f1f8b8a415eac19735c7dc3ba998e94b/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 8,
+   "id": "dd358884e91fc2a49ebd0802af8f06a9",
+   "images": {
+    "primary": "/api/items/dd358884e91fc2a49ebd0802af8f06a9/images/primary?v=a0b8423014488586f4b3aa0c",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Love is in the air. First, a smitten classmate seeks Rudeus's help to meet the girl of his dreams. Then the beast people's mating season puts Rudeus in an awkward position\u2014one he'll have to fight his way out of.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-08-28",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "fianc\u00e9 of despair",
+   "stream_url": "/api/items/dd358884e91fc2a49ebd0802af8f06a9/stream",
+   "title": "The Fianc\u00e9 of Despair",
+   "tmdb_id": 4573337,
+   "tvdb_id": 9862490,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
  "GET items/f60f42b775bc0d7e434726600d8f967c": {
   "body": {
    "added_at": 1793464922,
@@ -14899,6 +17486,10 @@
    }
   },
   "status": 200
+ },
+ "GET items/f60f42b775bc0d7e434726600d8f967c/next": {
+  "body": null,
+  "status": 204
  },
  "GET items/f62713908ffbd29863663fef9ba1a993": {
   "body": {
@@ -15050,6 +17641,40 @@
   },
   "status": 200
  },
+ "GET items/f62713908ffbd29863663fef9ba1a993/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 20,
+   "id": "39056682e3c2c13363ba7026a9913146",
+   "images": {
+    "primary": "/api/items/39056682e3c2c13363ba7026a9913146/images/primary?v=08d322c946acfadcf888ec3e",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus is in desperate straits, imprisoned in a magic-proof dungeon by a despotic prince. But just when all seems hopeless, an unexpected visitor appears with a strange request. Will Rudeus be able to talk his way out of this one?",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2021-11-29",
+   "runtime_min": 24,
+   "season_number": 1,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "birth of my little sister, the maid",
+   "stream_url": "/api/items/39056682e3c2c13363ba7026a9913146/stream",
+   "title": "The Birth of My Little Sister, the Maid",
+   "tmdb_id": 3308232,
+   "tvdb_id": 8722593,
+   "user_data": {
+    "played": false
+   },
+   "year": 2021
+  },
+  "status": 200
+ },
  "GET items/f75f82f71e8ac0cb804410fee3c5a138": {
   "body": {
    "added_at": 1793464921,
@@ -15109,6 +17734,10 @@
    }
   },
   "status": 200
+ },
+ "GET items/f75f82f71e8ac0cb804410fee3c5a138/next": {
+  "body": null,
+  "status": 204
  },
  "GET items/f786dd84071058c09735395d9e397cb6": {
   "body": {
@@ -15275,6 +17904,40 @@
    "title": "Ranoa University of Magic",
    "tmdb_id": 4573332,
    "tvdb_id": 9862486,
+   "user_data": {
+    "played": false
+   },
+   "year": 2023
+  },
+  "status": 200
+ },
+ "GET items/f786dd84071058c09735395d9e397cb6/next": {
+  "body": {
+   "added_at": 1793464922,
+   "episode_number": 6,
+   "id": "bbe7c3c5f15ce47b2acb026d7b74cd5a",
+   "images": {
+    "primary": "/api/items/bbe7c3c5f15ce47b2acb026d7b74cd5a/images/primary?v=028132cad634f30664609026",
+    "series_backdrop": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f",
+    "series_logo": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3",
+    "series_primary": "/api/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary"
+   },
+   "kind": "episode",
+   "library_id": 2,
+   "locked_fields": [],
+   "match_suppressed": false,
+   "metadata_state": "matched",
+   "overview": "Rudeus is settling into school life and growing better acquainted with the enigmatic Silent Fitz. But when his efforts to teach Zanoba hit a roadblock, his new friend proposes a drastic solution.",
+   "parent_id": "c4a0172b988a77e89f0b75b9f6e7e4e1",
+   "release_date": "2023-08-14",
+   "runtime_min": 24,
+   "season_number": 2,
+   "series_title": "Mushoku Tensei: Jobless Reincarnation",
+   "sort_title": "i don't want to die",
+   "stream_url": "/api/items/bbe7c3c5f15ce47b2acb026d7b74cd5a/stream",
+   "title": "I Don't Want To Die",
+   "tmdb_id": 4573334,
+   "tvdb_id": 9862487,
    "user_data": {
     "played": false
    },
@@ -19318,8 +21981,8 @@
      "files_probed": 0,
      "files_reused": 6,
      "files_seen": 6,
-     "finished_at": "2026-11-01T15:17:58.205270198Z",
-     "job_id": 2637920880044404,
+     "finished_at": "2026-11-01T16:17:58.205279855Z",
+     "job_id": 2637920880044407,
      "matched": 0,
      "metadata_errors": 0,
      "new_items": 0,
@@ -19328,7 +21991,7 @@
      "phase": "Adding extras",
      "probe_errors": 0,
      "running": false,
-     "started_at": "2026-11-01T15:17:58.192397919Z",
+     "started_at": "2026-11-01T16:17:58.193208652Z",
      "unmatched": 0
     },
     "skip_credits": false,
@@ -19355,8 +22018,8 @@
      "files_probed": 1,
      "files_reused": 11,
      "files_seen": 12,
-     "finished_at": "2026-11-01T15:17:58.424421548Z",
-     "job_id": 2637920880044405,
+     "finished_at": "2026-11-01T16:17:58.404942097Z",
+     "job_id": 2637920880044408,
      "matched": 0,
      "metadata_errors": 0,
      "new_items": 0,
@@ -19365,7 +22028,7 @@
      "phase": "Reading file details",
      "probe_errors": 1,
      "running": false,
-     "started_at": "2026-11-01T15:17:58.192426121Z",
+     "started_at": "2026-11-01T16:17:58.193222763Z",
      "total": 1,
      "unmatched": 0
     },
@@ -19392,8 +22055,8 @@
      "files_probed": 0,
      "files_reused": 85,
      "files_seen": 85,
-     "finished_at": "2026-11-01T15:17:58.243294838Z",
-     "job_id": 2637920880044406,
+     "finished_at": "2026-11-01T16:17:58.238810916Z",
+     "job_id": 2637920880044409,
      "matched": 0,
      "metadata_errors": 0,
      "new_items": 0,
@@ -19402,7 +22065,7 @@
      "phase": "Adding extras",
      "probe_errors": 0,
      "running": false,
-     "started_at": "2026-11-01T15:17:58.192428215Z",
+     "started_at": "2026-11-01T16:17:58.193225177Z",
      "unmatched": 0
     },
     "skip_credits": true,
@@ -56852,7 +59515,7 @@
     "MKV file"
    ],
    "server_limit_kbps": 0,
-   "session_id": "e2d5fa24f9c9483c",
+   "session_id": "bceb81ae7d4cb95c",
    "source_height": 720,
    "source_kbps": 1629,
    "subtitle_tracks": [
@@ -56868,7 +59531,7 @@
      "language": "eng"
     }
    ],
-   "url": "/api/transcode/e2d5fa24f9c9483c/index.m3u8",
+   "url": "/api/transcode/bceb81ae7d4cb95c/index.m3u8",
    "versions": [
     {
      "duration_ms": 20001,
@@ -59542,7 +62205,7 @@
     "MKV file"
    ],
    "server_limit_kbps": 0,
-   "session_id": "43f04ac0076f8581",
+   "session_id": "db5783b751704c6b",
    "source_height": 720,
    "source_kbps": 2573,
    "subtitle_tracks": [
@@ -59569,7 +62232,7 @@
      "language": "eng"
     }
    ],
-   "url": "/api/transcode/43f04ac0076f8581/index.m3u8",
+   "url": "/api/transcode/db5783b751704c6b/index.m3u8",
    "versions": [
     {
      "duration_ms": 3000,
