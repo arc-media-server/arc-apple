@@ -13,6 +13,9 @@ on:
     paths-ignore:
       - '**.md'
 
+permissions:
+  contents: write
+
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -64,6 +67,39 @@ jobs:
           fi
           cp standin.log screenshots/ 2>/dev/null || true
           ls screenshots
+      # Small JPEG copies on the ci-screenshots branch (runs/<run id>/), so agents whose network
+      # can't reach artifact storage can read them with git. Only ever appended to, never rewritten.
+      - name: Share the screenshots on the ci-screenshots branch
+        if: always()
+        run: |
+          set -e
+          mkdir -p small
+          python3 - <<'PY'
+          import json, os, shutil
+          m = json.load(open("screenshots/manifest.json")) if os.path.exists("screenshots/manifest.json") else []
+          for test in m:
+              for a in test.get("attachments", []):
+                  name = a.get("suggestedHumanReadableName", a["exportedFileName"]).split("_")[0]
+                  shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", name + ".png"))
+          PY
+          for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null; rm "$f"; done
+          cp standin.log small/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dir="runs/${{ github.run_id }}"
+          if git fetch --depth 1 origin ci-screenshots 2>/dev/null; then
+            git worktree add shots-branch FETCH_HEAD
+            git -C shots-branch checkout -b ci-screenshots
+          else
+            git worktree add --detach shots-branch
+            git -C shots-branch checkout --orphan ci-screenshots
+            git -C shots-branch rm -rfq .
+          fi
+          mkdir -p "shots-branch/$dir"
+          cp small/* "shots-branch/$dir/"
+          git -C shots-branch add runs
+          git -C shots-branch commit -qm "Screenshots for run ${{ github.run_id }} (${{ github.sha }})"
+          git -C shots-branch push origin ci-screenshots
       - uses: actions/upload-artifact@v4
         if: always()
         with:
