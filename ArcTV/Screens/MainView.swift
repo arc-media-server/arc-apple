@@ -103,11 +103,9 @@ struct MainView: View {
     /// The places opened so far: each keeps its pages while another is showing.
     @State private var opened: Set<String> = ["home"]
     @FocusState private var focused: String?
-    @Namespace private var scope
-    @Environment(\.resetFocus) private var resetFocus
-    /// Briefly true after a place is chosen (or Back in the sidebar): the rows can't hold the
-    /// focus, so tvOS moves it onto the page, and the sidebar shuts.
-    @State private var handingOver = false
+    /// While true, an invisible stop at the top left of the page can take the focus: choosing a
+    /// place moves the focus there, out of the sidebar, and the next press goes on into the page.
+    @State private var landingArmed = false
 
     /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
@@ -130,7 +128,7 @@ struct MainView: View {
                Place(id: "settings", title: L("tab.settings"), icon: "gearshape")]
     }
 
-    private var sidebarOpen: Bool { focused != nil && !handingOver }
+    private var sidebarOpen: Bool { focused != nil && focused != Sidebar.landing }
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -144,8 +142,17 @@ struct MainView: View {
                 }
             }
             .safeAreaPadding(.leading, Sidebar.collapsedWidth - 20)
-            .prefersDefaultFocus(in: scope)
             .environment(\.openSidebar, OpenSidebar { focused = tab })
+
+            Color.clear
+                .frame(width: 4, height: 4)
+                .focusable(landingArmed)
+                .focused($focused, equals: Sidebar.landing)
+                .onExitCommand { focused = tab }
+                .accessibilityHidden(true)
+                .padding(.leading, Sidebar.collapsedWidth + 90)
+                .padding(.top, 60)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             // The page dims behind the open sidebar, so its names read over any artwork.
             LinearGradient(colors: [.black.opacity(0.75), .black.opacity(0)], startPoint: .leading, endPoint: .trailing)
@@ -156,14 +163,14 @@ struct MainView: View {
 
             sidebar
         }
-        .focusScope(scope)
         .animation(.easeOut(duration: 0.25), value: sidebarOpen)
         .onChange(of: focused) { old, new in
+            // Leaving the stop on the page: it can't be reached again until the next choice.
+            if old == Sidebar.landing { landingArmed = false }
             // Coming into the sidebar from a page starts on the place showing, wherever the focus
-            // came from.
-            // (A step later: tvOS ignores a focus change made while it's moving the focus.)
-            if old == nil {
-                if let new, new != tab { Task { @MainActor in focused = tab } }
+            // came from. (A step later: tvOS ignores a focus change made while it's moving it.)
+            if old == nil || old == Sidebar.landing {
+                if let new, new != tab, new != Sidebar.landing { Task { @MainActor in focused = tab } }
             } else if new == Sidebar.above {
                 // Past the first or last place the focus stays in the sidebar, rather than
                 // jumping to whatever on the page lies that way.
@@ -204,7 +211,6 @@ struct MainView: View {
                 }
                 .buttonStyle(Sidebar.RowStyle())
                 .focused($focused, equals: Sidebar.profile)
-                .disabled(handingOver)
                 .padding(.bottom, 12)
             }
             ForEach(places) { place in
@@ -217,7 +223,6 @@ struct MainView: View {
                 }
                 .buttonStyle(Sidebar.RowStyle())
                 .focused($focused, equals: place.id)
-                .disabled(handingOver)
             }
             edge(Sidebar.below)
             Spacer(minLength: 0)
@@ -239,27 +244,18 @@ struct MainView: View {
         .ignoresSafeArea()
     }
 
-    /// Moves the focus from the sidebar onto the page showing: setting the focus to nothing
-    /// leaves it where it is on tvOS, but a focused button that can't be focused gives it up. A
-    /// page just opened may not be ready to take it, so this tries again a few times.
+    /// Moves the focus from the sidebar onto the page: to the stop at the page's top left (tvOS
+    /// can't be told to focus "something on the page", only a view it knows), so the sidebar shuts
+    /// and the next press moves on into the page from there.
     private func handOver() {
-        Task { @MainActor in
-            for _ in 0..<4 {
-                handingOver = true
-                // The page is the scope's preferred focus; asking tvOS to decide again moves it there.
-                resetFocus(in: scope)
-                try? await Task.sleep(for: .milliseconds(350))
-                handingOver = false
-                try? await Task.sleep(for: .milliseconds(150))
-                if focused == nil { return }
-            }
-        }
+        landingArmed = true
+        Task { @MainActor in focused = Sidebar.landing }
     }
 
     /// An invisible stop above and below the places (see onChange above).
     private func edge(_ id: String) -> some View {
         Color.clear.frame(height: 1)
-            .focusable(!handingOver)
+            .focusable()
             .focused($focused, equals: id)
             .accessibilityHidden(true)
     }
@@ -290,6 +286,7 @@ enum Sidebar {
     static let collapsedWidth: CGFloat = icon + inset * 2
     static let openWidth: CGFloat = 440
     static let profile = "sidebar:profile"
+    static let landing = "sidebar:landing"
     static let above = "sidebar:above"
     static let below = "sidebar:below"
 
