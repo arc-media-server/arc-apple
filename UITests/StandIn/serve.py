@@ -5,7 +5,7 @@ fixtures/sample.mp4 for every title. Any token is accepted.
 
     python3 UITests/StandIn/serve.py 8080
 """
-import hashlib, http.server, json, os, struct, sys, urllib.parse, zlib
+import hashlib, http.server, json, os, struct, sys, urllib.parse, urllib.request, zlib
 
 here = os.path.dirname(os.path.abspath(__file__))
 answers = json.load(open(os.path.join(here, "fixtures", "answers.json")))
@@ -16,6 +16,73 @@ for _c in (answers.get("GET home/continue?with_up_next=1", {}).get("body") or []
     _c["user_data"] = dict(_c.get("user_data") or {}, position_ms=28 * 60_000)
 pngs = {}
 polls = [0]
+
+# Real pictures from TMDB when the build has a TMDB_API_KEY secret (the recorded titles carry their
+# TMDB ids); without one, or when TMDB has nothing, the placeholders below are drawn. The key is
+# only sent to TMDB and never logged.
+tmdb_key = os.environ.get("TMDB_API_KEY", "").strip()
+titles = {}   # item id -> (kind, tmdb id, show's item id)
+people = {}   # person id -> name
+for _v in answers.values():
+    _docs = [_v["body"]] if isinstance(_v["body"], dict) else []
+    for _d in list(_docs):
+        _docs += [x for x in (_d.get("items") or []) if isinstance(x, dict)]
+    for _d in _docs:
+        if _d.get("id") and _d.get("kind"):
+            titles.setdefault(_d["id"], (_d["kind"], _d.get("tmdb_id"), _d.get("parent_id")))
+        for _c in _d.get("credits") or []:
+            people[str(_c.get("person_id"))] = _c.get("name")
+real = {}
+
+def tmdb(path, **query):
+    q = dict(query)
+    headers = {"Accept": "application/json"}
+    if len(tmdb_key) > 40:   # a read access token
+        headers["Authorization"] = "Bearer " + tmdb_key
+    else:
+        q["api_key"] = tmdb_key
+    req = urllib.request.Request("https://api.themoviedb.org/3/" + path + "?" + urllib.parse.urlencode(q), headers=headers)
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return json.loads(r.read())
+
+def real_picture(path):
+    """A real picture for an Arc image path, or None."""
+    if not tmdb_key: return None
+    parts = path.split("/")
+    try:
+        if parts[0] == "people" and len(parts) >= 3:
+            name = people.get(parts[1])
+            if not name: return None
+            key = ("person", name)
+            if key not in real:
+                hits = tmdb("search/person", query=name).get("results") or []
+                pic = next((h.get("profile_path") for h in hits if h.get("profile_path")), None)
+                real[key] = fetch("w342", pic) if pic else None
+            return real[key]
+        if parts[0] != "items" or len(parts) < 4: return None
+        item, which = parts[1], parts[3]
+        kind, tmdb_id, parent = titles.get(item, (None, None, None))
+        if kind in ("episode", "season") and parent:
+            kind, tmdb_id, _ = titles.get(parent, (None, None, None))
+            if which == "primary": which = "backdrop"   # an episode's still: its show's background
+        if not tmdb_id or kind not in ("movie", "series"): return None
+        key = (kind, tmdb_id, which)
+        if key not in real:
+            imgs = tmdb(("movie/" if kind == "movie" else "tv/") + str(tmdb_id) + "/images", include_image_language="en,null")
+            pick = lambda xs, langs: next((x["file_path"] for l in langs for x in xs if x.get("iso_639_1") == l), None)
+            if which == "logo": pic, size = pick(imgs.get("logos") or [], ["en"]), "w500"
+            elif which == "backdrop": pic, size = pick(imgs.get("backdrops") or [], [None, "en"]), "w1280"
+            else: pic, size = pick(imgs.get("posters") or [], ["en", None]), "w500"
+            real[key] = fetch(size, pic) if pic else None
+        return real[key]
+    except Exception as e:
+        sys.stderr.write(f"standin: no TMDB picture for {path.split('?')[0]}: {type(e).__name__}\n")
+        return None
+
+def fetch(size, file_path):
+    with urllib.request.urlopen("https://image.tmdb.org/t/p/" + size + file_path, timeout=15) as r:
+        data = r.read()
+    return (data, "image/png" if file_path.endswith(".png") else "image/jpeg")
 
 def png(seed, w, h):
     """A dark two-tone gradient in a colour picked from seed: enough to tell cards apart."""
@@ -72,6 +139,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         elif path.startswith("/api/"): path = path[len("/api/"):]
         parts = path.split("/")
         # Pictures: placeholders, posters tall and backdrops wide. Logos are left out so titles show as text.
+        if "/images/" in path or path.endswith("/image"):
+            got = real_picture(path)
+            if got: return self.send(200, got[0], got[1], {"Cache-Control": "max-age=3600"})
         if path.endswith("/images/logo"): return self.json(404, {"error": "no logo"})
         if "/images/" in path or path.endswith("/image"):
             wide = "backdrop" in path or "thumb" in path or (parts[0] == "items" and path.endswith("primary") and query.get("ep") == "1")
