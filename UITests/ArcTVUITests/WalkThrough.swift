@@ -56,6 +56,19 @@ final class WalkThrough: XCTestCase {
         remote.press(.playPause)
         pause(2)
         shot("10-player-paused")
+        // Skip Intro has the focus (the stand-in marks the clip's start as an intro); then
+        // down opens Subtitles and Audio, and the stand-in's track turns on.
+        remote.press(.select)
+        pause(2)
+        press(.down)
+        pause(2)
+        shot("10b-player-options")
+        press(.right)
+        remote.press(.select)
+        pause(3)
+        shot("10c-player-subtitles")
+        remote.press(.menu)
+        pause(1)
         // Back closes the player, Back again leaves the title page for Home. (A third would
         // leave the app: Back on Home goes to the Apple TV's home screen, as tvOS apps do.)
         remote.press(.menu)
