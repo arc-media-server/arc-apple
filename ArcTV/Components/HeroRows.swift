@@ -9,6 +9,8 @@ struct HeroRows<Header: View>: View {
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     let rows: [LoadedRow]
+    /// Room left at the top of the hero for the floating header.
+    var headerHeight: CGFloat = 0
     @ViewBuilder var header: () -> Header
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
@@ -40,6 +42,7 @@ struct HeroRows<Header: View>: View {
                         }
                     }
                 }
+                .padding(.top, headerHeight)
                 .padding(.bottom, 60)
             }
             header()
