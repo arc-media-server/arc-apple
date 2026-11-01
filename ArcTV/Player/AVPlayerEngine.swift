@@ -127,8 +127,11 @@ final class AVPlayerEngine: PlaybackEngine {
     }
 
     private func applyDisplayCriteria(_ criteria: AVDisplayCriteria?) {
-        guard let manager = surface.window?.avDisplayManager ?? Self.keyWindow?.avDisplayManager,
-              manager.isDisplayCriteriaMatchingEnabled else { return }
+        // Windows without a display manager (the simulator's) don't answer avDisplayManager at
+        // all, and asking stops the app: check first, and play without Match Content there.
+        let selector = NSSelectorFromString("avDisplayManager")
+        let window = [surface.window, Self.keyWindow].compactMap { $0 }.first { $0.responds(to: selector) }
+        guard let manager = window?.avDisplayManager, manager.isDisplayCriteriaMatchingEnabled else { return }
         manager.preferredDisplayCriteria = criteria
     }
 
