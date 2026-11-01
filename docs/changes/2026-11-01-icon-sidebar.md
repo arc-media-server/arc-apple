@@ -14,6 +14,13 @@ app, as on tvOS's own sidebar.
 Each place keeps its pages while another is showing, as the tab view did. A place is first built
 when it's opened.
 
+Moving the focus out of the sidebar after Select took some finding. tvOS won't move the focus to
+"the page", only to a view it's told about: dropping it, or asking tvOS to decide again, left the
+focus nowhere, so the next press went back into the sidebar and Back left the app. Select now
+moves the focus to an invisible stop at the page's top left. The sidebar shuts, the next press
+moves on into the page, and Back there opens the sidebar again. Up past the profile and down past
+Settings keep the focus in the sidebar.
+
 ## Why
 
 The owner (1 November) wants it to work as Plozz's does: tvOS 26's sidebar shrinks to a small
@@ -30,7 +37,10 @@ pill with no icons when shut, so you can't see where you are or what's there.
 
 ## Limits
 
-Checked in the tvOS 26 simulator only (the walk-through's screenshots), not on an Apple TV.
+- Checked in the tvOS 26 simulator only (the walk-through's screenshots), not on an Apple TV.
+- Right after Select nothing on the page looks focused until the next press, because the focus
+  sits on the invisible stop. Pages could later name their own first focus instead.
+- Search's keyboard is laid out by tvOS and starts under the icons.
 
 ## Logging
 
