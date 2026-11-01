@@ -239,7 +239,7 @@ struct EpisodeCard: View {
                     ArtworkImage(path: episode.images?.primary).frame(width: 384, height: 216).clipped()
                     if let progress = card.progress { ProgressBar(fraction: progress).padding(12) }
                     if episode.watched {
-                        Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.white, ArcColor.accentStrong)
+                        Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.black, .white)
                             .padding(10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }
                 }
