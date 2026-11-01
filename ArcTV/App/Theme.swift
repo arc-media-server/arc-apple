@@ -54,3 +54,49 @@ enum ArcLogApp {
     static func warn(_ message: String) { ArcLog.shared.warn(message) }
     static func debug(_ message: String) { ArcLog.shared.debug(message) }
 }
+
+// Apple's Liquid Glass (tvOS 26): controls and panels that float over the artwork are glass;
+// the artwork and text underneath stay as they are. Older tvOS gets the closest material look.
+extension View {
+    /// A glass button; `prominent` for the page's main action (Play), tinted with Arc's accent.
+    @ViewBuilder func arcGlassButton(prominent: Bool = false) -> some View {
+        #if compiler(>=6.2) // Xcode 26: the tvOS 26 SDK has the glass styles
+        if #available(tvOS 26.0, *) {
+            if prominent {
+                buttonStyle(.glassProminent).tint(ArcColor.accentStrong)
+            } else {
+                buttonStyle(.glass)
+            }
+        } else {
+            materialButton(prominent: prominent)
+        }
+        #else
+        materialButton(prominent: prominent)
+        #endif
+    }
+
+    @ViewBuilder private func materialButton(prominent: Bool) -> some View {
+        if prominent {
+            buttonStyle(.borderedProminent).tint(ArcColor.accentStrong)
+        } else {
+            buttonStyle(.bordered)
+        }
+    }
+
+    /// A floating glass panel (the player's controls, Up Next, the options).
+    @ViewBuilder func arcGlassPanel(cornerRadius: CGFloat = 32) -> some View {
+        #if compiler(>=6.2)
+        if #available(tvOS 26.0, *) {
+            glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        } else {
+            background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
+        }
+        #else
+        background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
+        #endif
+    }
+    /// A round glass button showing only its icon (its name stays for VoiceOver).
+    func roundIconButton() -> some View {
+        labelStyle(.iconOnly).arcGlassButton().buttonBorderShape(.circle)
+    }
+}

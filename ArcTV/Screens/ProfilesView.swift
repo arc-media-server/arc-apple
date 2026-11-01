@@ -43,7 +43,7 @@ struct ProfilesView: View {
                 .defaultFocus($focused, profiles.first?.id)
             }
             if let problem { Text(problem).foregroundStyle(ArcColor.error).multilineTextAlignment(.center).frame(maxWidth: 1100) }
-            Button(L("profiles.sign_out")) { Task { await app.signOut() } }
+            Button(L("profiles.sign_out")) { Task { await app.signOut() } }.arcGlassButton()
         }
         .padding(80)
         .task { await load() }

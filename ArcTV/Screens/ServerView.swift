@@ -26,6 +26,7 @@ struct ServerView: View {
             Button(action: connect) {
                 Text(checking ? L("server.checking") : L("server.connect")).frame(minWidth: 320)
             }
+            .arcGlassButton(prominent: true)
             .disabled(checking)
         }
         .padding(80)

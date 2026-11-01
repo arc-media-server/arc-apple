@@ -9,16 +9,13 @@ struct TitleGrid: View {
     @Environment(\.openRoute) private var openRoute
     @FocusState private var focused: String?
 
-    static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 48, alignment: .top)]
+    static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 40, alignment: .top)]
 
     var body: some View {
         LazyVGrid(columns: Self.columns, alignment: .leading, spacing: 56) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-                VStack(alignment: .leading, spacing: 10) {
-                    MediaCardView(card: MediaCard(item: item), style: .poster, focus: $focused, focusKey: item.id) { openRoute(.item(item)) }
-                    Text(item.title).font(.caption).lineLimit(1).frame(width: CardStyle.poster.size.width, alignment: .leading)
-                }
-                .onAppear { if index >= items.count - 12 { more?() } }
+                MediaCardView(card: MediaCard(item: item), style: .poster, focus: $focused, focusKey: item.id) { openRoute(.item(item)) }
+                    .onAppear { if index >= items.count - 12 { more?() } }
             }
         }
     }
@@ -43,6 +40,7 @@ struct TileButton: View {
                     }
                 }
                 .frame(width: size.width, height: size.height)
+                .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
             Text(title).font(.caption).lineLimit(1).frame(width: size.width, alignment: .leading)
