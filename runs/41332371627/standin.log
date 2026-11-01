@@ -1,0 +1,90 @@
+stand-in Arc on http://127.0.0.1:8080
+standin: "GET /api/v1/health HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/link HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 202 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 202 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/status HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/profile HTTP/1.1" 200 -
+standin: "GET /api/v1/identity HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/items/b10df778907ff671f83807a28df7a4e1/images/backdrop?local=eb4b2673c07c628f8fa99aca HTTP/1.1" 200 -
+standin: "GET /api/v1/items/95f0e3420d47e97793d7914f0ad90363/images/backdrop?local=b0f393dcfcd81944d22c153e HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885 HTTP/1.1" 404 -
+standin: "GET /api/v1/items/eb73ba691bc161dfeaff15734c3313c1/images/backdrop?local=6a76f54eb49030b3b7ed1915 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab HTTP/1.1" 200 -
+standin: "GET /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/images/primary?v=0793fa071b65ced6f67fbc7b HTTP/1.1" 200 -
+standin: "GET /api/v1/items/00624fb730521e579927d960b5937a84/images/backdrop?local=90ad6ec7de1f3187d8ae71d3 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/primary?v=ce8752dc51425b9379ae8ae7 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/b1876c7f071f4ad110d9ca08ea467427/images/backdrop?local=05cd034280ceaa6bab71972f HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/logo?v=820c3a8dda95347fa3d140c5 HTTP/1.1" 404 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/backdrop?v=f349d190ef45effabe9895e0 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885 HTTP/1.1" 404 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/logo?v=820c3a8dda95347fa3d140c5 HTTP/1.1" 404 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885 HTTP/1.1" 404 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "POST /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/playback HTTP/1.1" 200 -
+standin: "GET /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/next HTTP/1.1" 200 -
+standin: "GET /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/subtitles/standin?file=16 HTTP/1.1" 200 -
+standin: "POST /api/v1/cast HTTP/1.1" 200 -
+standin: "GET /media/sample.mp4 HTTP/1.1" 206 -
+standin: "GET /media/sample.mp4 HTTP/1.1" 206 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 49652)
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 694, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 359, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 763, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/http/server.py", line 474, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/http/server.py", line 462, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 54, in do_GET
+    def do_GET(self): self.route("GET")
+                      ~~~~~~~~~~^^^^^^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 66, in route
+    if path.startswith("/media/"): return self.media()
+                                          ~~~~~~~~~~^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 124, in media
+    return self.send(206, sample[start:end + 1], "video/mp4", {"Content-Range": f"bytes {start}-{end}/{size}", "Accept-Ranges": "bytes"})
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 48, in send
+    if self.command != "HEAD": self.wfile.write(body)
+                               ~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 842, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [Errno 54] Connection reset by peer
+----------------------------------------
+standin: "GET /media/sample.mp4 HTTP/1.1" 206 -
+standin: "GET /api/v1/items/5ca6bc787a7af9a0659e826e9bf516ad/images/primary?v=84e62b53dd5fa7f7b3a096b4 HTTP/1.1" 200 -
+standin: "PUT /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/progress HTTP/1.1" 204 -
+standin: "PUT /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/progress HTTP/1.1" 204 -
+standin: "PUT /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/progress HTTP/1.1" 204 -
+standin: "GET /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/subtitles/standin?file=16 HTTP/1.1" 200 -
+standin: "PATCH /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "PUT /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/progress HTTP/1.1" 204 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
