@@ -10,6 +10,10 @@ import hashlib, http.server, json, os, struct, sys, urllib.parse, zlib
 here = os.path.dirname(os.path.abspath(__file__))
 answers = json.load(open(os.path.join(here, "fixtures", "answers.json")))
 sample = open(os.path.join(here, "fixtures", "sample.mp4"), "rb").read()
+# The recording's Continue Watching has nothing part-watched: put each title 28 minutes in, so
+# the cards' resume strip (play mark, progress, minutes left) shows.
+for _c in (answers.get("GET home/continue?with_up_next=1", {}).get("body") or []):
+    _c["user_data"] = dict(_c.get("user_data") or {}, position_ms=28 * 60_000)
 pngs = {}
 polls = [0]
 
