@@ -58,12 +58,14 @@ enum ArcLogApp {
 // Apple's Liquid Glass (tvOS 26): controls and panels that float over the artwork are glass;
 // the artwork and text underneath stay as they are. Older tvOS gets the closest material look.
 extension View {
-    /// A glass button; `prominent` for the page's main action (Play), tinted with Arc's accent.
+    /// A glass button; `prominent` for the page's main action (Play) and the chosen option: white
+    /// with black text, as the sidebar's chosen place (owner, 1 November: no UI colour, only white
+    /// and black; the accent stays for the logo alone).
     @ViewBuilder func arcGlassButton(prominent: Bool = false) -> some View {
         #if compiler(>=6.2) // Xcode 26: the tvOS 26 SDK has the glass styles
         if #available(tvOS 26.0, *) {
             if prominent {
-                buttonStyle(.glassProminent).tint(ArcColor.accentStrong)
+                buttonStyle(.glassProminent).tint(.white).foregroundStyle(.black)
             } else {
                 buttonStyle(.glass)
             }
@@ -77,7 +79,7 @@ extension View {
 
     @ViewBuilder private func materialButton(prominent: Bool) -> some View {
         if prominent {
-            buttonStyle(.borderedProminent).tint(ArcColor.accentStrong)
+            buttonStyle(.borderedProminent).tint(.white).foregroundStyle(.black)
         } else {
             buttonStyle(.bordered)
         }

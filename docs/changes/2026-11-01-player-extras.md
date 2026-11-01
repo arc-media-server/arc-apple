@@ -33,3 +33,9 @@ fails; debug for thumbnails found or missing. No URLs or tokens.
 ## Limits
 
 Simulator only; not checked on a real Apple TV.
+
+## Also: white instead of teal
+
+The owner dropped a UI colour (1 November): the Play buttons, chosen options, season and
+library pills and the watched ticks are white with black, as the sidebar's chosen place. The
+teal stays only in Arc's wordmark. `arcGlassButton(prominent:)` tints glass white with black text.
