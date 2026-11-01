@@ -108,11 +108,13 @@ final class WalkThrough: XCTestCase {
         shot("20-search")
         press(.down)
         pause(1)
+        // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
+        // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
         let field = app.searchFields.firstMatch
-        if field.waitForExistence(timeout: 3) {
-            field.typeText("fire")
+        if field.exists {
+            field.typeText("alien")
         } else {
-            app.typeText("fire")
+            remote.press(.select)
         }
         pause(4)
         shot("21-search-results")

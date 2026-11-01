@@ -80,11 +80,16 @@ jobs:
           import json, os, shutil
           m = json.load(open("screenshots/manifest.json")) if os.path.exists("screenshots/manifest.json") else []
           for test in m:
-              for a in test.get("attachments", []):
+              for i, a in enumerate(test.get("attachments", [])):
                   name = a.get("suggestedHumanReadableName", a["exportedFileName"]).split("_")[0]
-                  shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", name + ".png"))
+                  ext = os.path.splitext(a["exportedFileName"])[1].lower()
+                  # Screenshots become small JPEGs; text (failure details) is kept; recordings are left out.
+                  if ext == ".png":
+                      shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", name + ".png"))
+                  elif ext == ".txt":
+                      shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", f"{name}-{i}.txt"))
           PY
-          for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null; rm "$f"; done
+          for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null || true; rm "$f"; done
           cp standin.log small/ 2>/dev/null || true
           cp screenshots/*.ips small/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
