@@ -163,7 +163,7 @@ struct MainView: View {
             } else if new == Sidebar.above {
                 // Past the first or last place the focus stays in the sidebar, rather than
                 // jumping to whatever on the page lies that way.
-                Task { @MainActor in focused = places.first?.id }
+                Task { @MainActor in focused = app.profile == nil ? places.first?.id : Sidebar.profile }
             } else if new == Sidebar.below {
                 Task { @MainActor in focused = places.last?.id }
             }
@@ -188,9 +188,21 @@ struct MainView: View {
         }
     }
 
+    /// Shut, only the icons show, straight on the page, with a grey disc behind the place showing;
+    /// open, a tall glass panel comes in behind them with the names, the profile's name at the
+    /// top (Select switches profile), and the focused place in white.
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             edge(Sidebar.above)
+            if let profile = app.profile {
+                Button { app.switchProfile() } label: {
+                    Sidebar.Row(icon: nil, profile: profile, title: profile.name, current: false, open: sidebarOpen)
+                }
+                .buttonStyle(Sidebar.RowStyle())
+                .focused($focused, equals: Sidebar.profile)
+                .disabled(handingOver)
+                .padding(.bottom, 12)
+            }
             ForEach(places) { place in
                 Button {
                     tab = place.id
@@ -204,15 +216,25 @@ struct MainView: View {
                 .disabled(handingOver)
             }
             edge(Sidebar.below)
+            Spacer(minLength: 0)
         }
-        .padding(Sidebar.inset)
+        .padding(.horizontal, Sidebar.inset)
+        .padding(.vertical, 40)
         .frame(width: sidebarOpen ? Sidebar.openWidth : Sidebar.collapsedWidth, alignment: .leading)
-        .arcGlassPanel(cornerRadius: 40)
-        .opacity(sidebarOpen ? 1 : 0.92)
+        .frame(maxHeight: .infinity, alignment: .top)
+        .background(alignment: .leading) {
+            Color.clear
+                .frame(width: Sidebar.openWidth)
+                .frame(maxHeight: .infinity)
+                .arcGlassPanel(cornerRadius: 48)
+                .opacity(sidebarOpen ? 1 : 0)
+        }
         .focusSection()
-        .padding(.leading, 28)
-        .ignoresSafeArea(edges: .leading)
+        .padding(.vertical, 30)
+        .padding(.leading, 30)
+        .ignoresSafeArea()
     }
+
     /// Moves the focus from the sidebar onto the page showing: setting the focus to nothing
     /// leaves it where it is on tvOS, but a focused button that can't be focused gives it up. A
     /// page just opened may not be ready to take it, so this tries again a few times.
@@ -258,41 +280,46 @@ struct MainView: View {
 /// the sidebar opens; the focused row white with black, as Apple's sidebar.
 enum Sidebar {
     static let inset: CGFloat = 12
-    static let icon: CGFloat = 64
+    static let icon: CGFloat = 72
     static let collapsedWidth: CGFloat = icon + inset * 2
-    static let openWidth: CGFloat = 400
+    static let openWidth: CGFloat = 440
+    static let profile = "sidebar:profile"
     static let above = "sidebar:above"
     static let below = "sidebar:below"
 
     struct Row: View {
-        let icon: String
+        let icon: String?
+        var profile: Profile? = nil
         let title: String
         let current: Bool
         let open: Bool
         @Environment(\.isFocused) private var isFocused
 
         var body: some View {
-            HStack(spacing: 14) {
-                Image(systemName: icon)
-                    .font(.system(size: 26, weight: current ? .semibold : .regular))
-                    .frame(width: Sidebar.icon, height: Sidebar.icon)
+            HStack(spacing: 16) {
+                ZStack {
+                    // The place showing, while the sidebar is shut: a grey disc behind its icon.
+                    Circle().fill(.white.opacity(0.22)).opacity(current && !open ? 1 : 0)
+                    if let profile {
+                        Avatar(profile: profile, size: 46)
+                    } else if let icon {
+                        Image(systemName: icon).font(.system(size: 28, weight: .semibold))
+                    }
+                }
+                .frame(width: Sidebar.icon, height: Sidebar.icon)
                 Text(title)
-                    .font(.system(size: 26, weight: current ? .semibold : .medium))
+                    .font(.system(size: 30, weight: current || profile != nil ? .semibold : .medium))
                     .lineLimit(1)
                     .opacity(open ? 1 : 0)
                 Spacer(minLength: 0)
             }
-            .foregroundStyle(isFocused ? Color.black : current ? Color.white : Color.white.opacity(0.6))
+            .foregroundStyle(isFocused ? Color.black : current || !open ? Color.white : Color.white.opacity(0.85))
+            .padding(.trailing, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
                 Capsule().fill(.white).opacity(isFocused ? 1 : 0)
             }
-            .background {
-                // The place showing, while the sidebar is shut: a faint disc behind its icon.
-                Circle().fill(.white.opacity(0.18)).frame(width: Sidebar.icon, height: Sidebar.icon)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .opacity(current && !open ? 1 : 0)
-            }
+            .shadow(color: .black.opacity(open ? 0 : 0.5), radius: 6) // icons over bright artwork
             .contentShape(Capsule())
         }
     }
