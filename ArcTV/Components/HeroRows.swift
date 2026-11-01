@@ -99,7 +99,7 @@ struct HeroRows<Header: View>: View {
                     HStack(spacing: 14) {
                         Image(systemName: "play.fill")
                         if let progress = card.progress, let left = card.minutesLeft {
-                            ProgressBar(fraction: progress).frame(width: 90)
+                            ProgressBar(fraction: progress, color: .black).frame(width: 90)
                             Text(L("card.minutes_short", left))
                         } else {
                             Text(L("details.play"))
