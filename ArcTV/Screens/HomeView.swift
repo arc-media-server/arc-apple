@@ -88,33 +88,26 @@ final class HomeModel {
 /// Home: the focused title's backdrop behind the rows, artwork-led, no banner.
 struct HomeView: View {
     @Environment(AppModel.self) private var app
+    @Environment(Browse.self) private var browse
+    @Environment(\.openRoute) private var openRoute
     @State private var model = HomeModel()
-    @State private var path = NavigationPath()
-    @State private var playing: PlayRequest?
     @FocusState private var focused: String?
 
     var body: some View {
-        NavigationStack(path: $path) {
-            ZStack(alignment: .topLeading) {
-                backdrop
-                if model.loading {
-                    ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if model.failed {
-                    message(L("home.failed_title"), L("common.unreachable"), retry: true)
-                } else if model.rows.isEmpty {
-                    message(L("home.empty_title"), L("home.empty_body"), retry: false)
-                } else {
-                    rows
-                }
-            }
-            .navigationDestination(for: Item.self) { item in
-                DetailsView(itemId: item.id, initial: item) { playing = $0 }
+        ZStack(alignment: .topLeading) {
+            backdrop
+            if model.loading {
+                ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if model.failed {
+                message(L("home.failed_title"), L("common.unreachable"), retry: true)
+            } else if model.rows.isEmpty {
+                message(L("home.empty_title"), L("home.empty_body"), retry: false)
+            } else {
+                rows
             }
         }
-        .fullScreenCover(item: $playing, onDismiss: { Task { await reload() } }) { request in
-            PlayerScreen(request: request)
-        }
-        .task { await reload() }
+        // Read again after playing or a change of watch state, so Continue Watching is current.
+        .task(id: browse.changes) { await reload() }
         // Focus starts on the first title, as Plex's Home, not on the profile button above the rows.
         .onChange(of: model.loading) { _, now in
             if !now, focused == nil, let row = model.rows.first, let card = row.cards.first {
@@ -191,9 +184,9 @@ struct HomeView: View {
         let item = card.item
         // Episodes on Continue Watching play at once, as Plex's do; everything else opens its page.
         if item.isEpisode && card.progress != nil {
-            playing = PlayRequest(item: item, startMs: item.resumeMs)
+            browse.play(PlayRequest(item: item, startMs: item.resumeMs))
         } else {
-            path.append(item)
+            openRoute(.item(item))
         }
     }
 

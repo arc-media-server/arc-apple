@@ -46,7 +46,10 @@ final class WalkThrough: XCTestCase {
         press(.down, 2)
         pause(2)
         shot("08-title-page-scrolled")
+        // Up returns to the button row under the focus (the middle of Play, Watched and
+        // Watchlist), so left to Play.
         press(.up, 4)
+        press(.left, 3)
         remote.press(.select)
         pause(6)
         shot("09-player")
@@ -68,6 +71,56 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(4)
         shot("13-third-row-title")
+        press(.down, 6)
+        pause(3)
+        shot("14-title-page-rows")
+
+        // Back to Home, then up to the tabs, and along them: the Watchlist, each library,
+        // Playlists and Settings (the tab under the focus opens as the focus moves).
+        remote.press(.menu)
+        pause(2)
+        remote.press(.menu)
+        pause(2)
+        shot("15-tabs")
+        for i in 1...7 {
+            press(.right)
+            pause(3)
+            shot(String(format: "16-tab-%02d", i))
+        }
+
+        // A library: its sort and filters, then the grid, and holding Select on a title.
+        press(.left, 3)
+        pause(3)
+        press(.down)
+        pause(1)
+        shot("17-library-header")
+        press(.down)
+        pause(2)
+        shot("18-library-grid")
+        remote.press(.select, forDuration: 1.6)
+        pause(2)
+        shot("19-title-actions")
+        remote.press(.menu)
+        pause(1)
+
+        // Search: type a few letters; results follow the typing.
+        remote.press(.menu)
+        pause(1)
+        press(.left, 10)
+        pause(2)
+        shot("20-search")
+        press(.down)
+        pause(1)
+        // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
+        // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
+        let field = app.searchFields.firstMatch
+        if field.exists {
+            field.typeText("alien")
+        } else {
+            remote.press(.select)
+        }
+        pause(4)
+        shot("21-search-results")
     }
 
     private func press(_ button: XCUIRemote.Button, _ times: Int = 1) {

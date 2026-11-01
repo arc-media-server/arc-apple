@@ -54,6 +54,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self): self.route("GET")
     def do_POST(self): self.route("POST")
     def do_PUT(self): self.route("PUT")
+    def do_PATCH(self): self.route("PATCH")
     def do_DELETE(self): self.route("DELETE")
 
     def route(self, method):
@@ -81,6 +82,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if method == "POST" and path == "cast":
             host = self.headers.get("Host")
             return self.json(200, {"url": f"http://{host}/media/sample.mp4"})
+        # Preferences: the recorded ones with the change made (not kept between requests).
+        if method == "PATCH" and path == "me/prefs":
+            return self.json(200, dict(answers["GET me/prefs"]["body"], **(body or {})))
         if method in ("PUT", "DELETE") or (method == "POST" and (path.endswith("/ping") or path == "auth/logout")):
             return self.send(204, b"")
         k = key(method, path, query)
@@ -89,6 +93,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         a = answers.get(k) or answers.get(f"{method} {path}")
         if a is None and method == "GET" and parts[0] == "items" and len(parts) == 1:
             a = next((v for kk, v in answers.items() if kk.startswith("GET items?")), None)
+        if a is None and method == "GET" and path == "search":
+            a = {"status": 200, "body": {"movies": [], "shows": [], "episodes": [], "collections": [], "people": []}}
         if a is None:
             return self.json(404, {"error": "the stand-in has no answer for " + k})
         doc = a["body"]
