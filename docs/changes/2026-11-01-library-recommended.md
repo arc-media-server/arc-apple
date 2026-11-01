@@ -8,7 +8,8 @@ layout's order and looks) under the same full-screen hero as Home. The pill bar 
 reads Recommended, Browse, Collections (and Folders for Other videos libraries, which have no
 Recommended and still open on Browse). On Recommended the bar floats over the top of the hero,
 so it shows as the page opens with the focus on the first title, and fades while the focus is
-further down than the first row, so it never covers a row. Sort and Filter show beside the bar on Browse.
+further down than the first row, so it never covers a row. To leave room for the bar, the library hero leaves out the overview
+(Info has it); Home's keeps it. Sort and Filter show beside the bar on Browse.
 
 Home and Recommended share one view (`HeroRows`): the focused title's background, logo or name,
 details, Play, Watchlist and Info, with the rows beneath. Focus starts on the first title.
