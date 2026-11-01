@@ -38,8 +38,28 @@ targets:
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "3"
         ENABLE_USER_SCRIPT_SANDBOXING: YES
+  # Walks the app in the simulator against the stand-in Arc and keeps screenshots (UITests/).
+  ArcTVUITests:
+    type: bundle.ui-testing
+    platform: tvOS
+    sources:
+      - path: UITests/ArcTVUITests
+    dependencies:
+      - target: ArcTV
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.arcmediaserver.apple.tv.uitests
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "3"
+        TEST_TARGET_NAME: ArcTV
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   ArcTV:
     build:
       targets:
         ArcTV: all
+    test:
+      targets:
+        - ArcTVUITests
+      environmentVariables:
+        ARC_STANDIN_URL: http://127.0.0.1:8080

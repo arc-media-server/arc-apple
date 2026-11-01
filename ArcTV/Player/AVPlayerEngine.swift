@@ -43,16 +43,20 @@ final class AVPlayerEngine: PlaybackEngine {
         }
     }
 
+    // AVFoundation calls these back on its own queues. The closures are @Sendable so they don't
+    // inherit the main actor (the runtime would stop the app on the first call off the main
+    // thread); each hops to the main actor itself.
     private func attach(_ item: AVPlayerItem) {
         observations = [
-            item.observe(\.status, options: [.new]) { [weak self] item, _ in
+            item.observe(\.status, options: [.new]) { @Sendable [weak self] item, _ in
                 Task { @MainActor in self?.statusChanged(item) }
             },
-            player.observe(\.timeControlStatus, options: [.new]) { [weak self] player, _ in
-                Task { @MainActor in self?.timeControlChanged(player.timeControlStatus) }
+            player.observe(\.timeControlStatus, options: [.new]) { @Sendable [weak self] player, _ in
+                let status = player.timeControlStatus
+                Task { @MainActor in self?.timeControlChanged(status) }
             },
         ]
-        endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { [weak self] _ in
+        endObserver = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main) { @Sendable [weak self] _ in
             Task { @MainActor in self?.onEvent?(.ended) }
         }
         player.replaceCurrentItem(with: item)
@@ -63,7 +67,7 @@ final class AVPlayerEngine: PlaybackEngine {
         case .readyToPlay where !started:
             started = true
             // A converted stream is a growing (EVENT) playlist: start where asked, not at its live edge.
-            player.seek(to: CMTime(seconds: startSeconds, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+            player.seek(to: CMTime(seconds: startSeconds, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero) { @Sendable [weak self] _ in
                 Task { @MainActor in
                     self?.player.play()
                     self?.onEvent?(.ready)
@@ -123,8 +127,11 @@ final class AVPlayerEngine: PlaybackEngine {
     }
 
     private func applyDisplayCriteria(_ criteria: AVDisplayCriteria?) {
-        guard let manager = surface.window?.avDisplayManager ?? Self.keyWindow?.avDisplayManager,
-              manager.isDisplayCriteriaMatchingEnabled else { return }
+        // Windows without a display manager (the simulator's) don't answer avDisplayManager at
+        // all, and asking stops the app: check first, and play without Match Content there.
+        let selector = NSSelectorFromString("avDisplayManager")
+        let window = [surface.window, Self.keyWindow].compactMap { $0 }.first { $0.responds(to: selector) }
+        guard let manager = window?.avDisplayManager, manager.isDisplayCriteriaMatchingEnabled else { return }
         manager.preferredDisplayCriteria = criteria
     }
 

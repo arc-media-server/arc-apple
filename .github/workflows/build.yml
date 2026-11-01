@@ -1,18 +1,30 @@
-# Builds ArcKit (with its tests) and the tvOS app on macOS. To save Actions minutes (macOS
-# minutes count ten times on a private repository) it runs only when asked: from the Actions
-# tab, or for a push to an agent's branch whose commit message contains [build].
+# Builds ArcKit (with its tests) and the tvOS app on macOS, then walks the app in the tvOS
+# simulator against a stand-in Arc (UITests/) and keeps a screenshot of each screen as the
+# "screenshots" artifact. To save Actions minutes (macOS minutes count ten times on a private
+# repository) it runs only when asked: from the Actions tab, or for a push to an agent's branch
+# whose commit message contains [build]. Pushes that only change Markdown never run it, and a
+# newer run on the same branch cancels an older one.
 name: Build
 
 on:
   workflow_dispatch:
   push:
     branches: ["claude/**", "codex/**"]
+    paths-ignore:
+      - '**.md'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build]')
     runs-on: macos-15
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - name: Tools
@@ -29,3 +41,71 @@ jobs:
           set -o pipefail
           xcodebuild -project Arc.xcodeproj -scheme ArcTV -configuration Debug \
             -destination 'generic/platform=tvOS' CODE_SIGNING_ALLOWED=NO -quiet build
+      - name: Start the stand-in Arc
+        run: |
+          python3 UITests/StandIn/serve.py 8080 > standin.log 2>&1 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8080/api/v1/health
+      - name: Walk the app in the simulator
+        run: |
+          set -o pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          tv = [(r, x) for r, xs in d.items() if "tvOS" in r for x in xs if "4K" in x["name"]]
+          tv.sort(key=lambda p: p[0])
+          print(tv[-1][1]["udid"])')
+          echo "simulator: $DEVICE"
+          xcodebuild -project Arc.xcodeproj -scheme ArcTV -destination "id=$DEVICE" \
+            -resultBundlePath walk.xcresult -quiet test
+      - name: Export the screenshots
+        if: always()
+        run: |
+          mkdir -p screenshots
+          if [ -d walk.xcresult ]; then
+            xcrun xcresulttool export attachments --path walk.xcresult --output-path screenshots || true
+          fi
+          cp standin.log screenshots/ 2>/dev/null || true
+          # The app's crash reports from the simulator, if it crashed.
+          find ~/Library/Logs/DiagnosticReports -name 'Arc*' -newer standin.log -exec cp {} screenshots/ \; 2>/dev/null || true
+          ls screenshots
+      # Small JPEG copies on the ci-screenshots branch (runs/<run id>/), so agents whose network
+      # can't reach artifact storage can read them with git. Only ever appended to, never rewritten.
+      - name: Share the screenshots on the ci-screenshots branch
+        if: always()
+        run: |
+          set -e
+          mkdir -p small
+          python3 - <<'PY'
+          import json, os, shutil
+          m = json.load(open("screenshots/manifest.json")) if os.path.exists("screenshots/manifest.json") else []
+          for test in m:
+              for a in test.get("attachments", []):
+                  name = a.get("suggestedHumanReadableName", a["exportedFileName"]).split("_")[0]
+                  shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", name + ".png"))
+          PY
+          for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null; rm "$f"; done
+          cp standin.log small/ 2>/dev/null || true
+          cp screenshots/*.ips small/ 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          dir="runs/${{ github.run_id }}"
+          if git fetch --depth 1 origin ci-screenshots 2>/dev/null; then
+            git worktree add shots-branch FETCH_HEAD
+            git -C shots-branch checkout -b ci-screenshots
+          else
+            git worktree add --detach shots-branch
+            git -C shots-branch checkout --orphan ci-screenshots
+            git -C shots-branch rm -rfq .
+          fi
+          mkdir -p "shots-branch/$dir"
+          cp small/* "shots-branch/$dir/"
+          git -C shots-branch add runs
+          git -C shots-branch commit -qm "Screenshots for run ${{ github.run_id }} (${{ github.sha }})"
+          git -C shots-branch push origin ci-screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots
+          retention-days: 7
