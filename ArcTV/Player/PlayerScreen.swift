@@ -175,9 +175,10 @@ struct PlayerScreen: View {
             }
             .padding(36)
         }
-        .scrollClipDisabled()
         .frame(width: 640)
+        .frame(maxHeight: .infinity)
         .arcGlassPanel(cornerRadius: 40)
+        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
         .padding(.vertical, 60)
         .padding(.trailing, 60)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
