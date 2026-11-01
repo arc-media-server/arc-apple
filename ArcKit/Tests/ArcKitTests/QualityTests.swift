@@ -1,7 +1,7 @@
 import XCTest
 @testable import ArcKit
 
-/// A file's badges read as Plozz shows them, from the fields Arc's items/{id} has.
+/// A file's badges read as the title page shows them, from the fields Arc's items/{id} has.
 final class QualityTests: XCTestCase {
     private func file(_ streams: String) throws -> MediaFile {
         let decoder = JSONDecoder()

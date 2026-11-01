@@ -3,7 +3,7 @@ import SwiftUI
 
 /// A full-screen hero describing the focused title (its background, logo or name and details)
 /// with rows of titles beneath, the first one peeking up: Home, and a library's Recommended.
-/// As Plozz's, the hero has no buttons: Select on a card plays it or opens its page, and holding
+/// The hero has no buttons: Select on a card plays it or opens its page, and holding
 /// Select gives its actions. `header` floats above the hero (a library's pill bar).
 struct HeroRows<Header: View>: View {
     @Environment(Browse.self) private var browse
@@ -15,7 +15,7 @@ struct HeroRows<Header: View>: View {
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
     @FocusState private var focused: String?
-    /// The header floats over the top of the page (as Plozz's pill bar) while the hero or the
+    /// The header floats over the top of the page (the library's pill bar) while the hero or the
     /// first row has the focus, and fades away further down so it doesn't cover a row.
     @State private var headerShown = true
 
@@ -80,7 +80,7 @@ struct HeroRows<Header: View>: View {
             } else {
                 Text(item.isEpisode ? item.seriesTitle ?? item.title : item.title).font(.system(size: 64, weight: .bold)).lineLimit(2)
             }
-            // Plozz's hero line: the rating in a box, then the genres; an episode's own line under it.
+            // The hero line: the rating in a box, then the genres; an episode's own line under it.
             HStack(spacing: 12) {
                 if let rating = item.contentRating, !rating.isEmpty { OutlinedBadge(text: rating) }
                 if let line = genreLine(item) { Text(line) }

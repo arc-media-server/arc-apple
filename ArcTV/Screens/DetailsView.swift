@@ -82,7 +82,7 @@ struct DetailsView: View {
         return parts.joined(separator: " · ")
     }
 
-    /// Plozz's title hero: logo, the rating boxed with the genres, the overview, the year, length
+    /// The title hero: logo, the rating boxed with the genres, the overview, the year, length
     /// and the file's quality badges, the buttons; who's in it and who directed it on the right.
     private var hero: some View {
         HStack(alignment: .bottom, spacing: 60) {
@@ -123,7 +123,7 @@ struct DetailsView: View {
     private var actors: [Credit] { shown.credits.filter { $0.role == "actor" || $0.role.isEmpty } }
     private func crew(_ role: String) -> [String] { shown.credits.filter { $0.role == role }.map(\.name) }
 
-    /// "Starring A, B and C" and "Director D", bottom right as Plozz has them.
+    /// "Starring A, B and C" and "Director D", bottom right.
     private var people: some View {
         let starring = actors.prefix(3).map(\.name)
         let directors = crew("director")
@@ -196,7 +196,7 @@ struct DetailsView: View {
         }
     }
 
-    /// About, Details, Crew and Playback as glass cards at the foot of the page, as Plozz's.
+    /// About, Details, Crew and Playback as glass cards at the foot of the page.
     /// (Arc's ratings are paused, so there's no Ratings card.)
     private var infoCards: some View {
         let file = Quality.file(of: shown)

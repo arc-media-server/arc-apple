@@ -1,4 +1,4 @@
-# Home and title pages follow Plozz
+# Home and title pages: badges, cast and info cards
 
 ## What changed
 
@@ -27,12 +27,12 @@ MA with DTS:X, the default audio track, HLG, SD and files with no streams.
 
 ## Why
 
-The owner's Plozz screenshots (1 November) of Home and Spider-Man: Brand New Day's page.
+The owner's reference screenshots (1 November) of a Home screen and a film's page.
 
 ## Decisions
 
 - No Ratings card and no critic or audience scores: Arc's ratings are paused, so the page shows
-  only what Arc has. In white, not Plozz's blue tick.
+  only what Arc has. In white, with no coloured ticks.
 - Badges describe the source file, not what this TV will output (as the web's labels).
 - No "New season" pill on the hero yet: Arc's API doesn't say when a season starts.
 

@@ -1,4 +1,4 @@
-# Library pages open on Recommended, with Plozz's pill bar
+# Library pages open on Recommended, with a pill bar
 
 ## What changed
 
@@ -20,14 +20,14 @@ know. The stand-in Arc makes Recommended rows from each library's titles.
 
 ## Why
 
-The owner's screenshots of Plozz (1 November): a library opens on its recommendations with a pill
+The owner's reference screenshots (1 November): a library opens on its recommendations with a pill
 bar of Recommended, Browse, Collections and Playlists. Plex also opens a library on Recommended.
 
 ## Decisions
 
 - Playlists aren't in the library's bar: Arc's playlists aren't per library, and they're in the
   sidebar.
-- The library's name isn't shown above the bar, as in Plozz; the sidebar shows which library it is.
+- The library's name isn't shown above the bar; the sidebar shows which library it is.
 - "Browse" names the grid of all titles (the web says Movies or Shows), following the owner's
   screenshots.
 - Row "see all" isn't offered yet; Browse has the whole library.
