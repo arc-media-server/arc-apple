@@ -32,3 +32,8 @@ poster, background and logo from TMDB by the recorded TMDB id, and cast photos b
 caches them for the run. Episodes show their show's background. Without the secret, or when TMDB
 has nothing, it draws the placeholders as before. The key goes only to TMDB and is never logged;
 a picture TMDB can't give is logged by its Arc path and the error's type.
+
+## Also: a narrower sidebar
+
+The owner found the open sidebar wide. It is Arc's own (not tvOS's), and now opens to 360 points
+(was 440) with slightly smaller icons and names, closer to Plozz's panel.
