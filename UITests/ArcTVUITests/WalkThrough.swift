@@ -137,7 +137,8 @@ final class WalkThrough: XCTestCase {
         // results follow the typing.
         remote.press(.menu)
         pause(1)
-        press(.up, 10)
+        press(.up, 10) // to the profile at the top, then down one to Search
+        press(.down)
         remote.press(.select)
         pause(2)
         shot("20-search")
