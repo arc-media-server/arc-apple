@@ -2,11 +2,12 @@
 
 ## What changed
 
-The places now sit in Arc's own sidebar instead of tvOS's adaptable one. When it's shut, a slim
-glass strip down the left shows each place's icon, with a faint disc behind the place that's
-showing. Moving left onto it (or Back from a place's first page) opens it. The icons stay
-exactly where they are while the glass widens and the names fade in beside them. The page behind
-dims. Moving up and down only highlights a place, and Select opens it and shuts the sidebar.
+The places now sit in Arc's own sidebar instead of tvOS's adaptable one, following the owner's
+screenshots of Plozz. When it's shut, only the icons show down the left, straight on the page, with
+the profile's picture at the top and a grey disc behind the place that's showing. Moving left onto
+it (or Back from a place's first page) opens it. The icons stay exactly where they are while a tall
+glass panel comes in behind them and the names fade in beside them, with the profile's name at the
+top. Selecting the profile switches profile. The page behind dims. Moving up and down only highlights a place, and Select opens it and shuts the sidebar.
 Coming into the sidebar always starts on the place that's showing. Back in the sidebar leaves the
 app, as on tvOS's own sidebar.
 
