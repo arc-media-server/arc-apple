@@ -51,10 +51,13 @@ final class WalkThrough: XCTestCase {
         press(.down, 2)
         pause(2)
         shot("08-title-page-scrolled")
-        // Up returns to the button row under the focus (the middle of Play, Watched and
-        // Watchlist), so left to Play.
+        // Up returns to the button row under the focus, then left to Play (one more left would
+        // open the sidebar).
         press(.up, 4)
-        press(.left, 3)
+        let play = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Play' OR label BEGINSWITH 'Resume'")).firstMatch
+        for _ in 0..<4 where !play.hasFocus {
+            press(.left)
+        }
         remote.press(.select)
         pause(6)
         shot("09-player")
@@ -141,7 +144,7 @@ final class WalkThrough: XCTestCase {
         // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
         // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
         let field = app.searchFields.firstMatch
-        if field.exists {
+        if field.exists && field.hasFocus {
             field.typeText("alien")
         } else {
             remote.press(.select)

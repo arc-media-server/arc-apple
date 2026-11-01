@@ -103,6 +103,9 @@ struct MainView: View {
     /// The places opened so far: each keeps its pages while another is showing.
     @State private var opened: Set<String> = ["home"]
     @FocusState private var focused: String?
+    /// Briefly true after a place is chosen (or Back in the sidebar): the rows can't hold the
+    /// focus, so tvOS moves it onto the page, and the sidebar shuts.
+    @State private var handingOver = false
 
     /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
@@ -154,7 +157,10 @@ struct MainView: View {
         .onChange(of: focused) { old, new in
             // Coming into the sidebar from a page starts on the place showing, wherever the focus
             // came from.
-            if old == nil, let new, new != tab { focused = tab }
+            // (A step later: tvOS ignores a focus change made while it's moving the focus.)
+            if old == nil, let new, new != tab {
+                Task { @MainActor in focused = tab }
+            }
         }
         .environment(browse)
         .fullScreenCover(item: Binding(get: { browse.playing }, set: { browse.playing = $0 }),
@@ -182,12 +188,13 @@ struct MainView: View {
                 Button {
                     tab = place.id
                     opened.insert(place.id)
-                    focused = nil
+                    handOver()
                 } label: {
                     Sidebar.Row(icon: place.icon, title: place.title, current: place.id == tab, open: sidebarOpen)
                 }
                 .buttonStyle(Sidebar.RowStyle())
                 .focused($focused, equals: place.id)
+                .disabled(handingOver)
             }
         }
         .padding(Sidebar.inset)
@@ -198,6 +205,16 @@ struct MainView: View {
         .padding(.leading, 28)
         .ignoresSafeArea(edges: .leading)
     }
+    /// Moves the focus from the sidebar onto the page showing: setting the focus to nothing
+    /// leaves it where it is on tvOS, but a focused button that can't be focused gives it up.
+    private func handOver() {
+        handingOver = true
+        Task {
+            try? await Task.sleep(for: .milliseconds(400))
+            handingOver = false
+        }
+    }
+
     private func loadTabs() async {
         guard let api = app.api else { return }
         do {
