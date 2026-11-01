@@ -22,3 +22,13 @@ Checked in the tvOS 26 simulator against the stand-in only.
 
 Removes code paths only; nothing new to log. (The hero's Watchlist failure warning goes with
 its button; the card menu's actions keep theirs.)
+
+## Also: real pictures in the screenshots
+
+The owner asked for screenshots that give more of a feel for the app. The stand-in Arc's titles,
+cast and descriptions were already real (recorded from a scratch Arc with TMDB); now its pictures
+can be too. When the build has a `TMDB_API_KEY` Actions secret, the stand-in fetches each title's
+poster, background and logo from TMDB by the recorded TMDB id, and cast photos by name, and
+caches them for the run. Episodes show their show's background. Without the secret, or when TMDB
+has nothing, it draws the placeholders as before. The key goes only to TMDB and is never logged;
+a picture TMDB can't give is logged by its Arc path and the error's type.
