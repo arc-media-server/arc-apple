@@ -10,6 +10,9 @@ struct ProfilesView: View {
     @State private var problem: String?
     @State private var pinFor: Profile?
     @State private var pin = ""
+    /// Focus starts on the first profile, as Plex's picker; otherwise tvOS can land on Sign Out,
+    /// and the first press of Select would sign the Apple TV out.
+    @FocusState private var focused: String?
 
     var body: some View {
         VStack(spacing: 48) {
@@ -34,14 +37,21 @@ struct ProfilesView: View {
                             .padding(24)
                         }
                         .buttonStyle(.card)
+                        .focused($focused, equals: profile.id)
                     }
                 }
+                .defaultFocus($focused, profiles.first?.id)
             }
             if let problem { Text(problem).foregroundStyle(ArcColor.error).multilineTextAlignment(.center).frame(maxWidth: 1100) }
             Button(L("profiles.sign_out")) { Task { await app.signOut() } }
         }
         .padding(80)
         .task { await load() }
+        // Sign Out is the only thing on screen while the profiles load, so it takes the focus:
+        // move it to the first profile once they appear.
+        .onChange(of: loading) { _, now in
+            if !now, focused == nil { Task { @MainActor in focused = profiles.first?.id } }
+        }
         .alert(L("profiles.pin_title", pinFor?.name ?? ""), isPresented: Binding(get: { pinFor != nil }, set: { if !$0 { pinFor = nil } })) {
             SecureField(L("profiles.pin_hint"), text: $pin).keyboardType(.numberPad)
             Button(L("common.ok")) {
