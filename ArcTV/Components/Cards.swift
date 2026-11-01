@@ -41,7 +41,7 @@ struct MediaCardView: View {
                         .frame(width: style.size.width, height: style.size.height)
                         .clipped()
                     if style == .backdrop, let logo = card.logo {
-                        ArtworkImage(path: logo, contentMode: .fit)
+                        ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
                             .frame(width: style.size.width * 0.6, height: style.size.height * 0.3)
                             .padding(20)
                     }
@@ -51,7 +51,7 @@ struct MediaCardView: View {
                         } else {
                             // Wide cards carry Plozz's resume strip on the art: play, how far, time left.
                             if style == .thumb, let logo = card.logo {
-                                ArtworkImage(path: logo, contentMode: .fit)
+                                ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
                                     .frame(width: style.size.width * 0.55, height: style.size.height * 0.3)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                                     .padding(.horizontal, 20)
@@ -133,12 +133,14 @@ struct OutlinedBadge: View {
 /// How far through: a thin rounded bar inset at the bottom of the artwork.
 struct ProgressBar: View {
     let fraction: Double
+    /// White on art; black on a white button.
+    var color: Color = .white
 
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(.white.opacity(0.3))
-                Capsule().fill(.white).frame(width: max(6, geo.size.width * fraction))
+                Capsule().fill(color.opacity(0.3))
+                Capsule().fill(color).frame(width: max(6, geo.size.width * fraction))
             }
         }
         .frame(height: 5)
