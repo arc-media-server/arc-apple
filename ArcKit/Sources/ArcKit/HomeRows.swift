@@ -61,7 +61,8 @@ public func orderedLibraries(_ libraries: [Library], order: [Int64]) -> [Library
     }.map(\.element)
 }
 
-private func style(_ saved: String?) -> CardStyle? {
+/// A saved row look (poster, thumb or arc) as a card style; nil for automatic.
+public func cardStyle(saved: String?) -> CardStyle? {
     switch saved {
     case "poster": return .poster
     case "thumb": return .thumb
@@ -81,7 +82,7 @@ public func resolveHomeRows(prefs: Prefs, libraries: [Library], today: Date = Da
     var out: [HomeRowSpec] = []
     func carryOn(_ id: String, _ source: RowSource) {
         let row = saved[id]
-        out.append(HomeRowSpec(id: id, source: source, style: style(row?.style) ?? .thumb, seasonPosters: row?.posters == "season"))
+        out.append(HomeRowSpec(id: id, source: source, style: cardStyle(saved: row?.style) ?? .thumb, seasonPosters: row?.posters == "season"))
     }
     if shown("continue") { carryOn("continue", .continueWatching(withUpNext: !prefs.splitUpNext)) }
     if prefs.splitUpNext && shown("next-up") { carryOn("next-up", .nextUp) }
