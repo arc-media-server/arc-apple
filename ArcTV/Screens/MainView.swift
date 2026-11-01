@@ -128,7 +128,7 @@ struct MainView: View {
                Place(id: "settings", title: L("tab.settings"), icon: "gearshape")]
     }
 
-    private var sidebarOpen: Bool { focused != nil }
+    private var sidebarOpen: Bool { focused != nil && !handingOver }
 
     var body: some View {
         ZStack(alignment: .leading) {
@@ -158,8 +158,14 @@ struct MainView: View {
             // Coming into the sidebar from a page starts on the place showing, wherever the focus
             // came from.
             // (A step later: tvOS ignores a focus change made while it's moving the focus.)
-            if old == nil, let new, new != tab {
-                Task { @MainActor in focused = tab }
+            if old == nil {
+                if let new, new != tab { Task { @MainActor in focused = tab } }
+            } else if new == Sidebar.above {
+                // Past the first or last place the focus stays in the sidebar, rather than
+                // jumping to whatever on the page lies that way.
+                Task { @MainActor in focused = places.first?.id }
+            } else if new == Sidebar.below {
+                Task { @MainActor in focused = places.last?.id }
             }
         }
         .environment(browse)
@@ -184,6 +190,7 @@ struct MainView: View {
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 6) {
+            edge(Sidebar.above)
             ForEach(places) { place in
                 Button {
                     tab = place.id
@@ -196,6 +203,7 @@ struct MainView: View {
                 .focused($focused, equals: place.id)
                 .disabled(handingOver)
             }
+            edge(Sidebar.below)
         }
         .padding(Sidebar.inset)
         .frame(width: sidebarOpen ? Sidebar.openWidth : Sidebar.collapsedWidth, alignment: .leading)
@@ -206,13 +214,26 @@ struct MainView: View {
         .ignoresSafeArea(edges: .leading)
     }
     /// Moves the focus from the sidebar onto the page showing: setting the focus to nothing
-    /// leaves it where it is on tvOS, but a focused button that can't be focused gives it up.
+    /// leaves it where it is on tvOS, but a focused button that can't be focused gives it up. A
+    /// page just opened may not be ready to take it, so this tries again a few times.
     private func handOver() {
-        handingOver = true
-        Task {
-            try? await Task.sleep(for: .milliseconds(400))
-            handingOver = false
+        Task { @MainActor in
+            for _ in 0..<4 {
+                handingOver = true
+                try? await Task.sleep(for: .milliseconds(350))
+                handingOver = false
+                try? await Task.sleep(for: .milliseconds(150))
+                if focused == nil { return }
+            }
         }
+    }
+
+    /// An invisible stop above and below the places (see onChange above).
+    private func edge(_ id: String) -> some View {
+        Color.clear.frame(height: 1)
+            .focusable(!handingOver)
+            .focused($focused, equals: id)
+            .accessibilityHidden(true)
     }
 
     private func loadTabs() async {
@@ -240,6 +261,8 @@ enum Sidebar {
     static let icon: CGFloat = 64
     static let collapsedWidth: CGFloat = icon + inset * 2
     static let openWidth: CGFloat = 400
+    static let above = "sidebar:above"
+    static let below = "sidebar:below"
 
     struct Row: View {
         let icon: String
