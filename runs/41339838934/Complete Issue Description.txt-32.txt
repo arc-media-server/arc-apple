@@ -1,0 +1,37 @@
+Failed to synthesize event: Neither element nor any descendant has keyboard focus. Event dispatch snapshot: SearchField, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections', value: Movies, shows, peo...
+Element debug description:
+Attributes: SearchField, 0x10632a930, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections'
+Element subtree:
+ →SearchField, 0x10632a930, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections'
+Path to element:
+ →Application, 0x10630a050, pid: 4077, label: 'Arc'
+  ↳Window (Main), 0x1063285e0, {{0.0, 0.0}, {1920.0, 1080.0}}
+   ↳Other, 0x106328220, {{0.0, 0.0}, {1920.0, 1080.0}}
+    ↳Other, 0x106327810, {{0.0, 0.0}, {1920.0, 1080.0}}
+     ↳Other, 0x10631d4a0, {{0.0, 0.0}, {1920.0, 1080.0}}
+      ↳Other, 0x106327ec0, {{0.0, 0.0}, {1920.0, 1080.0}}
+       ↳Other, 0x10632a5b0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled
+        ↳Other, 0x10632a250, {{0.0, 0.0}, {1920.0, 1080.0}}
+         ↳Other, 0x106329ec0, {{0.0, 0.0}, {1920.0, 1080.0}}
+          ↳Other, 0x1063293c0, {{0.0, 0.0}, {1920.0, 1080.0}}
+           ↳Other, 0x106329030, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled
+            ↳Other, 0x106326a70, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled
+             ↳Other, 0x106325270, {{0.0, 0.0}, {1920.0, 1080.0}}
+              ↳Other, 0x106324160, {{0.0, 0.0}, {1920.0, 1080.0}}
+               ↳Other, 0x106327140, {{0.0, 60.0}, {1920.0, 245.5}}
+                ↳Other, 0x1063274a0, {{80.0, 60.0}, {1760.0, 70.0}}
+                 ↳Other, 0x106328ca0, {{80.0, 60.0}, {1760.0, 70.0}}
+                  ↳SearchField, 0x10632a930, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections'
+Query chain:
+ →Find: Target Application 'org.arcmediaserver.apple.tv'
+  Output: {
+    Application, 0x105b52190, pid: 4077, label: 'Arc'
+  }
+  ↪︎Find: Descendants matching type SearchField
+    Output: {
+      SearchField, 0x10626b4b0, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections'
+    }
+    ↪︎Find: First Match
+      Output: {
+        SearchField, 0x105b3a110, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections'
+      }

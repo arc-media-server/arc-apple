@@ -1,0 +1,173 @@
+Application, 0x106218cc0, pid: 4077, label: 'Arc' <App element pid: 4077>
+  Window (Main), 0x1062188f0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315266864.22>
+    Other, 0x10621f930, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315269312.23>
+      Other, 0x10621d950, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315275920.24>
+        Other, 0x10621c080, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315265440.25>
+          Other, 0x10621bb40, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4316205040.26>
+            Other, 0x10621e3e0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4317591616.27>
+              Other, 0x10621ee20, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4317270976.32>
+                Other, 0x10621e040, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4316440944.51>
+                  Other, 0x10621dcd0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4317823392.54>
+                    Other, 0x10621fc80, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4316548176.57>
+                      Other, 0x10621fff0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4419047824.60>
+                        Other, 0x10621e770, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4419083888.64>
+                        Other, 0x10621ead0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315892016.65>
+                          Other, 0x106220690, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4316795024.69>
+                            Other, 0x10621d260, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4316275152.83>
+                              Other, 0x10621c7a0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315329168.93>
+                                Other, 0x10621cec0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4317520384.102>
+                                  Other, 0x10621d5d0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4317460352.138>
+                                    ScrollView, 0x106228380, {{960.0, 0.0}, {0.0, 1080.0}}, label: 'Search results' <AX element pid: 4077, elementOrHash.elementID: 4331026432.149>
+                                      Other, 0x106221740, {{960.0, 306.0}, {0.0, 80.0}} <AX element pid: 4077, elementOrHash.elementID: 4419238464.151>
+                                      Other, 0x1062390f0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 4077, elementOrHash.elementID: 4315326432.152>
+                                      Other, 0x106225030, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 4077, elementOrHash.elementID: 4315326432.152>
+                            Other, 0x1062243d0, {{0.0, 60.0}, {1920.0, 245.5}} <AX element pid: 4077, elementOrHash.elementID: 4315276544.84>
+                              Other, 0x1062141c0, {{80.0, 60.0}, {1760.0, 70.0}} <AX element pid: 4077, elementOrHash.elementID: 4317868592.94>
+                                Other, 0x10628ef70, {{80.0, 60.0}, {1760.0, 70.0}} <AX element pid: 4077, elementOrHash.elementID: 4316404992.103>
+                                  SearchField, 0x10628f090, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections' <AX element pid: 4077, elementOrHash.elementID: 4330391552.139>
+                                  StaticText, 0x106282ef0, {{1840.0, 95.0}, {0.0, 0.0}} <AX element pid: 4077, elementOrHash.elementID: 4317684432.140>
+                              Other, 0x106283010, {{80.0, 164.5}, {1760.0, 66.0}} <AX element pid: 4077, elementOrHash.elementID: 4317711920.95>
+                                Other, 0x10628e730, {{80.0, 164.5}, {1760.0, 66.0}} <AX element pid: 4077, elementOrHash.elementID: 4317730256.104>
+                                  Other, 0x10628e850, {{80.0, 164.5}, {1760.0, 66.0}} <AX element pid: 4077, elementOrHash.elementID: 4317445808.142>
+                                    Keyboard, 0x10628eb50, {{80.0, 164.5}, {1760.0, 66.0}}, label: 'Keyboard' <AX element pid: 4077, elementOrHash.elementID: 4317690512.150>
+                                      Other, 0x10628ec70, {{80.0, 164.5}, {1760.0, 66.0}} <AX element pid: 4077, elementOrHash.elementID: 4316137632.153>
+                                        Other, 0x10623b060, {{80.0, 164.5}, {1760.0, 66.0}}, identifier: 'UIKeyboardLayoutStar Preview' <AX element pid: 4077, elementOrHash.elementID: 4339356672.154>
+                                          Key, 0x10623b180, {{117.0, 164.5}, {89.0, 64.0}}, label: 'Numbers' <AX element pid: 4077, elementOrHash.elementID: 105553151585296.155>
+                                          Key, 0x10623b2a0, {{206.0, 164.5}, {119.0, 64.0}}, label: 'SPACE' <AX element pid: 4077, elementOrHash.elementID: 105553151581456.156>
+                                          Key, 0x10623b3c0, {{325.0, 164.5}, {54.0, 64.0}}, label: 'a' <AX element pid: 4077, elementOrHash.elementID: 105553151584816.157>
+                                          Key, 0x10623b4e0, {{379.0, 164.5}, {54.0, 64.0}}, label: 'b' <AX element pid: 4077, elementOrHash.elementID: 105553151581856.158>
+                                          Key, 0x10623b600, {{433.0, 164.5}, {54.0, 64.0}}, label: 'c' <AX element pid: 4077, elementOrHash.elementID: 105553151581776.159>
+                                          Key, 0x10623b720, {{487.0, 164.5}, {54.0, 64.0}}, label: 'd' <AX element pid: 4077, elementOrHash.elementID: 105553151585536.160>
+                                          Key, 0x10623b840, {{541.0, 164.5}, {54.0, 64.0}}, label: 'e' <AX element pid: 4077, elementOrHash.elementID: 105553151580576.161>
+                                          Key, 0x10623b960, {{595.0, 164.5}, {54.0, 64.0}}, label: 'f' <AX element pid: 4077, elementOrHash.elementID: 105553151583696.162>
+                                          Key, 0x10623ba80, {{649.0, 164.5}, {54.0, 64.0}}, label: 'g' <AX element pid: 4077, elementOrHash.elementID: 105553151584496.163>
+                                          Key, 0x10623bba0, {{703.0, 164.5}, {54.0, 64.0}}, label: 'h' <AX element pid: 4077, elementOrHash.elementID: 105553151579536.164>
+                                          Key, 0x10623bcc0, {{757.0, 164.5}, {54.0, 64.0}}, label: 'i' <AX element pid: 4077, elementOrHash.elementID: 105553151580096.165>
+                                          Key, 0x10623bde0, {{811.0, 164.5}, {54.0, 64.0}}, label: 'j' <AX element pid: 4077, elementOrHash.elementID: 105553151581696.166>
+                                          Key, 0x10623bf00, {{865.0, 164.5}, {54.0, 64.0}}, label: 'k' <AX element pid: 4077, elementOrHash.elementID: 105553151582736.167>
+                                          Key, 0x10623c020, {{919.0, 164.5}, {54.0, 64.0}}, label: 'l' <AX element pid: 4077, elementOrHash.elementID: 105553151584176.168>
+                                          Key, 0x10623c140, {{973.0, 164.5}, {54.0, 64.0}}, label: 'm' <AX element pid: 4077, elementOrHash.elementID: 105553151580336.169>
+                                          Key, 0x10623c260, {{1027.0, 164.5}, {54.0, 64.0}}, label: 'n' <AX element pid: 4077, elementOrHash.elementID: 105553151580016.170>
+                                          Key, 0x10623c380, {{1081.0, 164.5}, {54.0, 64.0}}, label: 'o' <AX element pid: 4077, elementOrHash.elementID: 105553151580256.171>
+                                          Key, 0x10623c4a0, {{1135.0, 164.5}, {54.0, 64.0}}, label: 'p' <AX element pid: 4077, elementOrHash.elementID: 105553151577296.172>
+                                          Key, 0x10623c5c0, {{1189.0, 164.5}, {54.0, 64.0}}, label: 'q' <AX element pid: 4077, elementOrHash.elementID: 105553151576736.173>
+                                          Key, 0x10623c6e0, {{1243.0, 164.5}, {54.0, 64.0}}, label: 'r' <AX element pid: 4077, elementOrHash.elementID: 105553151581136.174>
+                                          Key, 0x10623c800, {{1297.0, 164.5}, {54.0, 64.0}}, label: 's' <AX element pid: 4077, elementOrHash.elementID: 105553151446064.175>
+                                          Key, 0x10623c920, {{1351.0, 164.5}, {54.0, 64.0}}, label: 't' <AX element pid: 4077, elementOrHash.elementID: 105553151451504.176>
+                                          Key, 0x10623ca40, {{1405.0, 164.5}, {54.0, 64.0}}, label: 'u' <AX element pid: 4077, elementOrHash.elementID: 105553151447344.177>
+                                          Key, 0x10623cb60, {{1459.0, 164.5}, {54.0, 64.0}}, label: 'v' <AX element pid: 4077, elementOrHash.elementID: 105553151444624.178>
+                                          Key, 0x10623cc80, {{1513.0, 164.5}, {54.0, 64.0}}, label: 'w' <AX element pid: 4077, elementOrHash.elementID: 105553151445184.179>
+                                          Key, 0x106239b60, {{1567.0, 164.5}, {54.0, 64.0}}, label: 'x' <AX element pid: 4077, elementOrHash.elementID: 105553151444224.180>
+                                          Key, 0x106239c80, {{1621.0, 164.5}, {54.0, 64.0}}, label: 'y' <AX element pid: 4077, elementOrHash.elementID: 105553151445104.181>
+                                          Key, 0x106239ef0, {{1675.0, 164.5}, {54.0, 64.0}}, label: 'z' <AX element pid: 4077, elementOrHash.elementID: 105553151448704.182>
+                                          Key, 0x10623a010, {{1729.0, 164.5}, {74.0, 64.0}}, identifier: 'delete', label: 'delete' <AX element pid: 4077, elementOrHash.elementID: 105553151445504.183>
+                              Other, 0x10623a330, {{80.0, 274.5}, {1760.0, 1.0}} <AX element pid: 4077, elementOrHash.elementID: 4419107616.96>
+            Other, 0x10623a450, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315430384.28>
+              Other, 0x10623d0b0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315254352.33>
+                Other, 0x10623d1d0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4317275360.52>
+                  Other, 0x10623d2f0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4317552976.55>
+                    Other, 0x10623d410, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4317787600.58>
+                      Image, 0x10623d530, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4317711456.61>
+                      ScrollView, 0x10623d650, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4346502656.62>
+                        Other, 0x10623d770, {{0.0, 45.0}, {1840.0, 2191.0}} <AX element pid: 4077, elementOrHash.elementID: 4316864880.66>
+                          StaticText, 0x10623d890, {{160.0, 433.0}, {318.0, 77.0}}, label: 'Interstellar', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317717888.70>
+                          StaticText, 0x10623d9b0, {{160.0, 538.0}, {785.0, 35.0}}, label: '2014  ·  PG-13  ·  2h 49m  ·  Adventure, Drama, Science Fiction', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317718704.71>
+                          StaticText, 0x10623dad0, {{160.0, 601.0}, {1100.0, 107.0}}, label: 'The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317719520.72>
+                          Button, 0x10623dbf0, {{160.0, 737.0}, {154.0, 66.0}}, label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317722384.13>
+                            Image, 0x10623dd10, {{194.0, 757.0}, {22.0, 25.0}}, identifier: 'play.fill', label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317720432.85>
+                            StaticText, 0x10623de30, {{160.0, 737.0}, {154.0, 66.0}}, label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317721920.86>
+                          Button, 0x10623df50, {{338.0, 737.0}, {67.0, 67.0}}, identifier: 'eye.slash', label: 'Mark as Unwatched', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317723200.17>
+                          Button, 0x10623e070, {{429.0, 740.0}, {60.0, 60.0}}, identifier: 'bookmark.slash', label: 'Remove from Watchlist', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317728016.73>
+                          StaticText, 0x10623e190, {{160.0, 832.0}, {346.0, 58.0}}, label: 'Trailers & Extras', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317731888.74>
+                          ScrollView, 0x10623e2b0, {{160.0, 906.0}, {1600.0, 342.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4330577408.75>
+                            Other, 0x10623e3d0, {{160.0, 906.0}, {808.0, 342.0}} <AX element pid: 4077, elementOrHash.elementID: 4418832352.87>
+                              Other, 0x10623e4f0, {{160.0, 930.0}, {808.0, 294.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4317740176.97>
+                                Button, 0x10623e610, {{160.0, 930.0}, {384.0, 216.0}}, label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4315766336.105>
+                                  Image, 0x10623e730, {{160.0, 930.0}, {384.0, 216.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315613200.143>
+                                  Image, 0x10623e850, {{160.0, 930.0}, {384.0, 216.0}}, identifier: 'play.circle.fill', label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4562389152.144>
+                                StaticText, 0x10623e970, {{160.0, 1156.0}, {157.0, 30.0}}, label: 'Official Trailer', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317735184.106>
+                                StaticText, 0x10623ea90, {{160.0, 1196.0}, {124.0, 28.0}}, label: 'Trailer · 0:12', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317735664.107>
+                                Button, 0x10623ebb0, {{584.0, 930.0}, {384.0, 216.0}}, label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4315884480.108>
+                                  Image, 0x10623ecd0, {{584.0, 930.0}, {384.0, 216.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315884016.145>
+                                  Image, 0x10623edf0, {{584.0, 930.0}, {384.0, 216.0}}, identifier: 'play.circle.fill', label: 'Play', Disabled <AX element pid: 4077, elementOrHash.elementID: 4316885568.146>
+                                StaticText, 0x10623ef10, {{584.0, 1156.0}, {117.0, 30.0}}, label: 'Making Of', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317738544.109>
+                                StaticText, 0x10623f030, {{584.0, 1196.0}, {166.0, 28.0}}, label: 'Featurette · 0:12', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317740736.110>
+                          StaticText, 0x10623f150, {{160.0, 1276.0}, {267.0, 58.0}}, label: 'Cast & Crew', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317741200.76>
+                          ScrollView, 0x10623f270, {{160.0, 1350.0}, {1600.0, 306.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4347546624.77>
+                            Other, 0x10623f390, {{160.0, 1350.0}, {5480.0, 306.0}} <AX element pid: 4077, elementOrHash.elementID: 4316910064.88>
+                              Other, 0x10623f4b0, {{160.0, 1329.0}, {1630.0, 303.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4317756720.98>
+                                Button, 0x10623f5d0, {{170.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315886080.111>
+                                StaticText, 0x10623f6f0, {{160.0, 1564.0}, {200.0, 30.0}}, label: 'Matthew McConaughey', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317747600.112>
+                                StaticText, 0x10623f810, {{222.0, 1604.0}, {76.0, 28.0}}, label: 'Cooper', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317748416.113>
+                                Button, 0x10623f930, {{410.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315710480.114>
+                                StaticText, 0x10623fa50, {{413.0, 1564.0}, {175.0, 30.0}}, label: 'Anne Hathaway', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317750720.115>
+                                StaticText, 0x10623fb70, {{470.0, 1604.0}, {61.0, 28.0}}, label: 'Brand', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317751536.116>
+                                Button, 0x10623fc90, {{650.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315902576.117>
+                                StaticText, 0x10623fdb0, {{662.0, 1564.0}, {157.0, 30.0}}, label: 'Michael Caine', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317753840.118>
+                                StaticText, 0x10623fed0, {{658.0, 1604.0}, {164.0, 28.0}}, label: 'Professor Brand', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317754656.119>
+                                Button, 0x10623fff0, {{890.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315903504.120>
+                                StaticText, 0x106240110, {{886.0, 1564.0}, {188.0, 30.0}}, label: 'Jessica Chastain', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317756256.121>
+                                StaticText, 0x106240230, {{947.0, 1604.0}, {67.0, 28.0}}, label: 'Murph', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317757312.122>
+                                Button, 0x106240350, {{1130.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315615424.123>
+                                StaticText, 0x106240470, {{1143.0, 1564.0}, {154.0, 30.0}}, label: 'Casey Affleck', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317759616.124>
+                                StaticText, 0x106240590, {{1198.0, 1604.0}, {44.0, 28.0}}, label: 'Tom', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317760432.125>
+                                Button, 0x1062406b0, {{1370.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315616432.126>
+                                StaticText, 0x1062407d0, {{1391.0, 1564.0}, {138.0, 30.0}}, label: 'Wes Bentley', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317762736.127>
+                                StaticText, 0x1062408f0, {{1431.0, 1604.0}, {59.0, 28.0}}, label: 'Doyle', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317763552.128>
+                                Button, 0x106240a10, {{1610.0, 1329.0}, {180.0, 270.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315617440.129>
+                                StaticText, 0x106240b30, {{1626.0, 1564.0}, {149.0, 30.0}}, label: 'Topher Grace', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317766640.130>
+                                StaticText, 0x106240c50, {{1672.0, 1604.0}, {57.0, 28.0}}, label: 'Getty', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317767104.131>
+                          StaticText, 0x106240d70, {{160.0, 1684.0}, {310.0, 58.0}}, label: 'More Like This', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317768032.78>
+                          ScrollView, 0x106240e90, {{160.0, 1758.0}, {1600.0, 418.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4330735104.79>
+                            Other, 0x106240fb0, {{160.0, 1758.0}, {440.0, 418.0}} <AX element pid: 4077, elementOrHash.elementID: 4418892800.89>
+                              Other, 0x1062410d0, {{160.0, 1782.0}, {440.0, 370.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4317786208.99>
+                                Button, 0x1062411f0, {{160.0, 1782.0}, {200.0, 300.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315617904.132>
+                                StaticText, 0x106241310, {{160.0, 2092.0}, {152.0, 30.0}}, label: 'Blade Runner', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317778720.133>
+                                StaticText, 0x106241430, {{160.0, 2124.0}, {54.0, 28.0}}, label: '1982', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317779184.134>
+                                Button, 0x106241550, {{400.0, 1782.0}, {200.0, 300.0}}, label: 'Selected', Selected, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315620544.135>
+                                  Image, 0x106241670, {{400.0, 1782.0}, {200.0, 300.0}}, Disabled <AX element pid: 4077, elementOrHash.elementID: 4315619536.147>
+                                  Image, 0x106241790, {{400.0, 1782.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected, Disabled <AX element pid: 4077, elementOrHash.elementID: 4316670288.148>
+                                StaticText, 0x1062418b0, {{400.0, 2092.0}, {189.0, 30.0}}, label: 'Blade Runner 2049', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317781504.136>
+                                StaticText, 0x1062419d0, {{400.0, 2124.0}, {52.0, 28.0}}, label: '2017', Disabled <AX element pid: 4077, elementOrHash.elementID: 4317781968.137>
+            Other, 0x106241af0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4562484880.29>
+              Other, 0x106241c10, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4562485360.34>
+                Other, 0x106241d30, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315616896.53>
+                  Other, 0x106241e50, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4316435040.56>
+                    Other, 0x106241f70, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4315515328.59>
+                      ScrollView, 0x106242090, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 4077, elementOrHash.elementID: 4348168704.63>
+                        Other, 0x1062421b0, {{0.0, 60.0}, {1840.0, 559.0}} <AX element pid: 4077, elementOrHash.elementID: 4316382416.67>
+                          StaticText, 0x1062422d0, {{160.0, 100.0}, {238.0, 69.0}}, label: 'Watchlist' <AX element pid: 4077, elementOrHash.elementID: 4315397888.80>
+                          Other, 0x1062423f0, {{160.0, 209.0}, {200.0, 370.0}} <AX element pid: 4077, elementOrHash.elementID: 4315446352.81>
+                            Button, 0x106242510, {{160.0, 209.0}, {200.0, 300.0}}, label: 'Selected', Selected <AX element pid: 4077, elementOrHash.elementID: 4419125360.90>
+                              Image, 0x106242630, {{160.0, 209.0}, {200.0, 300.0}} <AX element pid: 4077, elementOrHash.elementID: 4315428192.100>
+                              Image, 0x106242750, {{297.0, 223.0}, {49.0, 49.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected <AX element pid: 4077, elementOrHash.elementID: 4315284592.101>
+                            StaticText, 0x106242870, {{160.0, 519.0}, {122.0, 30.0}}, label: 'Interstellar' <AX element pid: 4077, elementOrHash.elementID: 4419110272.91>
+                            StaticText, 0x106242990, {{160.0, 551.0}, {53.0, 28.0}}, label: '2014' <AX element pid: 4077, elementOrHash.elementID: 4419099152.92>
+                        Other, 0x106242ab0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 4077, elementOrHash.elementID: 4315584688.68>
+                          Other, 0x106242bd0, {{1834.0, 434.0}, {3.0, 583.0}} <AX element pid: 4077, elementOrHash.elementID: 4315585184.82>
+                        Other, 0x106242cf0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 4077, elementOrHash.elementID: 4315584688.68>
+                          Other, 0x106242e10, {{1834.0, 434.0}, {3.0, 583.0}} <AX element pid: 4077, elementOrHash.elementID: 4315585184.82>
+            Button, 0x106242f30, {{40.0, 263.0}, {376.0, 64.0}}, label: 'Search' <AX element pid: 4077, elementOrHash.elementID: 4314942800.6>
+              Image, 0x106243050, {{40.0, 263.0}, {376.0, 64.0}}, identifier: 'magnifyingglass', label: 'Search' <AX element pid: 4077, elementOrHash.elementID: 4314966512.35>
+              StaticText, 0x106243170, {{118.0, 279.0}, {81.0, 32.0}}, label: 'Search' <AX element pid: 4077, elementOrHash.elementID: 4314916000.36>
+            Button, 0x106243290, {{40.0, 333.0}, {376.0, 64.0}}, label: 'Home' <AX element pid: 4077, elementOrHash.elementID: 4315419024.7>
+              Image, 0x1062433b0, {{40.0, 333.0}, {376.0, 64.0}}, identifier: 'house', label: 'Home' <AX element pid: 4077, elementOrHash.elementID: 4315436496.37>
+              StaticText, 0x1062434d0, {{118.0, 349.0}, {70.0, 32.0}}, label: 'Home' <AX element pid: 4077, elementOrHash.elementID: 4315341712.38>
+            Button, 0x1062435f0, {{40.0, 403.0}, {376.0, 64.0}}, label: 'Watchlist', Focused <AX element pid: 4077, elementOrHash.elementID: 4315390720.19>
+              Image, 0x106243710, {{40.0, 403.0}, {376.0, 64.0}}, identifier: 'bookmark', label: 'Bookmark' <AX element pid: 4077, elementOrHash.elementID: 4315269840.39>
+              StaticText, 0x106243830, {{118.0, 419.0}, {111.0, 32.0}}, label: 'Watchlist' <AX element pid: 4077, elementOrHash.elementID: 4315376144.40>
+            Button, 0x106243950, {{40.0, 473.0}, {376.0, 64.0}}, label: 'Home Videos' <AX element pid: 4077, elementOrHash.elementID: 4316407776.20>
+              Image, 0x106243a70, {{40.0, 473.0}, {376.0, 64.0}}, identifier: 'video', label: 'Video' <AX element pid: 4077, elementOrHash.elementID: 4316275616.41>
+              StaticText, 0x106243b90, {{118.0, 489.0}, {155.0, 32.0}}, label: 'Home Videos' <AX element pid: 4077, elementOrHash.elementID: 4316276080.42>
+            Button, 0x106243cb0, {{40.0, 543.0}, {376.0, 64.0}}, label: 'Movies' <AX element pid: 4077, elementOrHash.elementID: 4316410560.21>
+              Image, 0x106243dd0, {{40.0, 543.0}, {376.0, 64.0}}, identifier: 'film', label: 'Movie' <AX element pid: 4077, elementOrHash.elementID: 4316408704.43>
+              StaticText, 0x106243ef0, {{118.0, 559.0}, {83.0, 32.0}}, label: 'Movies' <AX element pid: 4077, elementOrHash.elementID: 4316409520.44>
+            Button, 0x106244010, {{40.0, 613.0}, {376.0, 64.0}}, label: 'TV' <AX element pid: 4077, elementOrHash.elementID: 4316409984.30>
+              Image, 0x106244130, {{40.0, 613.0}, {376.0, 64.0}}, identifier: 'tv', label: 'Tv' <AX element pid: 4077, elementOrHash.elementID: 4316412288.45>
+              StaticText, 0x106244250, {{118.0, 629.0}, {33.0, 32.0}}, label: 'TV' <AX element pid: 4077, elementOrHash.elementID: 4316412752.46>
+            Button, 0x106244370, {{40.0, 683.0}, {376.0, 64.0}}, label: 'Playlists' <AX element pid: 4077, elementOrHash.elementID: 4315427376.31>
+              Image, 0x106244490, {{40.0, 683.0}, {376.0, 64.0}}, identifier: 'list.bullet.rectangle', label: 'list.bullet.rectangle' <AX element pid: 4077, elementOrHash.elementID: 4315359792.47>
+              StaticText, 0x1062445b0, {{118.0, 699.0}, {96.0, 32.0}}, label: 'Playlists' <AX element pid: 4077, elementOrHash.elementID: 4315421856.48>
+            Button, 0x1062446d0, {{40.0, 753.0}, {376.0, 64.0}}, label: 'Settings' <AX element pid: 4077, elementOrHash.elementID: 4315449136.18>
+              Image, 0x1062447f0, {{40.0, 753.0}, {376.0, 64.0}}, identifier: 'gearshape', label: 'gearshape' <AX element pid: 4077, elementOrHash.elementID: 4315421312.49>
+              StaticText, 0x106244910, {{118.0, 769.0}, {97.0, 32.0}}, label: 'Settings' <AX element pid: 4077, elementOrHash.elementID: 4315448672.50>
