@@ -6,7 +6,9 @@ A film or TV library now opens on **Recommended**: the library's rows from Arc (
 Recently Released, Recently Added, Because you watched…, Top Rated and the rest, in the shared
 layout's order and looks) under the same full-screen hero as Home. The pill bar across the top
 reads Recommended, Browse, Collections (and Folders for Other videos libraries, which have no
-Recommended and still open on Browse). Sort and Filter show beside the bar on Browse.
+Recommended and still open on Browse). On Recommended the bar floats over the top of the hero,
+so it shows as the page opens with the focus on the first title, and fades while the focus is
+further down than the first row, so it never covers a row. Sort and Filter show beside the bar on Browse.
 
 Home and Recommended share one view (`HeroRows`): the focused title's background, logo or name,
 details, Play, Watchlist and Info, with the rows beneath. Focus starts on the first title.

@@ -13,13 +13,15 @@ struct HeroRows<Header: View>: View {
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
     @FocusState private var focused: String?
+    /// The header floats over the top of the page (as Plozz's pill bar) while the hero or the
+    /// first row has the focus, and fades away further down so it doesn't cover a row.
+    @State private var headerShown = true
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             backdrop
             ScrollView(.vertical) {
                 LazyVStack(alignment: .leading, spacing: 44) {
-                    header()
                     if let hero { heroDetails(hero) }
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 16) {
@@ -40,12 +42,21 @@ struct HeroRows<Header: View>: View {
                 }
                 .padding(.bottom, 60)
             }
+            header()
+                .opacity(headerShown ? 1 : 0)
+                .animation(.easeInOut(duration: 0.25), value: headerShown)
         }
         // Focus starts on the first title, as Plex's Home and library pages.
         .onAppear { focusFirst() }
         .onChange(of: rows.first?.cards.first?.id) { _, _ in focusFirst() }
         .onChange(of: focused) { _, _ in
             if let card = focusedCard { hero = card }
+            // Focus outside the cards and the hero's buttons is in the header itself.
+            if let key = focused, !key.hasPrefix("hero|") {
+                headerShown = key.hasPrefix((rows.first?.id ?? "") + "|")
+            } else {
+                headerShown = true
+            }
         }
     }
 
