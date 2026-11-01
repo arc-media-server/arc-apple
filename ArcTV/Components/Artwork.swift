@@ -55,3 +55,36 @@ struct ArtworkImage: View {
         }
     }
 }
+
+/// A title's logo, or its name when there's no logo or it can't be loaded (never an empty box).
+struct TitleLogo: View {
+    @Environment(AppModel.self) private var app
+    let path: String?
+    let title: String
+    @State private var image: UIImage?
+    @State private var failed = false
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            if let image {
+                Image(uiImage: image).resizable().aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 640, maxHeight: 200, alignment: .leading)
+            } else if failed || path == nil {
+                Text(title).font(.system(size: 64, weight: .bold))
+            } else {
+                // Loading: keep the logo's room so the page doesn't jump when it arrives.
+                Color.clear.frame(width: 640, height: 200)
+            }
+        }
+        .task(id: path) {
+            image = nil
+            failed = false
+            guard let path, let api = app.api, let url = api.absolute(path) else {
+                failed = true
+                return
+            }
+            image = await ArtworkLoader.shared.image(url, headers: api.authorization)
+            failed = image == nil
+        }
+    }
+}
