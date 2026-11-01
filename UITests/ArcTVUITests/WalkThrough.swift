@@ -46,7 +46,10 @@ final class WalkThrough: XCTestCase {
         press(.down, 2)
         pause(2)
         shot("08-title-page-scrolled")
+        // Up returns to the button row under the focus (the middle of Play, Watched and
+        // Watchlist), so left to Play.
         press(.up, 4)
+        press(.left, 3)
         remote.press(.select)
         pause(6)
         shot("09-player")
@@ -86,7 +89,7 @@ final class WalkThrough: XCTestCase {
         }
 
         // A library: its sort and filters, then the grid, and holding Select on a title.
-        press(.left, 4)
+        press(.left, 3)
         pause(3)
         press(.down)
         pause(1)
