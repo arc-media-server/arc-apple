@@ -14,7 +14,7 @@ struct ArcTVApp: App {
 }
 
 /// One screen at a time, in the order a new Apple TV meets them: the server, signing in, the
-/// profile picker, then Home.
+/// profile picker, then Home and the other tabs.
 struct RootView: View {
     @Environment(AppModel.self) private var app
 
@@ -26,7 +26,7 @@ struct RootView: View {
             case .server: ServerView()
             case .signIn: SignInView()
             case .profiles: ProfilesView()
-            case .home: HomeView()
+            case .home: MainView()
             }
         }
         .task { await app.launch() }

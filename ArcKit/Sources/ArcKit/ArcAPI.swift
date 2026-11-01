@@ -174,21 +174,21 @@ public final class ArcAPI: Sendable {
         return s
     }
 
-    private func get<T: Decodable>(_ path: String, route: String? = nil) async throws -> T {
+    func get<T: Decodable>(_ path: String, route: String? = nil) async throws -> T {
         let route = route ?? path
         let (status, data) = try await raw("GET", path, route: route)
         guard (200...299).contains(status) else { throw failure(status, data, route) }
         return try decode(T.self, data, route)
     }
 
-    private func send<T: Decodable>(_ method: String, _ path: String, body: [String: String], route: String? = nil) async throws -> T {
+    func send<T: Decodable>(_ method: String, _ path: String, body: [String: String], route: String? = nil) async throws -> T {
         let route = route ?? path
         let (status, data) = try await raw(method, path, body: try JSONSerialization.data(withJSONObject: body, options: [.sortedKeys]), route: route)
         guard (200...299).contains(status) else { throw failure(status, data, route) }
         return try decode(T.self, data, route)
     }
 
-    private func decode<T: Decodable>(_ type: T.Type, _ data: Data, _ route: String) throws -> T {
+    func decode<T: Decodable>(_ type: T.Type, _ data: Data, _ route: String) throws -> T {
         do {
             return try ArcJSON.decoder.decode(type, from: data)
         } catch {
@@ -197,7 +197,7 @@ public final class ArcAPI: Sendable {
         }
     }
 
-    private func failure(_ status: Int, _ data: Data, _ route: String) -> APIError {
+    func failure(_ status: Int, _ data: Data, _ route: String) -> APIError {
         let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         let message = obj?["error"] as? String ?? "the server answered \(status)"
         // Signed out, a wrong PIN or a missing profile are expected; a server error is worth a warning.
@@ -206,7 +206,7 @@ public final class ArcAPI: Sendable {
     }
 
     /// Sends a request to /api/v1/`path`; `route` names it in logs without ids or query strings.
-    private func raw(_ method: String, _ path: String, body: Data? = nil, route: String) async throws -> (Int, Data) {
+    func raw(_ method: String, _ path: String, body: Data? = nil, route: String) async throws -> (Int, Data) {
         guard let url = URL(string: base + "/api/v1/" + path) else { throw UnexpectedAnswer() }
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -229,7 +229,7 @@ public final class ArcAPI: Sendable {
         }
     }
 
-    private func enc(_ s: String) -> String {
+    func enc(_ s: String) -> String {
         s.addingPercentEncoding(withAllowedCharacters: Self.unreserved) ?? s
     }
 
