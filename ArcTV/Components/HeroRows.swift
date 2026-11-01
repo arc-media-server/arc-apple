@@ -114,7 +114,7 @@ struct HeroRows<Header: View>: View {
             }
             .padding(.top, 8)
         }
-        .frame(height: 620, alignment: .bottomLeading)
+        .frame(height: 620 - headerHeight, alignment: .bottomLeading)
         .padding(.horizontal, 80)
         .focusSection()
     }

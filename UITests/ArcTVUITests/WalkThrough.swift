@@ -129,12 +129,14 @@ final class WalkThrough: XCTestCase {
         pause(2)
         shot("17a-library-recommended-rows")
         // Up to the pill bar (it floats over the hero), then right to Browse.
-        let browse = app.buttons["Browse"], collections = app.buttons["Collections"]
-        for _ in 0..<5 where !app.buttons["Recommended"].hasFocus && !browse.hasFocus && !collections.hasFocus {
+        let browse = app.buttons["Browse"]
+        for _ in 0..<5 where !app.buttons["Recommended"].hasFocus && !browse.hasFocus && !app.buttons["Collections"].hasFocus {
             press(.up)
         }
-        for _ in 0..<2 where !browse.hasFocus {
-            press(collections.hasFocus ? .left : .right)
+        // Whichever pill Up lands on: right to the last (Collections), then one back.
+        if !browse.hasFocus {
+            press(.right, 3)
+            press(.left)
         }
         pause(1)
         shot("17b-library-pills")
