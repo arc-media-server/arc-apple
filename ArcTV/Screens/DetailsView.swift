@@ -32,11 +32,7 @@ struct DetailsView: View {
             ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: 28) {
                     Spacer(minLength: 360)
-                    if let logo = shown.images?.logo {
-                        ArtworkImage(path: logo, contentMode: .fit).frame(maxWidth: 640, maxHeight: 200, alignment: .leading)
-                    } else {
-                        Text(shown.title).font(.system(size: 64, weight: .bold))
-                    }
+                    TitleLogo(path: shown.images?.logo, title: shown.title)
                     Text(meta).foregroundStyle(ArcColor.muted)
                     if let overview = shown.overview {
                         Text(overview).frame(maxWidth: 1100, alignment: .leading).lineLimit(4)
