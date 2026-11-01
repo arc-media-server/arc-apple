@@ -52,6 +52,7 @@ targets:
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "3"
         TEST_TARGET_NAME: ArcTV
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   ArcTV:
     build:
