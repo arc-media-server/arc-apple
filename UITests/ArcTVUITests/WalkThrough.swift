@@ -31,13 +31,18 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(6)
         shot("04-home")
+        // Up reaches the hero's Play, Watchlist and Info; down returns to the first row.
+        press(.up)
+        pause(1)
+        shot("04b-home-hero-buttons")
+        press(.down)
+        pause(1)
         press(.right)
         pause(3)
         shot("05-home-focus-moved")
         press(.down)
         pause(3)
         shot("06-home-second-row")
-        press(.left)
 
         // The focused title's page, then play it.
         remote.press(.select)
@@ -63,7 +68,7 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(2)
         shot("10b-player-options")
-        press(.right)
+        press(.down)
         remote.press(.select)
         pause(3)
         shot("10c-player-subtitles")
@@ -88,24 +93,27 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("14-title-page-rows")
 
-        // Back to Home, then up to the tabs, and along them: the Watchlist, each library,
-        // Playlists and Settings (the tab under the focus opens as the focus moves).
+        // Back to Home (Back again takes Home to its top), then left opens the sidebar, and down
+        // it: the Watchlist, each library, Playlists and Settings (each opens as the focus moves).
         remote.press(.menu)
         pause(2)
         remote.press(.menu)
+        pause(2)
+        press(.left, 3)
         pause(2)
         shot("15-tabs")
         for i in 1...7 {
-            press(.right)
+            press(.down)
             pause(3)
             shot(String(format: "16-tab-%02d", i))
         }
 
         // A library: its sort and filters, then the grid, and holding Select on a title.
-        press(.left, 3)
-        pause(3)
-        press(.down)
+        // (On tvOS 26 the sidebar only highlights as the focus moves; Select opens the place.)
+        press(.up, 3)
         pause(1)
+        remote.press(.select)
+        pause(3)
         shot("17-library-header")
         press(.down)
         pause(2)
@@ -119,11 +127,12 @@ final class WalkThrough: XCTestCase {
         // Search: type a few letters; results follow the typing.
         remote.press(.menu)
         pause(1)
-        press(.left, 10)
+        press(.left, 3)
+        pause(1)
+        press(.up, 10)
+        remote.press(.select)
         pause(2)
         shot("20-search")
-        press(.down)
-        pause(1)
         // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
         // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
         let field = app.searchFields.firstMatch

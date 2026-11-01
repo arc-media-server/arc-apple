@@ -65,25 +65,30 @@ struct DetailsView: View {
     }
 
     @ViewBuilder private var buttons: some View {
-        HStack(spacing: 32) {
+        HStack(spacing: 20) {
             if shown.playable {
                 let resume = shown.resumeMs
                 Button { play(PlayRequest(item: shown, startMs: resume)) } label: {
                     Label(resume > 0 ? L("details.resume") : L("details.play"), systemImage: "play.fill")
                 }
+                .arcGlassButton(prominent: true)
                 if resume > 0 {
                     Button { play(PlayRequest(item: shown, startMs: 0)) } label: {
                         Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise")
                     }
+                    .roundIconButton()
                 }
             } else if let next = nextEpisode {
                 Button { play(PlayRequest(item: next, startMs: next.resumeMs)) } label: {
                     Label(next.resumeMs > 0 ? L("details.resume_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0)
                           : L("details.play_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0), systemImage: "play.fill")
                 }
+                .arcGlassButton(prominent: true)
             }
-            TitleActions(item: shown, onPage: true)
+            // The page's other actions are round glass icons, as the Android app's title page.
+            TitleActions(item: shown, onPage: true).roundIconButton()
         }
+        .focusSection()
     }
 
     private func play(_ request: PlayRequest) { browse.play(request) }
@@ -101,7 +106,7 @@ struct DetailsView: View {
     private var collections: some View {
         section(L("details.collections")) {
             ForEach(shown.collections) { c in
-                Button(c.title) { openRoute(.collection(id: c.id, title: c.title)) }
+                Button(c.title) { openRoute(.collection(id: c.id, title: c.title)) }.arcGlassButton()
             }
         }
     }
@@ -146,7 +151,7 @@ struct DetailsView: View {
                 HStack(spacing: 24) {
                     ForEach(Array(seasons.enumerated()), id: \.element.id) { index, s in
                         Button(s.name.isEmpty ? L("details.season", s.seasonNumber) : s.name) { season = index }
-                            .tint(index == season ? ArcColor.accentStrong : nil)
+                            .arcGlassButton(prominent: index == season)
                     }
                 }
                 .padding(.vertical, 12)
@@ -194,25 +199,26 @@ struct EpisodeCard: View {
     let action: () -> Void
 
     var body: some View {
+        let card = MediaCard(item: episode)
         VStack(alignment: .leading, spacing: 10) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: episode.images?.primary).frame(width: 400, height: 225).clipped()
-                    if let card = Optional(MediaCard(item: episode)), let progress = card.progress {
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Rectangle().fill(.black.opacity(0.5))
-                                Rectangle().fill(ArcColor.accent).frame(width: geo.size.width * progress)
-                            }
-                        }
-                        .frame(height: 6)
+                    ArtworkImage(path: episode.images?.primary).frame(width: 384, height: 216).clipped()
+                    if let progress = card.progress { ProgressBar(fraction: progress).padding(12) }
+                    if episode.watched {
+                        Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.white, ArcColor.accentStrong)
+                            .padding(10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }
                 }
-                .frame(width: 400, height: 225)
+                .frame(width: 384, height: 216)
+                .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
             .disabled(!episode.available)
-            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title)).font(.callout).lineLimit(1).frame(width: 400, alignment: .leading)
+            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title)).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
+            if let overview = episode.overview {
+                Text(overview).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(2).frame(width: 384, alignment: .leading)
+            }
         }
     }
 }

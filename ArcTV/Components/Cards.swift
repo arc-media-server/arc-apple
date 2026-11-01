@@ -4,25 +4,37 @@ import SwiftUI
 extension CardStyle {
     var size: CGSize {
         switch self {
-        case .poster: return CGSize(width: 220, height: 330)
-        case .thumb: return CGSize(width: 400, height: 225)
-        case .backdrop: return CGSize(width: 400, height: 300)
+        case .poster: return CGSize(width: 200, height: 300)
+        case .thumb: return CGSize(width: 384, height: 216)
+        case .backdrop: return CGSize(width: 384, height: 288)
         }
     }
 }
 
-/// A title on a row, in its row's style. The tvOS card button gives the lift and shine on focus.
+/// How rounded artwork is, everywhere (tvOS 26's softer corners).
+let cardCorner: CGFloat = 18
+
+extension MediaCard {
+    /// Minutes left of a part-watched title.
+    var minutesLeft: Int? {
+        guard progress != nil else { return nil }
+        return max(1, Int((item.durationMs - item.resumeMs) / 60_000))
+    }
+}
+
+/// A title on a row or grid, in its row's style: rounded artwork that lifts on focus (tvOS's
+/// card), how far through as a thin bar inside it, and its name with the year or time left under.
 struct MediaCardView: View {
     let card: MediaCard
     let style: CardStyle
     var seasonPosters = false
-    /// Where the row keeps which card has the focus (Home's backdrop follows it).
+    /// Where the row keeps which card has the focus (Home's hero follows it).
     var focus: FocusState<String?>.Binding
     let focusKey: String
     let action: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
                     ArtworkImage(path: card.art(style, seasonPosters: seasonPosters))
@@ -34,42 +46,57 @@ struct MediaCardView: View {
                             .padding(20)
                     }
                     if let progress = card.progress {
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                Rectangle().fill(.black.opacity(0.5))
-                                Rectangle().fill(ArcColor.accent).frame(width: geo.size.width * progress)
-                            }
-                        }
-                        .frame(height: 6)
+                        ProgressBar(fraction: progress).padding(12)
                     }
                     if card.item.watched {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title3)
                             .foregroundStyle(.white, ArcColor.accentStrong)
-                            .padding(12)
+                            .padding(10)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }
                 }
                 .frame(width: style.size.width, height: style.size.height)
+                .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
             .contextMenu { TitleActions(item: card.item) }
-            if style != .poster {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(card.item.isEpisode ? card.item.seriesTitle ?? card.item.title : card.item.title).font(.callout).lineLimit(1)
-                    if let sub = subtitle { Text(sub).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
-                }
-                .frame(width: style.size.width, alignment: .leading)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title)
+                    .font(.caption.weight(.semibold)).lineLimit(1)
+                if let sub = subtitle { Text(sub).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
+            .frame(width: style.size.width, alignment: .leading)
         }
     }
 
     private var subtitle: String? {
         let item = card.item
         if let season = card.seasonNumber, card.newEpisodes > 0 { return L("card.new_episodes", season, card.newEpisodes) }
-        if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber { return L("card.episode", s, e, item.title) }
-        return item.year.map(String.init)
+        var parts: [String] = []
+        if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber {
+            parts.append(style == .poster ? L("card.episode_code", s, e) : L("card.episode", s, e, item.title))
+        } else if let year = item.year {
+            parts.append(String(year))
+        }
+        if let left = card.minutesLeft { parts.append(L("card.minutes_left", left)) }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+}
+
+/// How far through: a thin rounded bar inset at the bottom of the artwork.
+struct ProgressBar: View {
+    let fraction: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.3))
+                Capsule().fill(.white).frame(width: max(6, geo.size.width * fraction))
+            }
+        }
+        .frame(height: 5)
     }
 }
 

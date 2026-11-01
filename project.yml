@@ -4,7 +4,7 @@ name: Arc
 options:
   bundleIdPrefix: org.arcmediaserver
   deploymentTarget:
-    tvOS: "17.0"
+    tvOS: "18.0"
   developmentLanguage: en
 packages:
   ArcKit:

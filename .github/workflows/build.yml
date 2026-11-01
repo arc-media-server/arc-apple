@@ -29,6 +29,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Tools
         run: |
+          # The newest Xcode on the runner (Xcode 26 has the tvOS 26 SDK, so Liquid Glass).
+          XCODE=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
           xcodebuild -version
           swift --version
           brew install xcodegen
@@ -104,7 +107,7 @@ jobs:
             git -C shots-branch rm -rfq .
           fi
           mkdir -p "shots-branch/$dir"
-          cp small/* "shots-branch/$dir/"
+          cp small/* "shots-branch/$dir/" 2>/dev/null || { echo "nothing to share"; exit 0; }
           git -C shots-branch add runs
           git -C shots-branch commit -qm "Screenshots for run ${{ github.run_id }} (${{ github.sha }})"
           git -C shots-branch push origin ci-screenshots
