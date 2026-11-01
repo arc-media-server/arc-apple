@@ -93,11 +93,13 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("14-title-page-rows")
 
-        // Back to Home, then Back again opens the sidebar, and down it: the Watchlist, each
-        // library, Playlists and Settings (the place under the focus opens as the focus moves).
+        // Back to Home (Back again takes Home to its top), then left opens the sidebar, and down
+        // it: the Watchlist, each library, Playlists and Settings (each opens as the focus moves).
         remote.press(.menu)
         pause(2)
         remote.press(.menu)
+        pause(2)
+        press(.left, 3)
         pause(2)
         shot("15-tabs")
         for i in 1...7 {
