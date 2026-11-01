@@ -91,9 +91,10 @@ struct PlayerScreen: View {
         case .left: model?.seek(by: -10_000)
         case .right: model?.seek(by: 10_000)
         case .down:
-            if let model, !model.subtitleTracks.isEmpty || model.audioTracks.count > 1 {
+            if let model {
                 options = true
-                focus = .option(model.subtitle.map { "s:" + $0.id } ?? "s:off")
+                focus = .option(model.subtitleTracks.isEmpty ? "q:" + (model.maxKbps.map(String.init) ?? "original")
+                                : model.subtitle.map { "s:" + $0.id } ?? "s:off")
             }
         default: break
         }
@@ -147,12 +148,37 @@ struct PlayerScreen: View {
                         }
                     }
                 }
+                optionSection(L("player.quality")) {
+                    optionButton(L("player.original"), selected: model.maxKbps == nil, key: "q:original") { model.chooseQuality(nil) }
+                    ForEach(model.qualities, id: \.self) { kbps in
+                        optionButton(qualityName(kbps), selected: model.maxKbps == kbps, key: "q:\(kbps)") { model.chooseQuality(kbps) }
+                    }
+                }
+                if model.versions.count > 1 {
+                    optionSection(L("player.version")) {
+                        ForEach(model.versions) { v in
+                            optionButton(v.label, selected: model.fileId == v.fileId, key: "v:\(v.fileId)") { model.chooseVersion(v.fileId) }
+                        }
+                    }
+                }
+                if !model.chapters.isEmpty {
+                    optionSection(L("player.chapters")) {
+                        ForEach(Array(model.chapters.enumerated()), id: \.offset) { i, c in
+                            optionButton(chapterName(c, i), selected: model.chapter == c, key: "c:\(i)") {
+                                model.jump(to: c)
+                                options = false
+                                focus = .surface
+                            }
+                        }
+                    }
+                }
             }
             .padding(36)
         }
-        .scrollClipDisabled()
         .frame(width: 640)
+        .frame(maxHeight: .infinity)
         .arcGlassPanel(cornerRadius: 40)
+        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
         .padding(.vertical, 60)
         .padding(.trailing, 60)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
@@ -206,6 +232,13 @@ struct PlayerScreen: View {
             try? await Task.sleep(for: .seconds(5))
             if !Task.isCancelled && model?.playing == true { controls = false }
         }
+    }
+
+    private func chapterName(_ c: Chapter, _ index: Int) -> String {
+        let s = Int(c.startMs / 1000)
+        let time = s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)
+        let name = (c.title?.isEmpty == false ? c.title : nil) ?? L("player.chapter", index + 1)
+        return name + " · " + time
     }
 
     private func trackName(_ t: SubtitleTrack) -> String {
@@ -340,18 +373,23 @@ private struct PlayerControls: View {
                     }
                 }
                 Spacer()
-                if !model.subtitleTracks.isEmpty || model.audioTracks.count > 1 {
-                    HStack(spacing: 14) {
-                        if !model.subtitleTracks.isEmpty { glassIcon("captions.bubble") }
-                        if model.audioTracks.count > 1 { glassIcon("speaker.wave.2") }
-                        Image(systemName: "chevron.down").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.7))
-                    }
-                    .accessibilityHidden(true)
+                HStack(spacing: 14) {
+                    if !model.subtitleTracks.isEmpty { glassIcon("captions.bubble") }
+                    if model.audioTracks.count > 1 { glassIcon("speaker.wave.2") }
+                    glassIcon("slider.horizontal.3")
+                    Image(systemName: "chevron.down").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.7))
                 }
+                .accessibilityHidden(true)
             }
             GeometryReader { geo in
                 let fraction = model.durationMs > 0 ? min(1, Double(model.positionMs) / Double(model.durationMs)) : 0
                 ZStack(alignment: .leading) {
+                    // The picture at this point, for a moment after moving through the timeline.
+                    if let trick = model.trickplay, let at = model.seekedAt, Date().timeIntervalSince(at) < 3,
+                       let spot = trick.thumbnail(at: model.positionMs) {
+                        TrickplayThumb(sheet: spot.sheet, x: spot.x, y: spot.y, info: trick.info, chapter: model.chapter?.title)
+                            .offset(x: min(max(0, geo.size.width * fraction - 180), geo.size.width - 360), y: -150)
+                    }
                     Capsule().fill(.white.opacity(0.25)).frame(height: 6)
                     Capsule().fill(.white).frame(width: geo.size.width * fraction, height: 6)
                     Circle().fill(.white).frame(width: 18, height: 18)
@@ -386,6 +424,44 @@ private struct PlayerControls: View {
     private func time(_ ms: Int64) -> String {
         let s = Int(ms / 1000)
         return s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)
+    }
+}
+
+/// One timeline thumbnail, cut from its sheet, at 360 points wide.
+private struct TrickplayThumb: View {
+    @Environment(AppModel.self) private var app
+    let sheet: String
+    let x: Int
+    let y: Int
+    let info: Trickplay.Info
+    let chapter: String?
+    @State private var image: UIImage?
+
+    var body: some View {
+        let scale = 360 / CGFloat(max(1, info.width))
+        let height = CGFloat(info.height) * scale
+        VStack(alignment: .leading, spacing: 8) {
+            ZStack(alignment: .topLeading) {
+                if let image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .frame(width: CGFloat(info.width * info.columns) * scale, height: CGFloat(info.height * info.rows) * scale)
+                        .offset(x: -CGFloat(x) * scale, y: -CGFloat(y) * scale)
+                } else {
+                    ArcColor.surface2
+                }
+            }
+            .frame(width: 360, height: height, alignment: .topLeading)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            if let chapter, !chapter.isEmpty {
+                Text(chapter).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 360, alignment: .leading)
+            }
+        }
+        .frame(height: height, alignment: .bottom)
+        .task(id: sheet) {
+            guard let api = app.api, let url = api.absolute(sheet) else { return }
+            image = await ArtworkLoader.shared.image(url, headers: api.authorization)
+        }
     }
 }
 

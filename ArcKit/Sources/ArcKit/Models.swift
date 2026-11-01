@@ -113,6 +113,8 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     @Default<Defaults.List<CollectionRef>> public var collections: [CollectionRef]
     /// An episode's show.
     public var parentId: String?
+    /// Trailers and other extras (a title's page).
+    @Default<Defaults.List<Extra>> public var extras: [Extra]
 
     public init(id: String, kind: String, title: String, images: Images? = nil) {
         self.id = id
@@ -266,11 +268,14 @@ public struct PlaybackRequest: Codable, Sendable {
     public var startMs: Int64
     public var fileId: Int64?
     public var audioStream: Int?
+    /// A quality limit (kbit/s); nil for the original.
+    public var maxKbps: Int?
     /// A picture subtitle track to draw into the picture (Arc converts the video to do it).
     public var burnSubtitle: String?
 
-    public init(caps: PlayerCaps, startMs: Int64 = 0, fileId: Int64? = nil, audioStream: Int? = nil, burnSubtitle: String? = nil) {
+    public init(caps: PlayerCaps, startMs: Int64 = 0, fileId: Int64? = nil, audioStream: Int? = nil, burnSubtitle: String? = nil, maxKbps: Int? = nil) {
         self.caps = caps
+        self.maxKbps = maxKbps
         self.startMs = startMs
         self.fileId = fileId
         self.audioStream = audioStream
@@ -335,6 +340,14 @@ public struct PlaybackPlan: Codable, Sendable {
     @Default<Defaults.List<AudioTrack>> public var audioTracks: [AudioTrack]
     @Default<Defaults.List<SubtitleTrack>> public var subtitleTracks: [SubtitleTrack]
     @Default<Defaults.List<Marker>> public var markers: [Marker]
+    /// The title's files to choose from (editions, versions).
+    @Default<Defaults.List<Version>> public var versions: [Version]
+    @Default<Defaults.List<Chapter>> public var chapters: [Chapter]
+    /// The file's overall bitrate (kbit/s), so only lower qualities are offered.
+    @Default<Defaults.Zero> public var sourceKbps: Int
+    @Default<Defaults.Zero> public var sourceHeight: Int
+    /// Away from home, the most the server allows (0 at home).
+    @Default<Defaults.Zero> public var serverLimitKbps: Int
 
     public init(method: String, url: String, hls: Bool = false, sessionId: String? = nil, offsetMs: Int64 = 0, durationMs: Int64 = 0) {
         self.method = method

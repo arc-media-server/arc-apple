@@ -87,6 +87,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.json(200, dict(answers["GET me/prefs"]["body"], **(body or {})))
         if method in ("PUT", "DELETE") or (method == "POST" and (path.endswith("/ping") or path == "auth/logout")):
             return self.send(204, b"")
+        # Timeline thumbnails: one placeholder sheet of 4 x 3 for the 12-second clip.
+        if method == "GET" and len(parts) == 3 and parts[0] == "items" and parts[2] == "trickplay":
+            return self.json(200, {"info": {"interval_ms": 1000, "width": 320, "height": 180, "columns": 4, "rows": 3, "count": 12, "sheets": 1},
+                                   "sheets": [f"/api/items/{parts[1]}/trickplay/{query.get('file', '1')}/0"]})
+        if method == "GET" and len(parts) == 5 and parts[0] == "items" and parts[2] == "trickplay":
+            return self.send(200, png("trick" + parts[1], 1280, 540), "image/png")
         # Subtitle lines for any track: one every two seconds.
         if method == "GET" and len(parts) == 4 and parts[0] == "items" and parts[2] == "subtitles":
             return self.json(200, {"track": {"id": parts[3]}, "cues": [{"start_ms": i * 2000, "end_ms": i * 2000 + 1800, "text": f"Stand-in subtitles, line {i + 1}"} for i in range(30)]})
@@ -111,6 +117,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
             # seconds are an "intro", and every title has a stand-in subtitle track.
             doc["markers"] = [{"kind": "intro", "start_ms": 0, "end_ms": 9000}]
             doc["subtitle_tracks"] = (doc.get("subtitle_tracks") or []) + [{"id": "standin", "language": "eng", "title": "Stand-in", "codec": "subrip"}]
+            # Two versions, three chapters and a high bitrate, for the Quality, Version and Chapters choices.
+            fid = doc.get("file_id") or 1
+            doc["versions"] = [{"file_id": fid, "width": 3840, "height": 2160, "video_codec": "hevc", "hdr": "HDR10", "size": 58_000_000_000},
+                               {"file_id": fid + 1000, "edition": "Director's Cut", "width": 1920, "height": 1080, "video_codec": "h264", "size": 14_000_000_000}]
+            doc["chapters"] = [{"start_ms": 0, "end_ms": 4000, "title": "Opening"}, {"start_ms": 4000, "end_ms": 8000, "title": "The Job"},
+                               {"start_ms": 8000, "end_ms": 12000, "title": "Getaway"}]
+            doc["source_kbps"] = 25000
+        # Films get a trailer and a featurette (they play the sample clip through a cast link).
+        if method == "GET" and len(parts) == 2 and parts[0] == "items" and a["status"] == 200 and doc.get("kind") == "movie":
+            doc = dict(doc, extras=[{"id": "e1" + parts[1][:6], "kind": "trailer", "title": "Official Trailer", "duration_ms": 12000, "stream_url": "/api/extras/e1/stream"},
+                                    {"id": "e2" + parts[1][:6], "kind": "featurette", "title": "Making Of", "duration_ms": 12000, "stream_url": "/api/extras/e2/stream"}])
         return self.json(a["status"], doc)
 
     def media(self):
