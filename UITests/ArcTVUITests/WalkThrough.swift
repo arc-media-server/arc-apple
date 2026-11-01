@@ -51,10 +51,13 @@ final class WalkThrough: XCTestCase {
         press(.down, 2)
         pause(2)
         shot("08-title-page-scrolled")
-        // Up returns to the button row under the focus (the middle of Play, Watched and
-        // Watchlist), so left to Play.
+        // Up returns to the button row under the focus, then left to Play (one more left would
+        // open the sidebar).
         press(.up, 4)
-        press(.left, 3)
+        let play = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Play' OR label BEGINSWITH 'Resume'")).firstMatch
+        for _ in 0..<4 where !play.hasFocus {
+            press(.left)
+        }
         remote.press(.select)
         pause(6)
         shot("09-player")
@@ -101,23 +104,21 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("14-title-page-rows")
 
-        // Back to Home (Back again takes Home to its top), then left opens the sidebar, and down
-        // it: the Watchlist, each library, Playlists and Settings (each opens as the focus moves).
+        // Back to Home, and Back again opens the sidebar (its icons stay where they are; the glass
+        // and the names fade in), then down it: the Watchlist, each library, Playlists and Settings.
         remote.press(.menu)
         pause(2)
         remote.press(.menu)
-        pause(2)
-        press(.left, 3)
         pause(2)
         shot("15-tabs")
-        for i in 1...7 {
+        for i in 1...7 { // the last press finds the end of the sidebar and stays
             press(.down)
             pause(3)
             shot(String(format: "16-tab-%02d", i))
         }
 
         // A library: its sort and filters, then the grid, and holding Select on a title.
-        // (On tvOS 26 the sidebar only highlights as the focus moves; Select opens the place.)
+        // (The sidebar only highlights as the focus moves; Select opens the place and shuts it.)
         press(.up, 3)
         pause(1)
         remote.press(.select)
@@ -132,19 +133,19 @@ final class WalkThrough: XCTestCase {
         remote.press(.menu)
         pause(1)
 
-        // Search: type a few letters; results follow the typing.
+        // Search, at the top of the sidebar (Back from the library opens it): type a few letters;
+        // results follow the typing.
         remote.press(.menu)
         pause(1)
-        press(.left, 3)
-        pause(1)
-        press(.up, 10)
+        press(.up, 10) // to the profile at the top, then down one to Search
+        press(.down)
         remote.press(.select)
         pause(2)
         shot("20-search")
         // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
         // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
         let field = app.searchFields.firstMatch
-        if field.exists {
+        if field.exists && field.hasFocus {
             field.typeText("alien")
         } else {
             remote.press(.select)
