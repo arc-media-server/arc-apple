@@ -1,7 +1,7 @@
 import ArcKit
 import SwiftUI
 
-/// A library: its Recommended rows under a hero (first, as Plex and Plozz open a library), all its
+/// A library: its Recommended rows under a hero (first, as Plex opens a library), all its
 /// titles as a poster grid with the web's sorts and filters (genre, decade, resolution,
 /// unwatched), its collections, or (Other videos, which have no Recommended) its folders.
 struct LibraryView: View {
@@ -112,7 +112,7 @@ struct LibraryView: View {
     }
 
     /// Recommended, Browse, Collections and (Other videos) Folders as pills in one glass capsule,
-    /// as Plozz's and the Android app's library header. The sidebar says which library it is.
+    /// as the Android app's library header. The sidebar says which library it is.
     private var showTabs: some View {
         HStack(spacing: 8) {
             if !isVideos { showTab(L("library.recommended"), .recommended) }

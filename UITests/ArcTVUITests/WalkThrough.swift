@@ -31,12 +31,6 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(6)
         shot("04-home")
-        // Up reaches the hero's Play, Watchlist and Info; down returns to the first row.
-        press(.up)
-        pause(1)
-        shot("04b-home-hero-buttons")
-        press(.down)
-        pause(1)
         press(.right)
         pause(3)
         shot("05-home-focus-moved")
@@ -132,7 +126,7 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(2)
         shot("17a-library-recommended-rows")
-        // Up to the pill bar (it floats over the hero), then right to Browse.
+        // Up from the rows reaches the pill bar (it floats over the hero), then right to Browse.
         let browse = app.buttons["Browse"]
         for _ in 0..<5 where !app.buttons["Recommended"].hasFocus && !browse.hasFocus && !app.buttons["Collections"].hasFocus {
             press(.up)
