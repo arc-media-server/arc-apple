@@ -51,9 +51,13 @@ final class WalkThrough: XCTestCase {
         press(.down, 2)
         pause(2)
         shot("08-title-page-scrolled")
+        // The foot of the page: Cast, then the About, Details, Crew and Playback cards.
+        press(.down, 3)
+        pause(2)
+        shot("08b-title-page-cards")
         // Up returns to the button row under the focus, then left to Play (one more left would
         // open the sidebar).
-        press(.up, 4)
+        press(.up, 8)
         let play = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Play' OR label BEGINSWITH 'Resume'")).firstMatch
         for _ in 0..<4 where !play.hasFocus {
             press(.left)

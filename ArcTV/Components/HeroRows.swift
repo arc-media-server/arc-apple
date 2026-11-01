@@ -80,7 +80,15 @@ struct HeroRows<Header: View>: View {
             } else {
                 Text(item.isEpisode ? item.seriesTitle ?? item.title : item.title).font(.system(size: 64, weight: .bold)).lineLimit(2)
             }
-            Text(heroMeta(item)).font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
+            // Plozz's hero line: the rating in a box, then the genres; an episode's own line under it.
+            HStack(spacing: 12) {
+                if let rating = item.contentRating, !rating.isEmpty { OutlinedBadge(text: rating) }
+                if let line = genreLine(item) { Text(line) }
+            }
+            .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
+            if let line = detailLine(item) {
+                Text(line).font(.callout).foregroundStyle(.white.opacity(0.85))
+            }
             // Under a header there's no room for the overview: the first row would push the
             // title under the bar. Info has it.
             if headerHeight == 0, let overview = item.overview, !overview.isEmpty {
@@ -91,7 +99,7 @@ struct HeroRows<Header: View>: View {
                     HStack(spacing: 14) {
                         Image(systemName: "play.fill")
                         if let progress = card.progress, let left = card.minutesLeft {
-                            ProgressBar(fraction: progress).frame(width: 90)
+                            ProgressBar(fraction: progress, color: .black).frame(width: 90)
                             Text(L("card.minutes_short", left))
                         } else {
                             Text(L("details.play"))
@@ -121,13 +129,17 @@ struct HeroRows<Header: View>: View {
         .focusSection()
     }
 
-    private func heroMeta(_ item: Item) -> String {
+    private func genreLine(_ item: Item) -> String? {
         var parts: [String] = []
-        if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber { parts.append(L("card.episode", s, e, item.title)) }
-        if let year = item.year { parts.append(String(year)) }
-        if let rating = item.contentRating, !rating.isEmpty { parts.append(rating) }
+        if !item.isEpisode, let year = item.year { parts.append(String(year)) }
         parts += item.genres.prefix(3)
-        return parts.joined(separator: " · ")
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// An episode's season, number and name ("S1 · E7 · Safe").
+    private func detailLine(_ item: Item) -> String? {
+        guard item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber else { return nil }
+        return L("card.episode", s, e, item.title)
     }
 
     /// The focused title's background across the whole screen, darkened at the left and bottom

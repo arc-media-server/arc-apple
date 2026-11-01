@@ -36,6 +36,8 @@ struct ArtworkImage: View {
     @Environment(AppModel.self) private var app
     let path: String?
     var contentMode: ContentMode = .fill
+    /// What shows until (or unless) it loads; logos over art use clear.
+    var placeholder: Color = ArcColor.surface2
     @State private var image: UIImage?
 
     var body: some View {
@@ -43,7 +45,7 @@ struct ArtworkImage: View {
             if let image {
                 Image(uiImage: image).resizable().aspectRatio(contentMode: contentMode)
             } else {
-                ArcColor.surface2
+                placeholder
             }
         }
         .task(id: path) {
