@@ -103,6 +103,8 @@ struct MainView: View {
     /// The places opened so far: each keeps its pages while another is showing.
     @State private var opened: Set<String> = ["home"]
     @FocusState private var focused: String?
+    @Namespace private var scope
+    @Environment(\.resetFocus) private var resetFocus
     /// Briefly true after a place is chosen (or Back in the sidebar): the rows can't hold the
     /// focus, so tvOS moves it onto the page, and the sidebar shuts.
     @State private var handingOver = false
@@ -142,6 +144,7 @@ struct MainView: View {
                 }
             }
             .safeAreaPadding(.leading, Sidebar.collapsedWidth - 20)
+            .prefersDefaultFocus(in: scope)
             .environment(\.openSidebar, OpenSidebar { focused = tab })
 
             // The page dims behind the open sidebar, so its names read over any artwork.
@@ -153,6 +156,7 @@ struct MainView: View {
 
             sidebar
         }
+        .focusScope(scope)
         .animation(.easeOut(duration: 0.25), value: sidebarOpen)
         .onChange(of: focused) { old, new in
             // Coming into the sidebar from a page starts on the place showing, wherever the focus
@@ -242,6 +246,8 @@ struct MainView: View {
         Task { @MainActor in
             for _ in 0..<4 {
                 handingOver = true
+                // The page is the scope's preferred focus; asking tvOS to decide again moves it there.
+                resetFocus(in: scope)
                 try? await Task.sleep(for: .milliseconds(350))
                 handingOver = false
                 try? await Task.sleep(for: .milliseconds(150))
