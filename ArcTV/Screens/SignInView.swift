@@ -27,7 +27,7 @@ struct SignInView: View {
                         Text(String(c))
                             .font(.system(size: 64, weight: .semibold, design: .monospaced))
                             .frame(width: 96, height: 120)
-                            .background(ArcColor.surface2, in: RoundedRectangle(cornerRadius: 16))
+                            .arcGlassPanel(cornerRadius: 20)
                     }
                 }
                 Text(renewed ? L("signin.expired") : L("signin.waiting")).foregroundStyle(ArcColor.subtle)
@@ -36,8 +36,8 @@ struct SignInView: View {
             }
             if let problem { Text(problem).foregroundStyle(ArcColor.error) }
             HStack(spacing: 40) {
-                Button(L("signin.new_code")) { renewed = false; attempt += 1 }
-                Button(L("signin.change_server")) { app.changeServer() }
+                Button(L("signin.new_code")) { renewed = false; attempt += 1 }.arcGlassButton()
+                Button(L("signin.change_server")) { app.changeServer() }.arcGlassButton()
             }
             Text(L("signin.server", app.serverAddress ?? "")).font(.caption).foregroundStyle(ArcColor.subtle)
         }

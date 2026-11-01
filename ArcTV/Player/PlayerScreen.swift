@@ -117,6 +117,7 @@ struct PlayerScreen: View {
                         Text(L(marker.kind == "credits" ? "player.skip_credits" : marker.kind == "recap" ? "player.skip_recap" : "player.skip_intro"))
                             .font(.headline)
                     }
+                    .arcGlassButton()
                     .focused($focus, equals: .skip)
                 }
             }
@@ -126,52 +127,57 @@ struct PlayerScreen: View {
         .animation(.easeInOut(duration: 0.25), value: controls)
     }
 
-    /// Subtitles and Audio, from swiping down, as the web player's settings.
+    /// Subtitles and Audio, from swiping down, as the web player's settings: a glass panel down
+    /// the right-hand side, so the picture stays in view.
     private func optionsPanel(_ model: PlayerModel) -> some View {
-        VStack(alignment: .leading, spacing: 28) {
-            Spacer()
-            if !model.subtitleTracks.isEmpty {
-                optionRow(L("player.subtitles")) {
-                    optionButton(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
-                    ForEach(model.subtitleTracks) { t in
-                        optionButton(trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 32) {
+                if !model.subtitleTracks.isEmpty {
+                    optionSection(L("player.subtitles")) {
+                        optionButton(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
+                        ForEach(model.subtitleTracks) { t in
+                            optionButton(trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
+                        }
+                    }
+                }
+                if model.audioTracks.count > 1 {
+                    optionSection(L("player.audio")) {
+                        ForEach(model.audioTracks) { a in
+                            optionButton(audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
+                        }
                     }
                 }
             }
-            if model.audioTracks.count > 1 {
-                optionRow(L("player.audio")) {
-                    ForEach(model.audioTracks) { a in
-                        optionButton(audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
-                    }
-                }
-            }
+            .padding(36)
         }
-        .padding(.horizontal, 90)
-        .padding(.bottom, 60)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-        .background(alignment: .bottom) {
-            LinearGradient(colors: [.clear, .black.opacity(0.9)], startPoint: .top, endPoint: .bottom).frame(height: 520).ignoresSafeArea()
-        }
+        .scrollClipDisabled()
+        .frame(width: 640)
+        .arcGlassPanel(cornerRadius: 40)
+        .padding(.vertical, 60)
+        .padding(.trailing, 60)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+        .transition(.move(edge: .trailing).combined(with: .opacity))
     }
 
-    private func optionRow<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func optionSection<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 14) {
             Text(title).font(.headline).foregroundStyle(ArcColor.muted)
-            ScrollView(.horizontal) {
-                HStack(spacing: 24) { content() }.padding(.vertical, 16)
-            }
-            .scrollClipDisabled()
+            content()
         }
         .focusSection()
     }
 
     private func optionButton(_ title: String, selected: Bool, key: String, _ action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 12) {
+            HStack(spacing: 16) {
+                Text(title).lineLimit(1)
+                Spacer(minLength: 0)
                 Image(systemName: "checkmark").opacity(selected ? 1 : 0)
-                Text(title)
             }
+            .frame(maxWidth: .infinity)
         }
+        .arcGlassButton(prominent: selected)
+        .buttonBorderShape(.capsule)
         .focused($focus, equals: .option(key))
     }
 
@@ -246,14 +252,15 @@ private struct UpNextCard: View {
                     Button(action: play) {
                         Label(countdown.map { L("player.play_in", $0) } ?? L("player.play_now"), systemImage: "play.fill")
                     }
+                    .arcGlassButton(prominent: true)
                     .focused(focus, equals: .upNext)
-                    Button(L("common.cancel"), action: dismiss)
+                    Button(L("common.cancel"), action: dismiss).arcGlassButton()
                 }
             }
             .frame(maxWidth: 520, alignment: .leading)
         }
         .padding(28)
-        .background(.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
+        .arcGlassPanel()
     }
 }
 
@@ -314,45 +321,66 @@ private struct EngineSurface: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {}
 }
 
-/// The title, the timeline and the times, over a gradient at the bottom.
+/// The title large at the bottom left, a thin timeline and the times, over a soft shade, as
+/// the Android player; Down shows the subtitle and audio panel (the hint at the right says so).
 private struct PlayerControls: View {
     let model: PlayerModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 22) {
             Spacer()
-            VStack(alignment: .leading, spacing: 6) {
-                if model.item.isEpisode {
-                    Text(model.item.seriesTitle ?? "").font(.title3.weight(.semibold))
-                    Text(L("card.episode", model.item.seasonNumber ?? 0, model.item.episodeNumber ?? 0, model.item.title)).foregroundStyle(ArcColor.muted)
-                } else {
-                    Text(model.item.title).font(.title3.weight(.semibold))
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 6) {
+                    if model.item.isEpisode {
+                        Text(L("card.episode_code", model.item.seasonNumber ?? 0, model.item.episodeNumber ?? 0) + " · " + (model.item.seriesTitle ?? ""))
+                            .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.8))
+                        Text(model.item.title).font(.system(size: 52, weight: .bold)).lineLimit(1)
+                    } else {
+                        Text(model.item.title).font(.system(size: 52, weight: .bold)).lineLimit(1)
+                    }
+                }
+                Spacer()
+                if !model.subtitleTracks.isEmpty || model.audioTracks.count > 1 {
+                    HStack(spacing: 14) {
+                        if !model.subtitleTracks.isEmpty { glassIcon("captions.bubble") }
+                        if model.audioTracks.count > 1 { glassIcon("speaker.wave.2") }
+                        Image(systemName: "chevron.down").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.7))
+                    }
+                    .accessibilityHidden(true)
                 }
             }
             GeometryReader { geo in
                 let fraction = model.durationMs > 0 ? min(1, Double(model.positionMs) / Double(model.durationMs)) : 0
                 ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.25))
-                    Capsule().fill(ArcColor.accent).frame(width: geo.size.width * fraction)
+                    Capsule().fill(.white.opacity(0.25)).frame(height: 6)
+                    Capsule().fill(.white).frame(width: geo.size.width * fraction, height: 6)
+                    Circle().fill(.white).frame(width: 18, height: 18)
+                        .offset(x: geo.size.width * fraction - 9)
                 }
+                .frame(maxHeight: .infinity)
             }
-            .frame(height: 8)
-            HStack {
+            .frame(height: 18)
+            HStack(spacing: 14) {
                 Image(systemName: model.playing ? "pause.fill" : "play.fill")
                 Text(time(model.positionMs)).monospacedDigit()
                 Spacer()
                 Text("-" + time(max(0, model.durationMs - model.positionMs))).monospacedDigit()
             }
             .font(.callout)
-            .foregroundStyle(ArcColor.muted)
+            .foregroundStyle(.white.opacity(0.8))
         }
         .padding(.horizontal, 90)
         .padding(.bottom, 60)
         .background(alignment: .bottom) {
-            LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .top, endPoint: .bottom)
-                .frame(height: 420)
+            LinearGradient(colors: [.clear, .black.opacity(0.6)], startPoint: .top, endPoint: .bottom)
+                .frame(height: 360)
                 .ignoresSafeArea()
         }
+    }
+
+    /// A small glass circle with an icon, showing what Down opens.
+    private func glassIcon(_ name: String) -> some View {
+        Image(systemName: name).font(.callout).frame(width: 64, height: 64).arcGlassPanel(cornerRadius: 32)
     }
 
     private func time(_ ms: Int64) -> String {
@@ -371,8 +399,8 @@ private struct ProblemPane: View {
             Text(L("player.failed_title")).font(.title3.weight(.semibold))
             Text(message).foregroundStyle(ArcColor.muted).multilineTextAlignment(.center).frame(maxWidth: 900)
             HStack(spacing: 40) {
-                Button(L("common.retry"), action: retry)
-                Button(L("common.close"), action: close)
+                Button(L("common.retry"), action: retry).arcGlassButton(prominent: true)
+                Button(L("common.close"), action: close).arcGlassButton()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

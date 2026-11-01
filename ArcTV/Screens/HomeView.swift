@@ -85,12 +85,15 @@ final class HomeModel {
     }
 }
 
-/// Home: the focused title's backdrop behind the rows, artwork-led, no banner.
+/// Home: a full-screen hero for the focused title (its background, logo or name, details and
+/// glass Play, Watchlist and Info buttons) with the rows beneath, the first one peeking up.
 struct HomeView: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     @State private var model = HomeModel()
+    /// The title the hero shows: the focused card, or the one last focused.
+    @State private var hero: MediaCard?
     @FocusState private var focused: String?
 
     var body: some View {
@@ -108,60 +111,143 @@ struct HomeView: View {
         }
         // Read again after playing or a change of watch state, so Continue Watching is current.
         .task(id: browse.changes) { await reload() }
-        // Focus starts on the first title, as Plex's Home, not on the profile button above the rows.
+        // Focus starts on the first title, as Plex's Home.
         .onChange(of: model.loading) { _, now in
             if !now, focused == nil, let row = model.rows.first, let card = row.cards.first {
+                hero = card
                 Task { @MainActor in focused = row.id + "|" + card.id }
             }
+        }
+        .onChange(of: focused) { _, _ in
+            if let card = focusedCard { hero = card }
         }
     }
 
     private var rows: some View {
         ScrollView(.vertical) {
-            LazyVStack(alignment: .leading, spacing: 48) {
-                HStack {
-                    if let profile = app.profile {
-                        Button { app.switchProfile() } label: {
-                            HStack(spacing: 16) {
-                                Avatar(profile: profile, size: 56)
-                                Text(profile.name).font(.headline)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    Spacer()
-                }
-                .padding(.horizontal, 80)
+            LazyVStack(alignment: .leading, spacing: 44) {
+                if let hero { heroDetails(hero) }
                 ForEach(model.rows) { row in
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text(row.title).font(.title3.weight(.semibold)).padding(.horizontal, 80)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text(row.title).font(.headline).padding(.horizontal, 80)
                         ScrollView(.horizontal) {
-                            LazyHStack(alignment: .top, spacing: 40) {
+                            LazyHStack(alignment: .top, spacing: 36) {
                                 ForEach(row.cards) { card in
                                     MediaCardView(card: card, style: row.spec.style, seasonPosters: row.spec.seasonPosters,
                                                   focus: $focused, focusKey: row.id + "|" + card.id) { open(card) }
                                 }
                             }
                             .padding(.horizontal, 80)
-                            .padding(.vertical, 24)
+                            .padding(.vertical, 20)
                         }
                         .scrollClipDisabled()
                     }
                 }
             }
-            .padding(.vertical, 40)
+            .padding(.bottom, 60)
         }
     }
 
-    /// The focused title's background, fading into the page.
+    /// The hero's words and buttons, over the background; the first row starts just under it.
+    private func heroDetails(_ card: MediaCard) -> some View {
+        let item = card.item
+        return VStack(alignment: .leading, spacing: 18) {
+            Spacer(minLength: 0)
+            if let logo = card.logo {
+                TitleLogo(path: logo, title: item.isEpisode ? item.seriesTitle ?? item.title : item.title)
+                    .frame(maxWidth: 560, maxHeight: 180, alignment: .leading)
+            } else {
+                Text(item.isEpisode ? item.seriesTitle ?? item.title : item.title).font(.system(size: 64, weight: .bold)).lineLimit(2)
+            }
+            Text(heroMeta(item)).font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
+            if let overview = item.overview, !overview.isEmpty {
+                Text(overview).font(.callout).foregroundStyle(.white.opacity(0.75)).lineLimit(3).frame(maxWidth: 760, alignment: .leading)
+            }
+            HStack(spacing: 20) {
+                Button { play(card) } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "play.fill")
+                        if let progress = card.progress, let left = card.minutesLeft {
+                            ProgressBar(fraction: progress).frame(width: 90)
+                            Text(L("card.minutes_short", left))
+                        } else {
+                            Text(L("details.play"))
+                        }
+                    }
+                }
+                .arcGlassButton(prominent: true)
+                .focused($focused, equals: "hero|play")
+                if item.kind == "movie" || item.isSeries {
+                    Button { toggleWatchlist(item) } label: {
+                        Label(item.userData?.watchlisted == true ? L("actions.watchlist_remove") : L("actions.watchlist_add"),
+                              systemImage: item.userData?.watchlisted == true ? "bookmark.fill" : "bookmark")
+                    }
+                    .roundIconButton()
+                    .focused($focused, equals: "hero|watchlist")
+                }
+                Button { openRoute(.item(pageItem(item))) } label: {
+                    Label(L("home.more_info"), systemImage: "info.circle")
+                }
+                .roundIconButton()
+                .focused($focused, equals: "hero|info")
+            }
+            .padding(.top, 8)
+        }
+        .frame(height: 620, alignment: .bottomLeading)
+        .padding(.horizontal, 80)
+        .focusSection()
+    }
+
+    private func heroMeta(_ item: Item) -> String {
+        var parts: [String] = []
+        if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber { parts.append(L("card.episode", s, e, item.title)) }
+        if let year = item.year { parts.append(String(year)) }
+        if let rating = item.contentRating, !rating.isEmpty { parts.append(rating) }
+        parts += item.genres.prefix(3)
+        return parts.joined(separator: " · ")
+    }
+
+    /// The focused title's background across the whole screen, darkened at the left and bottom
+    /// so the hero's words and the rows read over it.
     private var backdrop: some View {
-        let art = focusedCard?.backdrop
+        let art = hero?.backdrop
         return ArtworkImage(path: art)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .opacity(art == nil ? 0 : 0.45)
-            .overlay(LinearGradient(colors: [ArcColor.background.opacity(0.2), ArcColor.background], startPoint: .top, endPoint: .bottom))
+            .opacity(art == nil ? 0 : 1)
+            .overlay(LinearGradient(stops: [.init(color: ArcColor.background.opacity(0.85), location: 0), .init(color: .clear, location: 0.65)],
+                                    startPoint: .leading, endPoint: .trailing))
+            .overlay(LinearGradient(stops: [.init(color: .clear, location: 0.35), .init(color: ArcColor.background.opacity(0.75), location: 0.7),
+                                            .init(color: ArcColor.background, location: 1)], startPoint: .top, endPoint: .bottom))
             .ignoresSafeArea()
-            .animation(.easeInOut(duration: 0.4), value: art)
+            .animation(.easeInOut(duration: 0.5), value: art)
+    }
+
+    /// The page Info opens: an episode's show, else the title itself.
+    private func pageItem(_ item: Item) -> Item {
+        guard item.isEpisode, let show = item.parentId else { return item }
+        return Item(id: show, kind: "series", title: item.seriesTitle ?? item.title)
+    }
+
+    private func play(_ card: MediaCard) {
+        let item = card.item
+        if item.playable {
+            browse.play(PlayRequest(item: item, startMs: item.resumeMs))
+        } else {
+            openRoute(.item(item))
+        }
+    }
+
+    private func toggleWatchlist(_ item: Item) {
+        guard let api = app.api else { return }
+        let on = item.userData?.watchlisted != true
+        Task {
+            do {
+                try await api.setWatchlisted(item.id, on)
+                browse.changed()
+            } catch {
+                ArcLogApp.warn("Watchlist change failed: \(type(of: error))")
+            }
+        }
     }
 
     private var focusedCard: MediaCard? {
@@ -175,7 +261,7 @@ struct HomeView: View {
         VStack(spacing: 20) {
             Text(title).font(.title3.weight(.semibold))
             Text(body).foregroundStyle(ArcColor.muted).multilineTextAlignment(.center).frame(maxWidth: 900)
-            if retry { Button(L("common.retry")) { Task { await reload() } } }
+            if retry { Button(L("common.retry")) { Task { await reload() } }.arcGlassButton() }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
