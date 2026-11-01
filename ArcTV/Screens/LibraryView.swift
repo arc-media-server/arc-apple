@@ -1,17 +1,19 @@
 import ArcKit
 import SwiftUI
 
-/// A library: all its titles as a poster grid, with the web's sorts and filters (genre, decade,
-/// resolution, unwatched), or its collections, or (Other videos) its folders.
+/// A library: its Recommended rows under a hero (first, as Plex and Plozz open a library), all its
+/// titles as a poster grid with the web's sorts and filters (genre, decade, resolution,
+/// unwatched), its collections, or (Other videos, which have no Recommended) its folders.
 struct LibraryView: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     let library: Library
 
-    enum Show: Hashable { case titles, collections, folders }
+    enum Show: Hashable { case recommended, titles, collections, folders }
 
-    @State private var show = Show.titles
+    @State private var show: Show
+    @State private var recommended: [LoadedRow] = []
     @State private var query = LibraryQuery()
     @State private var items: [Item] = []
     @State private var total = 0
@@ -25,7 +27,48 @@ struct LibraryView: View {
     private static let page = 60
     private var isVideos: Bool { library.kind == "videos" }
 
+    init(library: Library) {
+        self.library = library
+        _show = State(initialValue: library.kind == "videos" ? .titles : .recommended)
+    }
+
     var body: some View {
+        Group {
+            if show == .recommended {
+                recommendedPage
+            } else {
+                browsePage
+            }
+        }
+        .task(id: Reload(show: show, query: query, changes: browse.changes)) { await reload() }
+        .task { await loadFacets() }
+    }
+
+    /// Recommended: the hero and rows, as Home, with the pill bar above.
+    @ViewBuilder private var recommendedPage: some View {
+        if loading {
+            VStack(alignment: .leading) { header; Spacer() }.padding(.horizontal, 80).padding(.vertical, 40)
+                .overlay { ProgressView() }
+        } else if let problem {
+            VStack(alignment: .leading) {
+                header
+                RowsMessage(title: problem, message: "") { Task { await reload() } }
+            }
+            .padding(.horizontal, 80).padding(.vertical, 40)
+        } else if recommended.isEmpty {
+            VStack(alignment: .leading) {
+                header
+                RowsMessage(title: L("library.recommended_empty_title"), message: L("library.recommended_empty"), retry: nil)
+            }
+            .padding(.horizontal, 80).padding(.vertical, 40)
+        } else {
+            HeroRows(rows: recommended) {
+                header.padding(.horizontal, 80).padding(.top, 40)
+            }
+        }
+    }
+
+    private var browsePage: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 40) {
                 header
@@ -44,8 +87,6 @@ struct LibraryView: View {
             .padding(.horizontal, 80)
             .padding(.vertical, 40)
         }
-        .task(id: Reload(show: show, query: query, changes: browse.changes)) { await reload() }
-        .task { await loadFacets() }
     }
 
     /// What the page reloads for.
@@ -57,7 +98,6 @@ struct LibraryView: View {
 
     private var header: some View {
         HStack(alignment: .center, spacing: 24) {
-            Text(library.name).font(.title2.weight(.semibold))
             showTabs
             Spacer()
             if show == .titles {
@@ -71,11 +111,12 @@ struct LibraryView: View {
         .focusSection()
     }
 
-    /// Titles, Collections and (Other videos) Folders as pills in one glass capsule, as the
-    /// Android app's library header.
+    /// Recommended, Browse, Collections and (Other videos) Folders as pills in one glass capsule,
+    /// as Plozz's and the Android app's library header. The sidebar says which library it is.
     private var showTabs: some View {
         HStack(spacing: 8) {
-            showTab(L("library.titles"), .titles)
+            if !isVideos { showTab(L("library.recommended"), .recommended) }
+            showTab(L("library.browse"), .titles)
             showTab(L("library.collections"), .collections)
             if isVideos { showTab(L("library.folders"), .folders) }
         }
@@ -172,6 +213,16 @@ struct LibraryView: View {
         problem = nil
         let started = Date()
         switch show {
+        case .recommended:
+            let (answer, failed) = await loadPage(app, "library recommended") { try await $0.recommended(libraryId: library.id) }
+            if let answer {
+                recommended = answer.rows.map { row in
+                    LoadedRow(id: row.id, title: rowTitle(row), style: rowStyle(row),
+                              cards: row.items.map { MediaCard(item: $0) })
+                }.filter { !$0.cards.isEmpty }
+                ArcLogApp.debug("library \(library.id): \(recommended.count) recommended rows in \(Int(Date().timeIntervalSince(started) * 1000)) ms")
+            }
+            problem = failed
         case .titles:
             let params = query.parameters(library: library, offset: 0, limit: Self.page)
             let (page, failed) = await loadPage(app, "library") { try await $0.items(params) }
@@ -212,6 +263,20 @@ struct LibraryView: View {
     private func loadFacets() async {
         let (answer, _) = await loadPage(app, "library filters") { try await $0.facets(libraryId: library.id) }
         facets = answer ?? facets
+    }
+
+    private func rowTitle(_ row: RecommendedRow) -> String {
+        switch recommendedTitle(row, libraryName: library.name, libraryKind: library.kind) {
+        case .key(let key, let name?): return L(key, name)
+        case .key(let key, nil): return L(key)
+        case .server(let title): return title
+        }
+    }
+
+    /// The shared layout's look, else posters, with wide pictures for episodes and what's in progress.
+    private func rowStyle(_ row: RecommendedRow) -> CardStyle {
+        if let saved = cardStyle(saved: row.style) { return saved }
+        return row.type == "continue" || (row.type == "recently_watched" && library.kind == "shows") ? .thumb : .poster
     }
 
     private func sortName(_ sort: LibrarySort) -> String {
