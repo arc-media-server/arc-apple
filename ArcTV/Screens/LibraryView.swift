@@ -34,7 +34,7 @@ struct LibraryView: View {
                 } else if let problem {
                     VStack(spacing: 20) {
                         Text(problem).foregroundStyle(ArcColor.error)
-                        Button(L("common.retry")) { Task { await reload() } }
+                        Button(L("common.retry")) { Task { await reload() } }.arcGlassButton()
                     }
                     .frame(maxWidth: .infinity, minHeight: 400)
                 } else {
@@ -56,26 +56,39 @@ struct LibraryView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 32) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(library.name).font(.title2.weight(.semibold))
-                if show == .titles && !loading && problem == nil {
+        HStack(alignment: .center, spacing: 24) {
+            Text(library.name).font(.title2.weight(.semibold))
+            showTabs
+            Spacer()
+            if show == .titles {
+                if !loading && problem == nil {
                     Text(L(query.filtered ? "library.count_filtered" : "library.count", total)).font(.callout).foregroundStyle(ArcColor.muted)
                 }
-            }
-            Spacer()
-            Picker(L("library.show"), selection: $show) {
-                Text(L("library.titles")).tag(Show.titles)
-                Text(L("library.collections")).tag(Show.collections)
-                if isVideos { Text(L("library.folders")).tag(Show.folders) }
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: isVideos ? 720 : 500)
-            if show == .titles {
-                sortMenu
-                filterMenu
+                sortMenu.arcGlassButton().buttonBorderShape(.capsule)
+                filterMenu.arcGlassButton().buttonBorderShape(.capsule)
             }
         }
+        .focusSection()
+    }
+
+    /// Titles, Collections and (Other videos) Folders as pills in one glass capsule, as the
+    /// Android app's library header.
+    private var showTabs: some View {
+        HStack(spacing: 8) {
+            showTab(L("library.titles"), .titles)
+            showTab(L("library.collections"), .collections)
+            if isVideos { showTab(L("library.folders"), .folders) }
+        }
+        .padding(8)
+        .arcGlassPanel(cornerRadius: 44)
+        .focusSection()
+    }
+
+    private func showTab(_ title: String, _ value: Show) -> some View {
+        Button { show = value } label: { Text(title).padding(.horizontal, 8) }
+            .arcGlassButton(prominent: show == value)
+            .buttonBorderShape(.capsule)
+            .accessibilityAddTraits(show == value ? .isSelected : [])
     }
 
     private var sortMenu: some View {
