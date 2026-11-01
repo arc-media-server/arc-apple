@@ -87,6 +87,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.json(200, dict(answers["GET me/prefs"]["body"], **(body or {})))
         if method in ("PUT", "DELETE") or (method == "POST" and (path.endswith("/ping") or path == "auth/logout")):
             return self.send(204, b"")
+        # Subtitle lines for any track: one every two seconds.
+        if method == "GET" and len(parts) == 4 and parts[0] == "items" and parts[2] == "subtitles":
+            return self.json(200, {"track": {"id": parts[3]}, "cues": [{"start_ms": i * 2000, "end_ms": i * 2000 + 1800, "text": f"Stand-in subtitles, line {i + 1}"} for i in range(30)]})
         k = key(method, path, query)
         if method == "POST" and path == "auth/profile" and body:
             k += "#" + str(body.get("id"))
@@ -95,6 +98,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             a = next((v for kk, v in answers.items() if kk.startswith("GET items?")), None)
         if a is None and method == "GET" and path == "search":
             a = {"status": 200, "body": {"movies": [], "shows": [], "episodes": [], "collections": [], "people": []}}
+        if a is None and method == "GET" and parts[-1] == "next":
+            return self.send(204, b"")
         if a is None:
             return self.json(404, {"error": "the stand-in has no answer for " + k})
         doc = a["body"]
@@ -102,6 +107,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             # Every title plays the sample clip, directly.
             doc = dict(doc, method="direct", hls=False, url=f"/api/items/{parts[1]}/stream", reasons=[], offset_ms=0, duration_ms=12000)
             doc.pop("session_id", None)
+            # Something to show the player's Skip Intro and Subtitles with: the clip's first 9
+            # seconds are an "intro", and every title has a stand-in subtitle track.
+            doc["markers"] = [{"kind": "intro", "start_ms": 0, "end_ms": 9000}]
+            doc["subtitle_tracks"] = (doc.get("subtitle_tracks") or []) + [{"id": "standin", "language": "eng", "title": "Stand-in", "codec": "subrip"}]
         return self.json(a["status"], doc)
 
     def media(self):

@@ -3,44 +3,56 @@ import SwiftUI
 
 /// The player: the picture, a spinner while it waits, and Arc's own controls (title, timeline,
 /// times). Play/Pause and the touch surface's click toggle playing, left and right skip 10
-/// seconds, and Back hides the controls or closes the player.
+/// seconds, down opens Subtitles and Audio, and Back closes those, hides the controls or closes
+/// the player. Skip Intro and Up Next appear as Plex's do, with the focus on them.
 struct PlayerScreen: View {
     @Environment(AppModel.self) private var app
+    @Environment(Browse.self) private var browse
     @Environment(\.dismiss) private var dismiss
     let request: PlayRequest
 
     @State private var model: PlayerModel?
     @State private var controls = true
+    @State private var options = false
     @State private var hideTask: Task<Void, Never>?
-    @FocusState private var focused: Bool
+    /// Seconds left before the next episode starts (Auto-Play); nil when not counting.
+    @State private var countdown: Int?
+    @State private var upNextDismissed = false
+    @FocusState private var focus: PlayerFocus?
+
+    enum PlayerFocus: Hashable { case surface, skip, upNext, option(String) }
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
             if let model {
                 EngineSurface(engine: model.engine).ignoresSafeArea()
+                if let caption = model.caption, model.subtitle?.image != true {
+                    SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls || options)
+                }
                 if let problem = model.problem {
                     ProblemPane(message: problem, retry: { model.retry() }, close: { dismiss() })
                 } else {
+                    // The surface takes the remote while nothing else has the focus.
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .focusable(!options)
+                        .focused($focus, equals: .surface)
+                        .onMoveCommand { move($0) }
+                        .onTapGesture { model.togglePlay(); showControls() }
                     if model.loading || model.waiting { ProgressView().scaleEffect(1.6) }
-                    PlayerControls(model: model).opacity(controls ? 1 : 0).animation(.easeInOut(duration: 0.25), value: controls)
+                    PlayerControls(model: model).opacity(controls && !options ? 1 : 0).animation(.easeInOut(duration: 0.25), value: controls)
+                    corner(model)
+                    if options { optionsPanel(model) }
                 }
             }
         }
-        .focusable(model?.problem == nil)
-        .focused($focused)
-        .onMoveCommand { direction in
-            switch direction {
-            case .left: model?.seek(by: -10_000)
-            case .right: model?.seek(by: 10_000)
-            default: break
-            }
-            showControls()
-        }
         .onPlayPauseCommand { model?.togglePlay(); showControls() }
-        .onTapGesture { model?.togglePlay(); showControls() }
         .onExitCommand {
-            if controls && model?.playing == true {
+            if options {
+                options = false
+                focus = .surface
+            } else if controls && model?.playing == true {
                 controls = false
             } else {
                 dismiss()
@@ -51,14 +63,134 @@ struct PlayerScreen: View {
             let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: AVPlayerEngine()) { app.tokenRefused() }
             model = m
             m.start()
-            focused = true
+            focus = .surface
             showControls()
         }
         .onDisappear {
             hideTask?.cancel()
             model?.close()
         }
-        .onChange(of: model?.ended ?? false) { _, ended in if ended { dismiss() } }
+        .onChange(of: model?.ended ?? false) { _, ended in
+            guard ended else { return }
+            if let next = model?.next, model?.prefs?.autoPlay != false, !upNextDismissed { playNext(next) } else { dismiss() }
+        }
+        // Skip Intro takes the focus when it appears, so Select skips (as Plex).
+        .onChange(of: model?.marker?.startMs) { _, now in
+            if now != nil, !options { focus = model?.marker?.kind == "credits" && model?.next != nil ? .upNext : .skip }
+            else if focus == .skip { focus = .surface }
+        }
+        .onChange(of: model?.upNextDue ?? false) { _, due in
+            guard due, !upNextDismissed, !options else { return }
+            focus = .upNext
+            if model?.prefs?.autoPlay != false { startCountdown() }
+        }
+    }
+
+    private func move(_ direction: MoveCommandDirection) {
+        switch direction {
+        case .left: model?.seek(by: -10_000)
+        case .right: model?.seek(by: 10_000)
+        case .down:
+            if let model, !model.subtitleTracks.isEmpty || model.audioTracks.count > 1 {
+                options = true
+                focus = .option(model.subtitle.map { "s:" + $0.id } ?? "s:off")
+            }
+        default: break
+        }
+        showControls()
+    }
+
+    /// Skip Intro / Skip Credits, or the Up Next card.
+    @ViewBuilder private func corner(_ model: PlayerModel) -> some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                if model.upNextDue, !upNextDismissed, let next = model.next {
+                    UpNextCard(next: next, countdown: countdown, focus: $focus, play: { playNext(next) }, dismiss: {
+                        upNextDismissed = true
+                        countdown = nil
+                        focus = .surface
+                    })
+                } else if let marker = model.marker, marker.kind != "credits" || model.next == nil {
+                    Button { model.skipMarker(); focus = .surface } label: {
+                        Text(L(marker.kind == "credits" ? "player.skip_credits" : marker.kind == "recap" ? "player.skip_recap" : "player.skip_intro"))
+                            .font(.headline)
+                    }
+                    .focused($focus, equals: .skip)
+                }
+            }
+        }
+        .padding(.horizontal, 90)
+        .padding(.bottom, controls ? 220 : 80)
+        .animation(.easeInOut(duration: 0.25), value: controls)
+    }
+
+    /// Subtitles and Audio, from swiping down, as the web player's settings.
+    private func optionsPanel(_ model: PlayerModel) -> some View {
+        VStack(alignment: .leading, spacing: 28) {
+            Spacer()
+            if !model.subtitleTracks.isEmpty {
+                optionRow(L("player.subtitles")) {
+                    optionButton(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
+                    ForEach(model.subtitleTracks) { t in
+                        optionButton(trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
+                    }
+                }
+            }
+            if model.audioTracks.count > 1 {
+                optionRow(L("player.audio")) {
+                    ForEach(model.audioTracks) { a in
+                        optionButton(audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 90)
+        .padding(.bottom, 60)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+        .background(alignment: .bottom) {
+            LinearGradient(colors: [.clear, .black.opacity(0.9)], startPoint: .top, endPoint: .bottom).frame(height: 520).ignoresSafeArea()
+        }
+    }
+
+    private func optionRow<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title).font(.headline).foregroundStyle(ArcColor.muted)
+            ScrollView(.horizontal) {
+                HStack(spacing: 24) { content() }.padding(.vertical, 16)
+            }
+            .scrollClipDisabled()
+        }
+        .focusSection()
+    }
+
+    private func optionButton(_ title: String, selected: Bool, key: String, _ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark").opacity(selected ? 1 : 0)
+                Text(title)
+            }
+        }
+        .focused($focus, equals: .option(key))
+    }
+
+    private func playNext(_ next: Item) {
+        countdown = nil
+        ArcLogApp.info("playing the next episode")
+        browse.play(PlayRequest(item: next, startMs: next.resumeMs))
+    }
+
+    private func startCountdown() {
+        countdown = 10
+        Task { @MainActor in
+            while let left = countdown, left > 0 {
+                try? await Task.sleep(for: .seconds(1))
+                guard countdown != nil, !upNextDismissed else { return }
+                countdown = left - 1
+            }
+            if countdown == 0, let next = model?.next { playNext(next) }
+        }
     }
 
     private func showControls() {
@@ -68,6 +200,111 @@ struct PlayerScreen: View {
             try? await Task.sleep(for: .seconds(5))
             if !Task.isCancelled && model?.playing == true { controls = false }
         }
+    }
+
+    private func trackName(_ t: SubtitleTrack) -> String {
+        var parts = [languageName(t.language) ?? t.title ?? L("player.unknown_language")]
+        if let title = t.title, !title.isEmpty, parts.first != title { parts.append(title) }
+        if t.forced { parts.append(L("player.forced")) }
+        if t.hearingImpaired { parts.append(L("player.sdh")) }
+        return parts.joined(separator: " · ")
+    }
+
+    private func audioName(_ a: AudioTrack) -> String {
+        var parts = [languageName(a.language) ?? a.title ?? L("player.unknown_language")]
+        if !a.codec.isEmpty { parts.append(a.codec.uppercased()) }
+        switch a.channels {
+        case 0: break
+        case 1: parts.append(L("player.mono"))
+        case 2: parts.append(L("player.stereo"))
+        default: parts.append("\(a.channels - 1).1")
+        }
+        return parts.joined(separator: " · ")
+    }
+
+    private func languageName(_ code: String?) -> String? {
+        guard let code, !code.isEmpty, code != "und" else { return nil }
+        return Locale.current.localizedString(forLanguageCode: code) ?? code
+    }
+}
+
+/// The next episode near the end: its picture and name, Play Now and the countdown.
+private struct UpNextCard: View {
+    let next: Item
+    let countdown: Int?
+    var focus: FocusState<PlayerScreen.PlayerFocus?>.Binding
+    let play: () -> Void
+    let dismiss: () -> Void
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 28) {
+            ArtworkImage(path: next.images?.primary).frame(width: 320, height: 180).clipShape(RoundedRectangle(cornerRadius: 12))
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L("player.up_next")).font(.caption).foregroundStyle(ArcColor.muted)
+                Text(L("card.episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0, next.title)).font(.headline).lineLimit(2)
+                HStack(spacing: 20) {
+                    Button(action: play) {
+                        Label(countdown.map { L("player.play_in", $0) } ?? L("player.play_now"), systemImage: "play.fill")
+                    }
+                    .focused(focus, equals: .upNext)
+                    Button(L("common.cancel"), action: dismiss)
+                }
+            }
+            .frame(maxWidth: 520, alignment: .leading)
+        }
+        .padding(28)
+        .background(.black.opacity(0.75), in: RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+/// A line of subtitles in the profile's style (size, colour, background, top or bottom).
+private struct SubtitleText: View {
+    let text: String
+    let style: SubtitleStyle?
+    /// Lifted above the controls while they show.
+    let raised: Bool
+
+    var body: some View {
+        let top = style?.position == "top"
+        VStack {
+            if !top { Spacer() }
+            Text(plain)
+                .font(.system(size: size, weight: .semibold))
+                .foregroundStyle(style?.color == "yellow" ? Color(hex: 0xFFE14D) : Color.white)
+                .multilineTextAlignment(.center)
+                .shadow(color: .black.opacity(style?.background == "none" ? 0.9 : 0.5), radius: style?.background == "none" ? 3 : 1)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 6)
+                .background(background)
+            if top { Spacer() }
+        }
+        .padding(.horizontal, 120)
+        .padding(top ? .top : .bottom, top ? 70 : (raised ? 260 : 80))
+        .animation(.easeInOut(duration: 0.25), value: raised)
+        .allowsHitTesting(false)
+    }
+
+    private var size: CGFloat {
+        switch style?.size {
+        case "small": return 36
+        case "large": return 58
+        case "huge": return 72
+        default: return 46
+        }
+    }
+
+    @ViewBuilder private var background: some View {
+        switch style?.background {
+        case "solid": RoundedRectangle(cornerRadius: 6).fill(.black)
+        case "none": Color.clear
+        // The usual look (as the web's): a dark box behind the line.
+        default: RoundedRectangle(cornerRadius: 6).fill(.black.opacity(0.65))
+        }
+    }
+
+    /// The text without its <i>, <b> and <u> tags.
+    private var plain: String {
+        text.replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
     }
 }
 

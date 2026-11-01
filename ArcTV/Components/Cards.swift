@@ -87,6 +87,11 @@ struct TitleActions: View {
             Button { browse.play(PlayRequest(item: item, startMs: item.resumeMs)) } label: {
                 Label(item.resumeMs > 0 ? L("details.resume") : L("details.play"), systemImage: "play.fill")
             }
+            if item.resumeMs > 0 {
+                Button { browse.play(PlayRequest(item: item, startMs: 0)) } label: {
+                    Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise")
+                }
+            }
         }
         if item.playable || item.isSeries {
             Button { act("watched") { try await $0.setPlayed(item.id, !item.watched) } } label: {
