@@ -128,10 +128,16 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(2)
         shot("17a-library-recommended-rows")
-        press(.up, 4)
+        // Up to the pill bar (it floats over the hero), then right to Browse.
+        let browse = app.buttons["Browse"]
+        for _ in 0..<5 where !app.buttons["Recommended"].hasFocus && !browse.hasFocus {
+            press(.up)
+        }
+        for _ in 0..<2 where !browse.hasFocus {
+            press(.right)
+        }
         pause(1)
-        press(.right)
-        pause(1)
+        shot("17b-library-pills")
         remote.press(.select)
         pause(3)
         shot("17-library-header")

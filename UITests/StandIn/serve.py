@@ -104,7 +104,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                            if kk.startswith("GET items?") and f"library_id={lib}&" in kk and "sort=added" in kk), [])
             if not titles:
                 titles = next((v["body"].get("items", []) for kk, v in answers.items() if kk.startswith("GET items?") and f"parent_id=" not in kk), [])
-            cont = answers.get("GET home/continue?with_up_next=1", {}).get("body") or []
+            kinds = {t.get("kind") for t in titles}
+            kinds |= {"episode"} if "series" in kinds else set()
+            cont = [c for c in answers.get("GET home/continue?with_up_next=1", {}).get("body") or [] if c.get("kind") in kinds]
             rows = [{"id": "continue", "type": "continue", "title": "Continue Watching", "items": cont},
                     {"id": "added", "type": "recently_added", "title": "Recently Added", "items": titles},
                     {"id": "because", "type": "because_you_watched", "title": "Because you watched", "name": titles[0]["title"] if titles else "", "items": list(reversed(titles))},
