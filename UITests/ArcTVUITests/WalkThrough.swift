@@ -117,10 +117,29 @@ final class WalkThrough: XCTestCase {
             shot(String(format: "16-tab-%02d", i))
         }
 
-        // A library: its sort and filters, then the grid, and holding Select on a title.
+        // A library opens on Recommended: a hero and rows, the pill bar above. Then up to the pill
+        // bar and Browse: sort and filters, the grid, and holding Select on a title.
         // (The sidebar only highlights as the focus moves; Select opens the place and shuts it.)
         press(.up, 3)
         pause(1)
+        remote.press(.select)
+        pause(4)
+        shot("17-library-recommended")
+        press(.down)
+        pause(2)
+        shot("17a-library-recommended-rows")
+        // Up to the pill bar (it floats over the hero), then right to Browse.
+        let browse = app.buttons["Browse"]
+        for _ in 0..<5 where !app.buttons["Recommended"].hasFocus && !browse.hasFocus && !app.buttons["Collections"].hasFocus {
+            press(.up)
+        }
+        // Whichever pill Up lands on: right to the last (Collections), then one back.
+        if !browse.hasFocus {
+            press(.right, 3)
+            press(.left)
+        }
+        pause(1)
+        shot("17b-library-pills")
         remote.press(.select)
         pause(3)
         shot("17-library-header")
