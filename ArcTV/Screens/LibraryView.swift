@@ -184,6 +184,8 @@ struct LibraryView: View {
 
     @ViewBuilder private var content: some View {
         switch show {
+        case .recommended:
+            EmptyView() // shown by recommendedPage
         case .titles:
             if items.isEmpty {
                 Text(query.filtered ? L("library.nothing_matches") : L("library.empty")).foregroundStyle(ArcColor.muted)

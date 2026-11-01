@@ -107,7 +107,9 @@ jobs:
             git -C shots-branch rm -rfq .
           fi
           mkdir -p "shots-branch/$dir"
-          cp small/* "shots-branch/$dir/" 2>/dev/null || { echo "nothing to share"; exit 0; }
+          # Always leave a note, so a run that never reached the simulator (a build error) shows too.
+          ls small/*.jpg >/dev/null 2>&1 || echo "No screenshots: the build or the walk-through didn't start. See the run's log." > small/no-screenshots.txt
+          cp small/* "shots-branch/$dir/"
           git -C shots-branch add runs
           git -C shots-branch commit -qm "Screenshots for run ${{ github.run_id }} (${{ github.sha }})"
           git -C shots-branch push origin ci-screenshots
