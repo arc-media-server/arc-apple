@@ -109,10 +109,11 @@ final class WalkThrough: XCTestCase {
         }
 
         // A library: its sort and filters, then the grid, and holding Select on a title.
+        // (On tvOS 26 the sidebar only highlights as the focus moves; Select opens the place.)
         press(.up, 3)
-        pause(3)
-        press(.right)
         pause(1)
+        remote.press(.select)
+        pause(3)
         shot("17-library-header")
         press(.down)
         pause(2)
@@ -126,11 +127,12 @@ final class WalkThrough: XCTestCase {
         // Search: type a few letters; results follow the typing.
         remote.press(.menu)
         pause(1)
+        press(.left, 3)
+        pause(1)
         press(.up, 10)
+        remote.press(.select)
         pause(2)
         shot("20-search")
-        press(.right)
-        pause(1)
         // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
         // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
         let field = app.searchFields.firstMatch
