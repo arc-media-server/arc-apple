@@ -97,6 +97,8 @@ for i in sorted(ids):
         people.add(c["person_id"])
     if item.get("kind") in ("movie", "series"):
         call("GET", f"items/{i}/similar")
+    if item.get("kind") == "episode":
+        call("GET", f"items/{i}/next")
     if item.get("kind") in ("movie", "episode"):
         call("POST", f"items/{i}/playback", body={"caps": caps, "start_ms": 0})
 

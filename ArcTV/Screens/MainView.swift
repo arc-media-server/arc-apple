@@ -116,7 +116,7 @@ struct MainView: View {
         .environment(browse)
         .fullScreenCover(item: Binding(get: { browse.playing }, set: { browse.playing = $0 }),
                          onDismiss: { browse.changed() }) { request in
-            PlayerScreen(request: request)
+            PlayerScreen(request: request).environment(browse)
         }
         .task { await loadTabs() }
     }

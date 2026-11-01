@@ -139,3 +139,18 @@
 
 "player.failed_title" = "This can't play right now";
 "player.failed" = "Arc couldn't start this title. Try again, or check the Dashboard in Arc for why.";
+
+"player.subtitles" = "Subtitles";
+"player.audio" = "Audio";
+"player.off" = "Off";
+"player.forced" = "Forced";
+"player.sdh" = "SDH";
+"player.mono" = "Mono";
+"player.stereo" = "Stereo";
+"player.unknown_language" = "Unknown";
+"player.skip_intro" = "Skip Intro";
+"player.skip_recap" = "Skip Recap";
+"player.skip_credits" = "Skip Credits";
+"player.up_next" = "Up Next";
+"player.play_now" = "Play Now";
+"player.play_in" = "Playing in %d";
