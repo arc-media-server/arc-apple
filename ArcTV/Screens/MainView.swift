@@ -68,9 +68,9 @@ struct RouteView: View {
     }
 }
 
-/// After the profile is chosen: the tabs along the top (tvOS's own tab bar, as Plex's sidebar
-/// sources): Search, Home, the Watchlist and libraries in the profile's order (Arrange
-/// libraries on the web), Playlists and Settings. Back from a tab's first page shows the tabs.
+/// After the profile is chosen: the sidebar of places, as Apple's own tvOS apps and Plex have it
+/// (tvOS 18's adaptable sidebar): Search, Home, the Watchlist and libraries in the profile's order
+/// (Arrange libraries on the web), Playlists and Settings. Back from a page's top opens it.
 struct MainView: View {
     @Environment(AppModel.self) private var app
     @State private var browse = Browse()
@@ -78,41 +78,48 @@ struct MainView: View {
     @State private var watchlistAt = 0
     @State private var tab = "home"
 
-    private enum Tab: Hashable { case watchlist, library(Library) }
+    /// A place in the sidebar between Home and Playlists.
+    private struct Place: Hashable, Identifiable {
+        let id: String
+        let title: String
+        let icon: String
+        let library: Library?
+    }
 
-    private var middle: [Tab] {
-        var out = libraries.map { Tab.library($0) }
-        out.insert(.watchlist, at: min(max(watchlistAt, 0), out.count))
+    private var places: [Place] {
+        var out = libraries.map { lib in
+            Place(id: "library:\(lib.id)", title: lib.name,
+                  icon: lib.kind == "shows" ? "tv" : lib.kind == "videos" ? "video" : "film", library: lib)
+        }
+        out.insert(Place(id: "watchlist", title: L("tab.watchlist"), icon: "bookmark", library: nil), at: min(max(watchlistAt, 0), out.count))
         return out
     }
 
     var body: some View {
         TabView(selection: $tab) {
-            BrowseStack { SearchView() }
-                .tabItem { Label(L("tab.search"), systemImage: "magnifyingglass") }
-                .tag("search")
-            BrowseStack { HomeView() }
-                .tabItem { Text(L("tab.home")) }
-                .tag("home")
-            ForEach(middle, id: \.self) { entry in
-                switch entry {
-                case .watchlist:
-                    BrowseStack { WatchlistView() }
-                        .tabItem { Text(L("tab.watchlist")) }
-                        .tag("watchlist")
-                case .library(let library):
-                    BrowseStack { LibraryView(library: library) }
-                        .tabItem { Text(library.name) }
-                        .tag("library:\(library.id)")
+            Tab(L("tab.search"), systemImage: "magnifyingglass", value: "search", role: .search) {
+                BrowseStack { SearchView() }
+            }
+            Tab(L("tab.home"), systemImage: "house", value: "home") {
+                BrowseStack { HomeView() }
+            }
+            ForEach(places) { place in
+                Tab(place.title, systemImage: place.icon, value: place.id) {
+                    if let library = place.library {
+                        BrowseStack { LibraryView(library: library) }
+                    } else {
+                        BrowseStack { WatchlistView() }
+                    }
                 }
             }
-            BrowseStack { PlaylistsView() }
-                .tabItem { Text(L("tab.playlists")) }
-                .tag("playlists")
-            BrowseStack { SettingsView() }
-                .tabItem { Label(L("tab.settings"), systemImage: "gearshape") }
-                .tag("settings")
+            Tab(L("tab.playlists"), systemImage: "list.bullet.rectangle", value: "playlists") {
+                BrowseStack { PlaylistsView() }
+            }
+            Tab(L("tab.settings"), systemImage: "gearshape", value: "settings") {
+                BrowseStack { SettingsView() }
+            }
         }
+        .tabViewStyle(.sidebarAdaptable)
         .environment(browse)
         .fullScreenCover(item: Binding(get: { browse.playing }, set: { browse.playing = $0 }),
                          onDismiss: { browse.changed() }) { request in

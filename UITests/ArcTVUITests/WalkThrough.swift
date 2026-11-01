@@ -88,23 +88,23 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("14-title-page-rows")
 
-        // Back to Home, then up to the tabs, and along them: the Watchlist, each library,
-        // Playlists and Settings (the tab under the focus opens as the focus moves).
+        // Back to Home, then Back again opens the sidebar, and down it: the Watchlist, each
+        // library, Playlists and Settings (the place under the focus opens as the focus moves).
         remote.press(.menu)
         pause(2)
         remote.press(.menu)
         pause(2)
         shot("15-tabs")
         for i in 1...7 {
-            press(.right)
+            press(.down)
             pause(3)
             shot(String(format: "16-tab-%02d", i))
         }
 
         // A library: its sort and filters, then the grid, and holding Select on a title.
-        press(.left, 3)
+        press(.up, 3)
         pause(3)
-        press(.down)
+        press(.right)
         pause(1)
         shot("17-library-header")
         press(.down)
@@ -119,10 +119,10 @@ final class WalkThrough: XCTestCase {
         // Search: type a few letters; results follow the typing.
         remote.press(.menu)
         pause(1)
-        press(.left, 10)
+        press(.up, 10)
         pause(2)
         shot("20-search")
-        press(.down)
+        press(.right)
         pause(1)
         // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
         // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
