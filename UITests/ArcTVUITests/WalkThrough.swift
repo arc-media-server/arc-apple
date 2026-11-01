@@ -111,7 +111,7 @@ final class WalkThrough: XCTestCase {
         remote.press(.menu)
         pause(2)
         shot("15-tabs")
-        for i in 1...7 {
+        for i in 1...7 { // the last press finds the end of the sidebar and stays
             press(.down)
             pause(3)
             shot(String(format: "16-tab-%02d", i))
