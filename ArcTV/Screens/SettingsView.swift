@@ -39,6 +39,8 @@ struct SettingsView: View {
                             Text(L("settings.subtitles_always")).tag("always")
                             Text(L("settings.subtitles_manual")).tag("manual")
                         }
+                        // Its own list, as tvOS's Settings: the choices are too long side by side.
+                        .pickerStyle(.navigationLink)
                         if let problem { Text(problem).foregroundStyle(ArcColor.error) }
                     } else if let problem {
                         Text(problem).foregroundStyle(ArcColor.error)
