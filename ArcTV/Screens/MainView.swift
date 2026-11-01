@@ -39,16 +39,37 @@ extension EnvironmentValues {
     }
 }
 
-/// One tab's pages: its first page, then whatever is opened from it, Back going back up.
+/// Opens the sidebar (Back from the top of a place's first page, as tvOS apps do).
+struct OpenSidebar {
+    let action: () -> Void
+    func callAsFunction() { action() }
+}
+
+private struct OpenSidebarKey: EnvironmentKey {
+    static let defaultValue = OpenSidebar {}
+}
+
+extension EnvironmentValues {
+    var openSidebar: OpenSidebar {
+        get { self[OpenSidebarKey.self] }
+        set { self[OpenSidebarKey.self] = newValue }
+    }
+}
+
+/// One place's pages: its first page, then whatever is opened from it, Back going back up. Back on
+/// the first page opens the sidebar.
 struct BrowseStack<Root: View>: View {
+    @Environment(\.openSidebar) private var openSidebar
     @State private var path = NavigationPath()
     @ViewBuilder let root: () -> Root
 
     var body: some View {
         NavigationStack(path: $path) {
-            root().navigationDestination(for: Route.self) { route in
-                RouteView(route: route)
-            }
+            root()
+                .onExitCommand { openSidebar() }
+                .navigationDestination(for: Route.self) { route in
+                    RouteView(route: route)
+                }
         }
         .environment(\.openRoute, OpenRoute { path.append($0) })
     }
@@ -68,58 +89,73 @@ struct RouteView: View {
     }
 }
 
-/// After the profile is chosen: the sidebar of places, as Apple's own tvOS apps and Plex have it
-/// (tvOS 18's adaptable sidebar): Search, Home, the Watchlist and libraries in the profile's order
-/// (Arrange libraries on the web), Playlists and Settings. Back from a page's top opens it.
+/// After the profile is chosen: the places, in a sidebar down the left, as Plozz and Apple's own
+/// apps have one (owner, 1 November: Plozz's). Its icons always show, in the same places; moving
+/// left onto them opens it, its glass and the names fading in around them, and Select opens the
+/// place. The places: Search, Home, the Watchlist and libraries in the profile's order (Arrange
+/// libraries on the web), Playlists and Settings. Back from a place's first page opens the sidebar.
 struct MainView: View {
     @Environment(AppModel.self) private var app
     @State private var browse = Browse()
     @State private var libraries: [Library] = []
     @State private var watchlistAt = 0
     @State private var tab = "home"
+    /// The places opened so far: each keeps its pages while another is showing.
+    @State private var opened: Set<String> = ["home"]
+    @FocusState private var focused: String?
 
-    /// A place in the sidebar between Home and Playlists.
+    /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
         let id: String
         let title: String
         let icon: String
-        let library: Library?
+        var library: Library? = nil
     }
 
     private var places: [Place] {
-        var out = libraries.map { lib in
+        var middle = libraries.map { lib in
             Place(id: "library:\(lib.id)", title: lib.name,
                   icon: lib.kind == "shows" ? "tv" : lib.kind == "videos" ? "video" : "film", library: lib)
         }
-        out.insert(Place(id: "watchlist", title: L("tab.watchlist"), icon: "bookmark", library: nil), at: min(max(watchlistAt, 0), out.count))
-        return out
+        middle.insert(Place(id: "watchlist", title: L("tab.watchlist"), icon: "bookmark"), at: min(max(watchlistAt, 0), middle.count))
+        return [Place(id: "search", title: L("tab.search"), icon: "magnifyingglass"),
+                Place(id: "home", title: L("tab.home"), icon: "house")]
+            + middle
+            + [Place(id: "playlists", title: L("tab.playlists"), icon: "list.bullet.rectangle"),
+               Place(id: "settings", title: L("tab.settings"), icon: "gearshape")]
     }
 
+    private var sidebarOpen: Bool { focused != nil }
+
     var body: some View {
-        TabView(selection: $tab) {
-            Tab(L("tab.search"), systemImage: "magnifyingglass", value: "search", role: .search) {
-                BrowseStack { SearchView() }
-            }
-            Tab(L("tab.home"), systemImage: "house", value: "home") {
-                BrowseStack { HomeView() }
-            }
-            ForEach(places) { place in
-                Tab(place.title, systemImage: place.icon, value: place.id) {
-                    if let library = place.library {
-                        BrowseStack { LibraryView(library: library) }
-                    } else {
-                        BrowseStack { WatchlistView() }
-                    }
+        ZStack(alignment: .leading) {
+            ZStack {
+                ForEach(places.filter { opened.contains($0.id) }) { place in
+                    let showing = place.id == tab
+                    page(for: place)
+                        .opacity(showing ? 1 : 0)
+                        .disabled(!showing)
+                        .accessibilityHidden(!showing)
                 }
             }
-            Tab(L("tab.playlists"), systemImage: "list.bullet.rectangle", value: "playlists") {
-                BrowseStack { PlaylistsView() }
-            }
-            Tab(L("tab.settings"), systemImage: "gearshape", value: "settings") {
-                BrowseStack { SettingsView() }
-            }
+            .safeAreaPadding(.leading, Sidebar.collapsedWidth - 20)
+            .environment(\.openSidebar, OpenSidebar { focused = tab })
+
+            // The page dims behind the open sidebar, so its names read over any artwork.
+            LinearGradient(colors: [.black.opacity(0.75), .black.opacity(0)], startPoint: .leading, endPoint: .trailing)
+                .frame(width: 900)
+                .ignoresSafeArea()
+                .opacity(sidebarOpen ? 1 : 0)
+                .allowsHitTesting(false)
+
+            sidebar
         }
-        .tabViewStyle(.sidebarAdaptable)
+        .animation(.easeOut(duration: 0.25), value: sidebarOpen)
+        .onChange(of: focused) { old, new in
+            // Coming into the sidebar from a page starts on the place showing, wherever the focus
+            // came from.
+            if old == nil, let new, new != tab { focused = tab }
+        }
         .environment(browse)
         .fullScreenCover(item: Binding(get: { browse.playing }, set: { browse.playing = $0 }),
                          onDismiss: { browse.changed() }) { request in
@@ -128,6 +164,40 @@ struct MainView: View {
         .task { await loadTabs() }
     }
 
+    @ViewBuilder private func page(for place: Place) -> some View {
+        switch place.id {
+        case "search": BrowseStack { SearchView() }
+        case "home": BrowseStack { HomeView() }
+        case "watchlist": BrowseStack { WatchlistView() }
+        case "playlists": BrowseStack { PlaylistsView() }
+        case "settings": BrowseStack { SettingsView() }
+        default:
+            if let library = place.library { BrowseStack { LibraryView(library: library) } }
+        }
+    }
+
+    private var sidebar: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(places) { place in
+                Button {
+                    tab = place.id
+                    opened.insert(place.id)
+                    focused = nil
+                } label: {
+                    Sidebar.Row(icon: place.icon, title: place.title, current: place.id == tab, open: sidebarOpen)
+                }
+                .buttonStyle(Sidebar.RowStyle())
+                .focused($focused, equals: place.id)
+            }
+        }
+        .padding(Sidebar.inset)
+        .frame(width: sidebarOpen ? Sidebar.openWidth : Sidebar.collapsedWidth, alignment: .leading)
+        .arcGlassPanel(cornerRadius: 40)
+        .opacity(sidebarOpen ? 1 : 0.92)
+        .focusSection()
+        .padding(.leading, 28)
+        .ignoresSafeArea(edges: .leading)
+    }
     private func loadTabs() async {
         guard let api = app.api else { return }
         do {
@@ -142,6 +212,56 @@ struct MainView: View {
         } catch {
             // Home says when Arc can't be reached; the library tabs come back with the next launch.
             ArcLogApp.warn("libraries failed to load: \(type(of: error))")
+        }
+    }
+}
+
+/// The sidebar's measures and rows: an icon at a fixed place, its name fading in beside it when
+/// the sidebar opens; the focused row white with black, as Apple's sidebar.
+enum Sidebar {
+    static let inset: CGFloat = 12
+    static let icon: CGFloat = 64
+    static let collapsedWidth: CGFloat = icon + inset * 2
+    static let openWidth: CGFloat = 400
+
+    struct Row: View {
+        let icon: String
+        let title: String
+        let current: Bool
+        let open: Bool
+        @Environment(\.isFocused) private var isFocused
+
+        var body: some View {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 26, weight: current ? .semibold : .regular))
+                    .frame(width: Sidebar.icon, height: Sidebar.icon)
+                Text(title)
+                    .font(.system(size: 26, weight: current ? .semibold : .medium))
+                    .lineLimit(1)
+                    .opacity(open ? 1 : 0)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(isFocused ? Color.black : current ? Color.white : Color.white.opacity(0.6))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                Capsule().fill(.white).opacity(isFocused ? 1 : 0)
+            }
+            .background {
+                // The place showing, while the sidebar is shut: a faint disc behind its icon.
+                Circle().fill(.white.opacity(0.18)).frame(width: Sidebar.icon, height: Sidebar.icon)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .opacity(current && !open ? 1 : 0)
+            }
+            .contentShape(Capsule())
+        }
+    }
+
+    /// No lift or system highlight: the row draws its own.
+    struct RowStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .scaleEffect(configuration.isPressed ? 0.97 : 1)
         }
     }
 }

@@ -101,13 +101,11 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("14-title-page-rows")
 
-        // Back to Home (Back again takes Home to its top), then left opens the sidebar, and down
-        // it: the Watchlist, each library, Playlists and Settings (each opens as the focus moves).
+        // Back to Home, and Back again opens the sidebar (its icons stay where they are; the glass
+        // and the names fade in), then down it: the Watchlist, each library, Playlists and Settings.
         remote.press(.menu)
         pause(2)
         remote.press(.menu)
-        pause(2)
-        press(.left, 3)
         pause(2)
         shot("15-tabs")
         for i in 1...7 {
@@ -117,7 +115,7 @@ final class WalkThrough: XCTestCase {
         }
 
         // A library: its sort and filters, then the grid, and holding Select on a title.
-        // (On tvOS 26 the sidebar only highlights as the focus moves; Select opens the place.)
+        // (The sidebar only highlights as the focus moves; Select opens the place and shuts it.)
         press(.up, 3)
         pause(1)
         remote.press(.select)
@@ -132,10 +130,9 @@ final class WalkThrough: XCTestCase {
         remote.press(.menu)
         pause(1)
 
-        // Search: type a few letters; results follow the typing.
+        // Search, at the top of the sidebar (Back from the library opens it): type a few letters;
+        // results follow the typing.
         remote.press(.menu)
-        pause(1)
-        press(.left, 3)
         pause(1)
         press(.up, 10)
         remote.press(.select)
