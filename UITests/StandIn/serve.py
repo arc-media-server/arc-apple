@@ -10,6 +10,10 @@ import hashlib, http.server, json, os, struct, sys, urllib.parse, zlib
 here = os.path.dirname(os.path.abspath(__file__))
 answers = json.load(open(os.path.join(here, "fixtures", "answers.json")))
 sample = open(os.path.join(here, "fixtures", "sample.mp4"), "rb").read()
+# The recording's Continue Watching has nothing part-watched: put each title 28 minutes in, so
+# the cards' resume strip (play mark, progress, minutes left) shows.
+for _c in (answers.get("GET home/continue?with_up_next=1", {}).get("body") or []):
+    _c["user_data"] = dict(_c.get("user_data") or {}, position_ms=28 * 60_000)
 pngs = {}
 polls = [0]
 
@@ -141,6 +145,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
                                {"start_ms": 8000, "end_ms": 12000, "title": "Getaway"}]
             doc["source_kbps"] = 25000
         # Films get a trailer and a featurette (they play the sample clip through a cast link).
+        # Titles get a cast, a crew, a studio and a 4K Dolby Vision file with Atmos (made-up
+        # people), so the title page's badges, Starring line and cards have something to show.
+        if method == "GET" and len(parts) == 2 and parts[0] == "items" and a["status"] == 200 and doc.get("kind") in ("movie", "series"):
+            people = ["Ada Stone", "Ben Okafor", "Cleo Marsh", "Dev Patel-Ray", "Eli Novak"]
+            credits = [{"person_id": 900 + i, "name": n, "role": "actor", "character": f"Role {i + 1}"} for i, n in enumerate(people)]
+            credits += [{"person_id": 950, "name": "Fran Leigh", "role": "director"}, {"person_id": 951, "name": "Gus Hart", "role": "writer"}]
+            doc = dict(doc, credits=doc.get("credits") or credits, studio=doc.get("studio") or "Stand-in Pictures",
+                       tagline=doc.get("tagline") or "A stand-in tagline.")
+            if doc.get("kind") == "movie" and doc.get("files"):
+                f0 = dict(doc["files"][0], size=58_000_000_000, container="matroska",
+                          streams=[{"kind": "video", "codec": "hevc", "width": 3840, "height": 2160, "color_transfer": "smpte2084", "dolby_vision": True},
+                                   {"kind": "audio", "codec": "eac3", "profile": "Dolby Digital Plus + Dolby Atmos", "channels": 6, "is_default": True}])
+                doc["files"] = [f0] + doc["files"][1:]
         if method == "GET" and len(parts) == 2 and parts[0] == "items" and a["status"] == 200 and doc.get("kind") == "movie":
             doc = dict(doc, extras=[{"id": "e1" + parts[1][:6], "kind": "trailer", "title": "Official Trailer", "duration_ms": 12000, "stream_url": "/api/extras/e1/stream"},
                                     {"id": "e2" + parts[1][:6], "kind": "featurette", "title": "Making Of", "duration_ms": 12000, "stream_url": "/api/extras/e2/stream"}])
