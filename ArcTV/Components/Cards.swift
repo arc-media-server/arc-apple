@@ -34,7 +34,7 @@ struct MediaCardView: View {
     let action: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .center, spacing: 10) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
                     ArtworkImage(path: card.art(style, seasonPosters: seasonPosters))
@@ -46,7 +46,18 @@ struct MediaCardView: View {
                             .padding(20)
                     }
                     if let progress = card.progress {
-                        ProgressBar(fraction: progress).padding(12)
+                        if style == .poster {
+                            ProgressBar(fraction: progress).padding(12)
+                        } else {
+                            // Wide cards carry Plozz's resume strip on the art: play, how far, time left.
+                            if style == .thumb, let logo = card.logo {
+                                ArtworkImage(path: logo, contentMode: .fit)
+                                    .frame(width: style.size.width * 0.55, height: style.size.height * 0.3)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 20)
+                            }
+                            ResumeStrip(fraction: progress, minutesLeft: card.minutesLeft)
+                        }
                     }
                     if card.item.watched {
                         Image(systemName: "checkmark.circle.fill")
@@ -62,12 +73,13 @@ struct MediaCardView: View {
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
             .contextMenu { TitleActions(item: card.item) }
-            VStack(alignment: .leading, spacing: 2) {
+            // Names centred under the art, as Plozz's.
+            VStack(alignment: .center, spacing: 2) {
                 Text(card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title)
                     .font(.caption.weight(.semibold)).lineLimit(1)
                 if let sub = subtitle { Text(sub).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
-            .frame(width: style.size.width, alignment: .leading)
+            .frame(width: style.size.width, alignment: .center)
         }
     }
 
@@ -76,12 +88,45 @@ struct MediaCardView: View {
         if let season = card.seasonNumber, card.newEpisodes > 0 { return L("card.new_episodes", season, card.newEpisodes) }
         var parts: [String] = []
         if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber {
-            parts.append(style == .poster ? L("card.episode_code", s, e) : L("card.episode", s, e, item.title))
+            // A part-watched episode's card is short, as Plozz's: S8 · E6 (the strip has the time).
+            parts.append(style == .poster || card.progress != nil ? L("card.episode_code", s, e) : L("card.episode", s, e, item.title))
         } else if let year = item.year {
             parts.append(String(year))
         }
-        if let left = card.minutesLeft { parts.append(L("card.minutes_left", left)) }
+        if style == .poster, let left = card.minutesLeft { parts.append(L("card.minutes_left", left)) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+}
+
+/// A wide card's resume strip along the bottom of the art: a play mark, how far through and the
+/// minutes left, over a soft shade so it reads on any picture.
+struct ResumeStrip: View {
+    let fraction: Double
+    let minutesLeft: Int?
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "play.fill").font(.caption2)
+            ProgressBar(fraction: fraction).frame(width: 70)
+            if let minutesLeft { Text(L("card.minutes_short", minutesLeft)).font(.caption2.weight(.semibold)) }
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .top, endPoint: .bottom))
+    }
+}
+
+/// A content rating (PG-13, TV-14) or a file's quality (4K, DV HDR10) in an outlined box, as
+/// Plozz shows them.
+struct OutlinedBadge: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.caption2.weight(.bold))
+            .padding(.horizontal, 6).padding(.vertical, 1)
+            .overlay(RoundedRectangle(cornerRadius: 4).stroke(.white.opacity(0.85), lineWidth: 1.5))
     }
 }
 

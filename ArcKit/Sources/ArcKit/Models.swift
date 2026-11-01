@@ -86,6 +86,41 @@ public struct MediaFile: Codable, Sendable, Hashable, Identifiable {
     @Default<Defaults.Zero64> public var durationMs: Int64
     @Default<Defaults.False> public var missing: Bool
     public var edition: String?
+    public var container: String?
+    public var size: Int64?
+    public var bitrate: Int64?
+    /// The file's video, audio and subtitle tracks as ffprobe read them (a title's page).
+    @Default<Defaults.List<MediaStream>> public var streams: [MediaStream]
+}
+
+/// One track of a file: what the title page's quality badges and Playback card are made from.
+public struct MediaStream: Codable, Sendable, Hashable {
+    /// video, audio or subtitle.
+    @Default<Defaults.Empty> public var kind: String
+    @Default<Defaults.Empty> public var codec: String
+    public var profile: String?
+    public var width: Int?
+    public var height: Int?
+    public var channels: Int?
+    public var language: String?
+    public var colorTransfer: String?
+    @Default<Defaults.False> public var dolbyVision: Bool
+    @Default<Defaults.False> public var hdr10Plus: Bool
+    @Default<Defaults.False> public var isDefault: Bool
+
+    public init(kind: String, codec: String, profile: String? = nil, width: Int? = nil, height: Int? = nil, channels: Int? = nil,
+                colorTransfer: String? = nil, dolbyVision: Bool = false, hdr10Plus: Bool = false, isDefault: Bool = false) {
+        self.kind = kind
+        self.codec = codec
+        self.profile = profile
+        self.width = width
+        self.height = height
+        self.channels = channels
+        self.colorTransfer = colorTransfer
+        self.dolbyVision = dolbyVision
+        self.hdr10Plus = hdr10Plus
+        self.isDefault = isDefault
+    }
 }
 
 public struct Item: Codable, Sendable, Hashable, Identifiable {
@@ -99,6 +134,11 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     public var runtimeMin: Int?
     public var contentRating: String?
     @Default<Defaults.List<String>> public var genres: [String]
+    /// A title's page: where it's from and when it came out.
+    public var studio: String?
+    public var releaseDate: String?
+    public var originalTitle: String?
+    public var originalLanguage: String?
     public var seriesTitle: String?
     public var seasonNumber: Int?
     public var episodeNumber: Int?

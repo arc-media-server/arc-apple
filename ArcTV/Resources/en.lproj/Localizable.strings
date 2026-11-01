@@ -64,9 +64,8 @@
 "details.resume_episode" = "Resume S%1$d E%2$d";
 "details.season" = "Season %d";
 "details.runtime" = "%1$dh %2$dm";
-"details.cast" = "Cast & Crew";
+"details.cast" = "Cast";
 "details.collections" = "Collections";
-"details.more_like_this" = "More Like This";
 "details.role_director" = "Director";
 "details.role_writer" = "Writer";
 
@@ -187,6 +186,21 @@
 "player.chapters" = "Chapters";
 "player.chapter" = "Chapter %d";
 "details.extras" = "Trailers & Extras";
+"details.related" = "Related";
+"details.starring" = "Starring";
+"details.about" = "About";
+"details.details" = "Details";
+"details.crew" = "Crew";
+"details.playback" = "Playback";
+"details.released" = "Released";
+"details.studio" = "Studio";
+"details.original_title" = "Original title";
+"details.directed_by" = "Directed by";
+"details.written_by" = "Written by";
+"details.video" = "Video";
+"details.audio" = "Audio";
+"details.size" = "Size";
+"details.edition" = "Edition";
 "extra.trailer" = "Trailer";
 "extra.featurette" = "Featurette";
 "extra.behindthescenes" = "Behind the Scenes";
