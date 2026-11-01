@@ -43,7 +43,6 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(3)
         shot("06-home-second-row")
-        press(.left)
 
         // The focused title's page, then play it.
         remote.press(.select)
