@@ -115,6 +115,12 @@ struct HomeView: View {
             PlayerScreen(request: request)
         }
         .task { await reload() }
+        // Focus starts on the first title, as Plex's Home, not on the profile button above the rows.
+        .onChange(of: model.loading) { _, now in
+            if !now, focused == nil, let row = model.rows.first, let card = row.cards.first {
+                Task { @MainActor in focused = row.id + "|" + card.id }
+            }
+        }
     }
 
     private var rows: some View {

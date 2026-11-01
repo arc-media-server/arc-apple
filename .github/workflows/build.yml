@@ -66,6 +66,8 @@ jobs:
             xcrun xcresulttool export attachments --path walk.xcresult --output-path screenshots || true
           fi
           cp standin.log screenshots/ 2>/dev/null || true
+          # The app's crash reports from the simulator, if it crashed.
+          find ~/Library/Logs/DiagnosticReports -name 'Arc*' -newer standin.log -exec cp {} screenshots/ \; 2>/dev/null || true
           ls screenshots
       # Small JPEG copies on the ci-screenshots branch (runs/<run id>/), so agents whose network
       # can't reach artifact storage can read them with git. Only ever appended to, never rewritten.
@@ -84,6 +86,7 @@ jobs:
           PY
           for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null; rm "$f"; done
           cp standin.log small/ 2>/dev/null || true
+          cp screenshots/*.ips small/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           dir="runs/${{ github.run_id }}"
