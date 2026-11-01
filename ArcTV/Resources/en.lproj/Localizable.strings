@@ -158,3 +158,18 @@
 "player.up_next" = "Up Next";
 "player.play_now" = "Play Now";
 "player.play_in" = "Playing in %d";
+
+"player.quality" = "Quality";
+"player.original" = "Original";
+"player.version" = "Version";
+"player.chapters" = "Chapters";
+"player.chapter" = "Chapter %d";
+"details.extras" = "Trailers & Extras";
+"extra.trailer" = "Trailer";
+"extra.featurette" = "Featurette";
+"extra.behindthescenes" = "Behind the Scenes";
+"extra.deleted" = "Deleted Scene";
+"extra.interview" = "Interview";
+"extra.scene" = "Scene";
+"extra.short" = "Short";
+"extra.other" = "Extra";

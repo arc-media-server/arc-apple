@@ -273,8 +273,9 @@ public struct PlaybackRequest: Codable, Sendable {
     /// A picture subtitle track to draw into the picture (Arc converts the video to do it).
     public var burnSubtitle: String?
 
-    public init(caps: PlayerCaps, startMs: Int64 = 0, fileId: Int64? = nil, audioStream: Int? = nil, burnSubtitle: String? = nil) {
+    public init(caps: PlayerCaps, startMs: Int64 = 0, fileId: Int64? = nil, audioStream: Int? = nil, burnSubtitle: String? = nil, maxKbps: Int? = nil) {
         self.caps = caps
+        self.maxKbps = maxKbps
         self.startMs = startMs
         self.fileId = fileId
         self.audioStream = audioStream

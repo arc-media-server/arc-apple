@@ -65,6 +65,10 @@ final class WalkThrough: XCTestCase {
         // down opens Subtitles and Audio, and the stand-in's track turns on.
         remote.press(.select)
         pause(2)
+        // Right moves 10 seconds on, with the timeline thumbnail (the stand-in has a sheet).
+        press(.right)
+        pause(1)
+        shot("10a-player-thumbnail")
         press(.down)
         pause(2)
         shot("10b-player-options")
@@ -72,6 +76,10 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(3)
         shot("10c-player-subtitles")
+        // Further down the panel: Quality, Version and Chapters.
+        press(.down, 4)
+        pause(1)
+        shot("10d-player-quality")
         remote.press(.menu)
         pause(1)
         // Back closes the player, Back again leaves the title page for Home. (A third would
