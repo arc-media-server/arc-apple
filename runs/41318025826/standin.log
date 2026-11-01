@@ -1,0 +1,15 @@
+stand-in Arc on http://127.0.0.1:8080
+standin: "GET /api/v1/health HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/link HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 202 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 202 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/status HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/logout HTTP/1.1" 204 -
+standin: "POST /api/v1/auth/link HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/status HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/logout HTTP/1.1" 204 -
+standin: "POST /api/v1/auth/link HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/status HTTP/1.1" 200 -
