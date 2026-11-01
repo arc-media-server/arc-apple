@@ -31,12 +31,13 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(6)
         shot("04-home")
-        press(.right, 2)
+        press(.right)
         pause(3)
         shot("05-home-focus-moved")
         press(.down)
         pause(3)
         shot("06-home-second-row")
+        press(.left)
 
         // The focused title's page, then play it.
         remote.press(.select)
