@@ -89,8 +89,8 @@ struct RouteView: View {
     }
 }
 
-/// After the profile is chosen: the places, in a sidebar down the left, as Plozz and Apple's own
-/// apps have one (owner, 1 November: Plozz's). Its icons always show, in the same places; moving
+/// After the profile is chosen: the places, in a sidebar down the left, as Apple's own
+/// apps have one (owner, 1 November). Its icons always show, in the same places; moving
 /// left onto them opens it, its glass and the names fading in around them, and Select opens the
 /// place. The places: Search, Home, the Watchlist and libraries in the profile's order (Arrange
 /// libraries on the web), Playlists and Settings. Back from a place's first page opens the sidebar.

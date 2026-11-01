@@ -12,7 +12,7 @@ straight to the pill bar.
 ## Why
 
 The owner (1 November) found a Play button on the hero above the Continue Watching row
-confusing: two ways to play the same thing. Plozz's hero has no buttons.
+confusing: two ways to play the same thing.
 
 ## Limits
 
@@ -36,4 +36,4 @@ a picture TMDB can't give is logged by its Arc path and the error's type.
 ## Also: a narrower sidebar
 
 The owner found the open sidebar wide. It is Arc's own (not tvOS's), and now opens to 360 points
-(was 440) with slightly smaller icons and names, closer to Plozz's panel.
+(was 440) with slightly smaller icons and names.
