@@ -53,22 +53,21 @@ final class WalkThrough: XCTestCase {
         remote.press(.playPause)
         pause(2)
         shot("10-player-paused")
+        // Back closes the player, Back again leaves the title page for Home. (A third would
+        // leave the app: Back on Home goes to the Apple TV's home screen, as tvOS apps do.)
         remote.press(.menu)
         pause(1)
         remote.press(.menu)
         pause(3)
         shot("11-back-from-player")
-        remote.press(.menu)
-        pause(3)
-        shot("12-home-again")
 
         // A show: down the rows until a show's page has seasons.
         press(.down)
         pause(2)
-        shot("13-home-third-row")
+        shot("12-home-third-row")
         remote.press(.select)
         pause(4)
-        shot("14-third-row-title")
+        shot("13-third-row-title")
     }
 
     private func press(_ button: XCUIRemote.Button, _ times: Int = 1) {
