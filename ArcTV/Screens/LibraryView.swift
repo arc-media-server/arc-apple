@@ -62,7 +62,7 @@ struct LibraryView: View {
             }
             .padding(.horizontal, 80).padding(.vertical, 40)
         } else {
-            HeroRows(rows: recommended) {
+            HeroRows(rows: recommended, headerHeight: 110) {
                 header.padding(.horizontal, 80).padding(.top, 40)
             }
         }
