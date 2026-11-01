@@ -117,9 +117,20 @@ final class WalkThrough: XCTestCase {
             shot(String(format: "16-tab-%02d", i))
         }
 
-        // A library: its sort and filters, then the grid, and holding Select on a title.
+        // A library opens on Recommended: a hero and rows, the pill bar above. Then up to the pill
+        // bar and Browse: sort and filters, the grid, and holding Select on a title.
         // (The sidebar only highlights as the focus moves; Select opens the place and shuts it.)
         press(.up, 3)
+        pause(1)
+        remote.press(.select)
+        pause(4)
+        shot("17-library-recommended")
+        press(.down)
+        pause(2)
+        shot("17a-library-recommended-rows")
+        press(.up, 4)
+        pause(1)
+        press(.right)
         pause(1)
         remote.press(.select)
         pause(3)

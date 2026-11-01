@@ -96,6 +96,20 @@ class Handler(http.server.BaseHTTPRequestHandler):
         # Subtitle lines for any track: one every two seconds.
         if method == "GET" and len(parts) == 4 and parts[0] == "items" and parts[2] == "subtitles":
             return self.json(200, {"track": {"id": parts[3]}, "cues": [{"start_ms": i * 2000, "end_ms": i * 2000 + 1800, "text": f"Stand-in subtitles, line {i + 1}"} for i in range(30)]})
+        # A library's Recommended rows, made from its titles (the recording has none: it was
+        # made before the app asked for them).
+        if method == "GET" and len(parts) == 3 and parts[0] == "libraries" and parts[2] == "recommended":
+            lib = parts[1]
+            titles = next((v["body"].get("items", []) for kk, v in answers.items()
+                           if kk.startswith("GET items?") and f"library_id={lib}&" in kk and "sort=added" in kk), [])
+            if not titles:
+                titles = next((v["body"].get("items", []) for kk, v in answers.items() if kk.startswith("GET items?") and f"parent_id=" not in kk), [])
+            cont = answers.get("GET home/continue?with_up_next=1", {}).get("body") or []
+            rows = [{"id": "continue", "type": "continue", "title": "Continue Watching", "items": cont},
+                    {"id": "added", "type": "recently_added", "title": "Recently Added", "items": titles},
+                    {"id": "because", "type": "because_you_watched", "title": "Because you watched", "name": titles[0]["title"] if titles else "", "items": list(reversed(titles))},
+                    {"id": "top", "type": "top_rated", "title": "Top Rated", "items": titles[1:] + titles[:1]}]
+            return self.json(200, {"rows": [r for r in rows if r["items"]]})
         k = key(method, path, query)
         if method == "POST" and path == "auth/profile" and body:
             k += "#" + str(body.get("id"))
