@@ -108,6 +108,11 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     @Default<Defaults.List<MediaFile>> public var files: [MediaFile]
     /// On episodes in a season list: whether a file is on disk.
     @Default<Defaults.True> public var available: Bool
+    /// On a title's own page (items/{id}): its cast and crew, and the collections it's in.
+    @Default<Defaults.List<Credit>> public var credits: [Credit]
+    @Default<Defaults.List<CollectionRef>> public var collections: [CollectionRef]
+    /// An episode's show.
+    public var parentId: String?
 
     public init(id: String, kind: String, title: String, images: Images? = nil) {
         self.id = id
@@ -190,6 +195,8 @@ public struct Prefs: Codable, Sendable {
     @Default<Defaults.Empty> public var subtitleMode: String
     @Default<Defaults.Empty> public var audioLanguage: String
     @Default<Defaults.True> public var autoPlay: Bool
+    /// Skip intros and recaps without pressing Skip.
+    @Default<Defaults.False> public var autoSkip: Bool
     public var subtitleStyle: SubtitleStyle?
 
     public init(home: [HomeRowPref] = [], splitUpNext: Bool = false, libraryOrder: [Int64] = [], watchlistPosition: Int = 0) {
@@ -200,7 +207,7 @@ public struct Prefs: Codable, Sendable {
     }
 }
 
-public struct CollectionRef: Codable, Sendable, Hashable {
+public struct CollectionRef: Codable, Sendable, Hashable, Identifiable {
     public let id: String
     public let title: String
 }

@@ -57,6 +57,31 @@ for lib in call("GET", "libraries"):
     collect(page.get("items"))
     if lib["kind"] == "shows":
         collect(call("GET", f"libraries/{lib['id']}/recent-shows"))
+# The library tabs: each sort (the stand-in answers any other /items with one of these), the
+# filters, collections, folders (Other videos), the playlists tab and search as it's typed.
+people = set()
+for lib in call("GET", "libraries"):
+    kind = "series" if lib["kind"] == "shows" else "movie"
+    for sort in ["title", "added", "release", "year", "rating", "runtime", "watched"]:
+        collect(call("GET", "items", {"library_id": str(lib["id"]), "kind": kind, "sort": sort, "offset": "0", "limit": "60"}).get("items"))
+    call("GET", f"libraries/{lib['id']}/facets")
+    for c in call("GET", f"libraries/{lib['id']}/collections") or []:
+        collect(call("GET", f"collections/{c['id']}").get("items"))
+    if lib["kind"] == "videos":
+        def walk(path):
+            page = call("GET", f"libraries/{lib['id']}/folders", {"path": path} if path else None)
+            collect(page.get("items"))
+            for f in page.get("folders") or []:
+                walk(f["path"])
+        walk("")
+for pl in call("GET", "playlists") or []:
+    collect(call("GET", f"playlists/{pl['id']}").get("entries"))
+for word in ["firefly", "alien"]:
+    for n in range(1, len(word) + 1):
+        found = call("GET", "search", {"q": word[:n]})
+        for p in found.get("people") or []:
+            people.add(p["id"])
+
 for p in ["home/continue?with_up_next=1", "home/next-up", "watchlist"]:
     k = key("GET", *p.split("?")) if "?" not in p else key("GET", "home/continue", {"with_up_next": "1"})
     collect(saved[k]["body"])
@@ -68,8 +93,15 @@ for s in sorted(series):
 caps = {"containers": ["mp4", "mov"], "video": ["h264", "hevc"], "audio": ["aac", "mp3", "ac3", "eac3"], "hdr": [], "max_height": 2160}
 for i in sorted(ids):
     item = call("GET", f"items/{i}")
+    for c in (item.get("credits") or [])[:8]:
+        people.add(c["person_id"])
+    if item.get("kind") in ("movie", "series"):
+        call("GET", f"items/{i}/similar")
     if item.get("kind") in ("movie", "episode"):
         call("POST", f"items/{i}/playback", body={"caps": caps, "start_ms": 0})
+
+for p in sorted(people):
+    call("GET", f"people/{p}")
 
 with open(os.path.join(out, "answers.json"), "w") as f:
     json.dump(saved, f, indent=1, sort_keys=True)

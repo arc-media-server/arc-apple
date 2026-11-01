@@ -60,6 +60,82 @@
 "details.resume_episode" = "Resume S%1$d E%2$d";
 "details.season" = "Season %d";
 "details.runtime" = "%1$dh %2$dm";
+"details.cast" = "Cast & Crew";
+"details.collections" = "Collections";
+"details.more_like_this" = "More Like This";
+"details.role_director" = "Director";
+"details.role_writer" = "Writer";
+
+"tab.search" = "Search";
+"tab.home" = "Home";
+"tab.watchlist" = "Watchlist";
+"tab.playlists" = "Playlists";
+"tab.settings" = "Settings";
+
+"actions.mark_watched" = "Mark as Watched";
+"actions.mark_unwatched" = "Mark as Unwatched";
+"actions.watchlist_add" = "Add to Watchlist";
+"actions.watchlist_remove" = "Remove from Watchlist";
+"actions.go_to_show" = "Go to Show";
+
+"library.count" = "%d titles";
+"library.count_filtered" = "%d titles match";
+"library.show" = "Show";
+"library.titles" = "Titles";
+"library.collections" = "Collections";
+"library.folders" = "Folders";
+"library.sort_title" = "Title";
+"library.sort_added" = "Date Added";
+"library.sort_released" = "Release Date";
+"library.sort_year" = "Year";
+"library.sort_rating" = "Rating";
+"library.sort_runtime" = "Duration";
+"library.sort_watched" = "Last Watched";
+"library.filter" = "Filter";
+"library.filtered" = "Filtered";
+"library.unwatched" = "Unwatched Only";
+"library.genre" = "Genre";
+"library.decade" = "Decade";
+"library.decade_value" = "%@s";
+"library.resolution" = "Resolution";
+"library.any" = "Any";
+"library.clear_filters" = "Clear Filters";
+"library.empty" = "This library is empty. Add files to its folders and Arc will find them.";
+"library.nothing_matches" = "Nothing matches these filters.";
+"library.no_collections" = "This library has no collections yet.";
+
+"browse.titles_count" = "%d titles";
+"browse.videos_count" = "%d videos";
+"browse.collection_empty" = "This collection has nothing you can watch yet.";
+"browse.playlist_empty" = "This playlist is empty. Add titles to it in Arc in a browser.";
+"browse.person_empty" = "Nothing in your libraries has them in it.";
+"browse.folder_empty" = "This folder is empty.";
+"browse.watchlist_empty" = "Your Watchlist is empty. Hold Select on a movie or show and choose Add to Watchlist.";
+"browse.playlists_empty" = "No playlists yet. Make one in Arc in a browser.";
+
+"search.prompt" = "Movies, shows, people and collections";
+"search.nothing" = "Nothing matches “%@”.";
+"search.movies" = "Movies";
+"search.shows" = "Shows";
+"search.episodes" = "Episodes";
+"search.collections" = "Collections";
+"search.people" = "People";
+
+"settings.playback" = "Playback";
+"settings.auto_play" = "Auto-Play Next Episode";
+"settings.auto_skip" = "Skip Intros Automatically";
+"settings.subtitles" = "Subtitles";
+"settings.subtitles_last" = "In the language I last chose";
+"settings.subtitles_foreign" = "When the audio is in another language";
+"settings.subtitles_always" = "Always";
+"settings.subtitles_manual" = "Only when I choose them";
+"settings.account" = "Profile and Server";
+"settings.switch_profile" = "Switch Profile";
+"settings.sign_out_title" = "Sign this Apple TV out?";
+"settings.sign_out_body" = "You'll need a new code from Arc to sign in again.";
+"settings.not_saved" = "That change wasn't saved. Check Arc is running and try again.";
+"settings.version" = "Arc for Apple TV %@";
+"settings.attribution" = "Metadata and artwork from TMDB and TheTVDB. This product uses the TMDB API but is not endorsed or certified by TMDB.";
 
 "player.failed_title" = "This can't play right now";
 "player.failed" = "Arc couldn't start this title. Try again, or check the Dashboard in Arc for why.";

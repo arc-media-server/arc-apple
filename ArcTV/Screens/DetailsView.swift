@@ -8,14 +8,18 @@ struct PlayRequest: Identifiable, Hashable {
     var id: String { item.id + "@\(startMs)" }
 }
 
-/// A title's page: its background, logo or title, details and Play; a show's seasons and episodes.
+/// A title's page: its background, logo or title, details, Play and its actions; a show's seasons
+/// and episodes; then its cast, collections and More Like This, as Plex's page.
 struct DetailsView: View {
     @Environment(AppModel.self) private var app
+    @Environment(Browse.self) private var browse
+    @Environment(\.openRoute) private var openRoute
     let itemId: String
     let initial: Item
-    let play: (PlayRequest) -> Void
 
     @State private var item: Item?
+    @State private var similar: [Item] = []
+    @FocusState private var focused: String?
     @State private var seasons: [Season] = []
     @State private var season = 0
     @State private var problem: String?
@@ -40,12 +44,15 @@ struct DetailsView: View {
                     if let problem { Text(problem).foregroundStyle(ArcColor.error) }
                     buttons
                     if !seasons.isEmpty { episodes }
+                    if !shown.credits.isEmpty { cast }
+                    if !shown.collections.isEmpty { collections }
+                    if !similar.isEmpty { moreLikeThis }
                 }
                 .padding(.horizontal, 80)
                 .padding(.bottom, 60)
             }
         }
-        .task(id: itemId) { await load() }
+        .task(id: browse.changes) { await load() }
     }
 
     private var meta: String {
@@ -75,6 +82,54 @@ struct DetailsView: View {
                           : L("details.play_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0), systemImage: "play.fill")
                 }
             }
+            TitleActions(item: shown, onPage: true)
+        }
+    }
+
+    private func play(_ request: PlayRequest) { browse.play(request) }
+
+    private var cast: some View {
+        section(L("details.cast")) {
+            ForEach(shown.credits.prefix(30)) { credit in
+                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image) {
+                    openRoute(.person(id: credit.personId, name: credit.name))
+                }
+            }
+        }
+    }
+
+    private var collections: some View {
+        section(L("details.collections")) {
+            ForEach(shown.collections) { c in
+                Button(c.title) { openRoute(.collection(id: c.id, title: c.title)) }
+            }
+        }
+    }
+
+    private var moreLikeThis: some View {
+        section(L("details.more_like_this")) {
+            ForEach(similar) { other in
+                MediaCardView(card: MediaCard(item: other), style: .poster, focus: $focused, focusKey: other.id) { openRoute(.item(other)) }
+            }
+        }
+    }
+
+    private func section<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text(title).font(.title3.weight(.semibold))
+            ScrollView(.horizontal) {
+                LazyHStack(alignment: .top, spacing: 40) { content() }.padding(.vertical, 24)
+            }
+            .scrollClipDisabled()
+        }
+    }
+
+    private func roleName(_ role: String) -> String? {
+        switch role {
+        case "director": return L("details.role_director")
+        case "writer": return L("details.role_writer")
+        case "actor", "": return nil
+        default: return role.capitalized
         }
     }
 
@@ -115,6 +170,10 @@ struct DetailsView: View {
         guard let api = app.api else { return }
         do {
             item = try await api.item(itemId)
+            if !shown.isEpisode {
+                // More Like This is extra: the page shows without it.
+                similar = (try? await api.similar(itemId)) ?? similar
+            }
             if shown.isSeries {
                 seasons = try await api.seasons(seriesId: itemId).seasons
                 if let next = nextEpisode, let at = seasons.firstIndex(where: { $0.seasonNumber == next.seasonNumber }) { season = at }
