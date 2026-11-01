@@ -34,8 +34,26 @@ final class PlayerModel {
     /// Whether the Up Next card is due.
     var upNextDue: Bool { next != nil && !loading && showsUpNext(markers: plan?.markers ?? [], positionMs: positionMs, durationMs: durationMs) }
 
+    /// The title's files (editions, versions) and the one playing.
+    var versions: [Version] { plan?.versions ?? [] }
+    var fileId: Int64 { plan?.fileId ?? 0 }
+    var chapters: [Chapter] { plan?.chapters ?? [] }
+    /// The quality limit chosen (nil: the original), and the limits worth offering for this file.
+    private(set) var maxKbps: Int?
+    var qualities: [Int] {
+        let offered = offeredQualities(sourceKbps: plan?.sourceKbps ?? 0)
+        guard let limit = plan?.serverLimitKbps, limit > 0 else { return offered }
+        return offered.filter { $0 <= limit }
+    }
+    /// The file's timeline thumbnails, once Arc has made them.
+    private(set) var trickplay: Trickplay?
+    /// When the viewer last moved through the timeline (the thumbnail shows for a moment after).
+    private(set) var seekedAt: Date?
+
     let engine: PlaybackEngine
     private let api: ArcAPI
+    /// The version the viewer chose (nil: Arc's choice).
+    private var fileChoice: Int64?
     private var plan: PlaybackPlan?
     private var caps: PlayerCaps
     private var retried = false
@@ -89,10 +107,13 @@ final class PlayerModel {
         startTask = Task {
             if let old { await api.stopTranscode(old) }
             do {
-                let p = try await api.startPlayback(itemId: item.id, request: PlaybackRequest(caps: caps, startMs: fileMs, fileId: plan.flatMap { $0.fileId > 0 ? $0.fileId : nil }, audioStream: audioChoice, burnSubtitle: burn))
+                let p = try await api.startPlayback(itemId: item.id, request: PlaybackRequest(caps: caps, startMs: fileMs, fileId: fileChoice ?? plan.flatMap { $0.fileId > 0 ? $0.fileId : nil },
+                                                                                               audioStream: audioChoice, burnSubtitle: burn, maxKbps: maxKbps))
                 guard !Task.isCancelled else { return }
+                let fileChanged = plan?.fileId != p.fileId
                 plan = p
                 settleSubtitles()
+                if fileChanged { loadTrickplay(p) }
                 log.info("playing by \(p.method)" + (p.reasons.isEmpty ? "" : " (\(p.reasons.joined(separator: ", ")))"))
                 // Apple's player fetches a converted stream's pieces itself, without the app's
                 // header: a cast link carries its own token. An older Arc without them gets the header.
@@ -177,6 +198,49 @@ final class PlayerModel {
                 self.log.debug("subtitles loaded: \(lines.count) lines")
             } catch {
                 ArcLog.shared.warn("subtitles failed to load: \(type(of: error))")
+            }
+        }
+    }
+
+    /// The viewer chose another version (edition or copy) of the title: it plays from the same place.
+    func chooseVersion(_ id: Int64) {
+        guard id != fileId else { return }
+        fileChoice = id
+        audioChoice = nil
+        burn = nil
+        log.info("version changed")
+        load(at: positionMs)
+    }
+
+    /// The viewer chose a quality limit (nil: the original). Arc converts down to it.
+    func chooseQuality(_ kbps: Int?) {
+        guard kbps != maxKbps else { return }
+        maxKbps = kbps
+        log.info(kbps == nil ? "quality: original" : "quality limited to \(kbps!) kbps")
+        load(at: positionMs)
+    }
+
+    /// Jumps to a chapter's start.
+    func jump(to chapter: Chapter) {
+        seek(by: chapter.startMs - positionMs)
+    }
+
+    /// The chapter playing now.
+    var chapter: Chapter? { chapters.last { $0.startMs <= positionMs } }
+
+    /// Timeline thumbnails for the file now playing; none is fine (they're made in the background).
+    private func loadTrickplay(_ p: PlaybackPlan) {
+        trickplay = nil
+        guard p.fileId > 0 else { return }
+        let api = self.api, id = item.id, file = p.fileId
+        Task { [weak self] in
+            do {
+                let found = try await api.trickplay(itemId: id, fileId: file)
+                guard let self, self.plan?.fileId == file else { return }
+                self.trickplay = found
+                self.log.debug(found == nil ? "no timeline thumbnails yet" : "timeline thumbnails: \(found!.info.count)")
+            } catch {
+                ArcLog.shared.debug("timeline thumbnails unavailable: \(type(of: error))")
             }
         }
     }
@@ -266,6 +330,7 @@ final class PlayerModel {
     /// Moves by `deltaMs` in the file: within the stream when it can, else a new stream from there.
     func seek(by deltaMs: Int64) {
         guard let p = plan, !loading else { return }
+        seekedAt = Date()
         let target = min(max(0, positionMs + deltaMs), max(0, durationMs - 1_000))
         positionMs = target
         if PlaybackClock.seekInStream(p, fileMs: target, availableMs: Int64(engine.availableSeconds * 1000)) {

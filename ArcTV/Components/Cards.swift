@@ -51,7 +51,7 @@ struct MediaCardView: View {
                     if card.item.watched {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title3)
-                            .foregroundStyle(.white, ArcColor.accentStrong)
+                            .foregroundStyle(.black, .white)
                             .padding(10)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }

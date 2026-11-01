@@ -31,7 +31,8 @@ wider context; decisions waiting for the owner are on arc-media-server#80.
   (`AVPlayerEngine`) is behind it for now; another engine (e.g. AetherEngine) may replace it later
   without changing the screens. Don't use AVPlayerViewController or engine types in screens.
 - **Feel:** native tvOS first (focus engine, `.card` buttons, Back always works), Arc identity
-  through the teal accent and wordmark. Dark only; artwork-led Home (no banner). The player's
+  through the wordmark. No UI colour (owner, 1 November): chosen and main
+  controls are white with black text, as the sidebar's; the teal is the logo's alone. Dark only; artwork-led Home (no banner). The player's
   controls follow the web and Android players' set and order. Brand colours live only in
   `ArcTV/App/Theme.swift`.
 - **Plex first:** match how Plex for Apple TV behaves unless there's a clear reason not to; log
