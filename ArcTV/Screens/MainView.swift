@@ -89,8 +89,8 @@ struct RouteView: View {
     }
 }
 
-/// After the profile is chosen: the places, in a sidebar down the left, as Plozz and Apple's own
-/// apps have one (owner, 1 November: Plozz's). Its icons always show, in the same places; moving
+/// After the profile is chosen: the places, in a sidebar down the left, as Apple's own
+/// apps have one (owner, 1 November). Its icons always show, in the same places; moving
 /// left onto them opens it, its glass and the names fading in around them, and Select opens the
 /// place. The places: Search, Home, the Watchlist and libraries in the profile's order (Arrange
 /// libraries on the web), Playlists and Settings. Back from a place's first page opens the sidebar.
@@ -282,9 +282,9 @@ struct MainView: View {
 /// the sidebar opens; the focused row white with black, as Apple's sidebar.
 enum Sidebar {
     static let inset: CGFloat = 12
-    static let icon: CGFloat = 72
+    static let icon: CGFloat = 64
     static let collapsedWidth: CGFloat = icon + inset * 2
-    static let openWidth: CGFloat = 440
+    static let openWidth: CGFloat = 360
     static let profile = "sidebar:profile"
     static let landing = "sidebar:landing"
     static let above = "sidebar:above"
@@ -304,14 +304,14 @@ enum Sidebar {
                     // The place showing, while the sidebar is shut: a grey disc behind its icon.
                     Circle().fill(.white.opacity(0.22)).opacity(current && !open ? 1 : 0)
                     if let profile {
-                        Avatar(profile: profile, size: 46)
+                        Avatar(profile: profile, size: 42)
                     } else if let icon {
-                        Image(systemName: icon).font(.system(size: 28, weight: .semibold))
+                        Image(systemName: icon).font(.system(size: 25, weight: .semibold))
                     }
                 }
                 .frame(width: Sidebar.icon, height: Sidebar.icon)
                 Text(title)
-                    .font(.system(size: 30, weight: current || profile != nil ? .semibold : .medium))
+                    .font(.system(size: 27, weight: current || profile != nil ? .semibold : .medium))
                     .lineLimit(1)
                     .opacity(open ? 1 : 0)
                 Spacer(minLength: 0)

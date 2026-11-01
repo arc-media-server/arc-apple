@@ -1,9 +1,9 @@
-# The sidebar's icons always show (as Plozz's)
+# The sidebar's icons always show
 
 ## What changed
 
 The places now sit in Arc's own sidebar instead of tvOS's adaptable one, following the owner's
-screenshots of Plozz. When it's shut, only the icons show down the left, straight on the page, with
+reference screenshots. When it's shut, only the icons show down the left, straight on the page, with
 the profile's picture at the top and a grey disc behind the place that's showing. Moving left onto
 it (or Back from a place's first page) opens it. The icons stay exactly where they are while a tall
 glass panel comes in behind them and the names fade in beside them, with the profile's name at the
@@ -23,7 +23,7 @@ Settings keep the focus in the sidebar.
 
 ## Why
 
-The owner (1 November) wants it to work as Plozz's does: tvOS 26's sidebar shrinks to a small
+The owner (1 November) wants it to work as their reference screenshots show: tvOS 26's sidebar shrinks to a small
 pill with no icons when shut, so you can't see where you are or what's there.
 
 ## Decisions

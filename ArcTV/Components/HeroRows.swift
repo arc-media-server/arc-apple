@@ -1,11 +1,11 @@
 import ArcKit
 import SwiftUI
 
-/// A full-screen hero for the focused title (its background, logo or name, details and glass
-/// Play, Watchlist and Info buttons) with rows of titles beneath, the first one peeking up: Home,
-/// and a library's Recommended. `header` sits above the hero (a library's pill bar).
+/// A full-screen hero describing the focused title (its background, logo or name and details)
+/// with rows of titles beneath, the first one peeking up: Home, and a library's Recommended.
+/// The hero has no buttons: Select on a card plays it or opens its page, and holding
+/// Select gives its actions. `header` floats above the hero (a library's pill bar).
 struct HeroRows<Header: View>: View {
-    @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     let rows: [LoadedRow]
@@ -15,7 +15,7 @@ struct HeroRows<Header: View>: View {
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
     @FocusState private var focused: String?
-    /// The header floats over the top of the page (as Plozz's pill bar) while the hero or the
+    /// The header floats over the top of the page (the library's pill bar) while the hero or the
     /// first row has the focus, and fades away further down so it doesn't cover a row.
     @State private var headerShown = true
 
@@ -69,7 +69,7 @@ struct HeroRows<Header: View>: View {
         Task { @MainActor in focused = row.id + "|" + card.id }
     }
 
-    /// The hero's words and buttons, over the background; the first row starts just under it.
+    /// The hero's words over the background; the first row starts just under it.
     private func heroDetails(_ card: MediaCard) -> some View {
         let item = card.item
         return VStack(alignment: .leading, spacing: 18) {
@@ -80,7 +80,7 @@ struct HeroRows<Header: View>: View {
             } else {
                 Text(item.isEpisode ? item.seriesTitle ?? item.title : item.title).font(.system(size: 64, weight: .bold)).lineLimit(2)
             }
-            // Plozz's hero line: the rating in a box, then the genres; an episode's own line under it.
+            // The hero line: the rating in a box, then the genres; an episode's own line under it.
             HStack(spacing: 12) {
                 if let rating = item.contentRating, !rating.isEmpty { OutlinedBadge(text: rating) }
                 if let line = genreLine(item) { Text(line) }
@@ -90,43 +90,13 @@ struct HeroRows<Header: View>: View {
                 Text(line).font(.callout).foregroundStyle(.white.opacity(0.85))
             }
             // Under a header there's no room for the overview: the first row would push the
-            // title under the bar. Info has it.
+            // title under the bar. The title's page has it.
             if headerHeight == 0, let overview = item.overview, !overview.isEmpty {
                 Text(overview).font(.callout).foregroundStyle(.white.opacity(0.75)).lineLimit(3).frame(maxWidth: 760, alignment: .leading)
             }
-            HStack(spacing: 20) {
-                Button { play(card) } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "play.fill")
-                        if let progress = card.progress, let left = card.minutesLeft {
-                            ProgressBar(fraction: progress, color: .black).frame(width: 90)
-                            Text(L("card.minutes_short", left))
-                        } else {
-                            Text(L("details.play"))
-                        }
-                    }
-                }
-                .arcGlassButton(prominent: true)
-                .focused($focused, equals: "hero|play")
-                if item.kind == "movie" || item.isSeries {
-                    Button { toggleWatchlist(item) } label: {
-                        Label(item.userData?.watchlisted == true ? L("actions.watchlist_remove") : L("actions.watchlist_add"),
-                              systemImage: item.userData?.watchlisted == true ? "bookmark.fill" : "bookmark")
-                    }
-                    .roundIconButton()
-                    .focused($focused, equals: "hero|watchlist")
-                }
-                Button { openRoute(.item(pageItem(item))) } label: {
-                    Label(L("home.more_info"), systemImage: "info.circle")
-                }
-                .roundIconButton()
-                .focused($focused, equals: "hero|info")
-            }
-            .padding(.top, 8)
         }
         .frame(height: 620 - headerHeight, alignment: .bottomLeading)
         .padding(.horizontal, 80)
-        .focusSection()
     }
 
     private func genreLine(_ item: Item) -> String? {
@@ -155,34 +125,6 @@ struct HeroRows<Header: View>: View {
                                             .init(color: ArcColor.background, location: 1)], startPoint: .top, endPoint: .bottom))
             .ignoresSafeArea()
             .animation(.easeInOut(duration: 0.5), value: art)
-    }
-
-    /// The page Info opens: an episode's show, else the title itself.
-    private func pageItem(_ item: Item) -> Item {
-        guard item.isEpisode, let show = item.parentId else { return item }
-        return Item(id: show, kind: "series", title: item.seriesTitle ?? item.title)
-    }
-
-    private func play(_ card: MediaCard) {
-        let item = card.item
-        if item.playable {
-            browse.play(PlayRequest(item: item, startMs: item.resumeMs))
-        } else {
-            openRoute(.item(item))
-        }
-    }
-
-    private func toggleWatchlist(_ item: Item) {
-        guard let api = app.api else { return }
-        let on = item.userData?.watchlisted != true
-        Task {
-            do {
-                try await api.setWatchlisted(item.id, on)
-                browse.changed()
-            } catch {
-                ArcLogApp.warn("Watchlist change failed: \(type(of: error))")
-            }
-        }
     }
 
     private var focusedCard: MediaCard? {

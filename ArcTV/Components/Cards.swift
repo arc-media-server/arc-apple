@@ -49,7 +49,7 @@ struct MediaCardView: View {
                         if style == .poster {
                             ProgressBar(fraction: progress).padding(12)
                         } else {
-                            // Wide cards carry Plozz's resume strip on the art: play, how far, time left.
+                            // Wide cards carry a resume strip on the art: play, how far, time left.
                             if style == .thumb, let logo = card.logo {
                                 ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
                                     .frame(width: style.size.width * 0.55, height: style.size.height * 0.3)
@@ -73,7 +73,7 @@ struct MediaCardView: View {
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
             .contextMenu { TitleActions(item: card.item) }
-            // Names centred under the art, as Plozz's.
+            // Names centred under the art.
             VStack(alignment: .center, spacing: 2) {
                 Text(card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title)
                     .font(.caption.weight(.semibold)).lineLimit(1)
@@ -88,7 +88,7 @@ struct MediaCardView: View {
         if let season = card.seasonNumber, card.newEpisodes > 0 { return L("card.new_episodes", season, card.newEpisodes) }
         var parts: [String] = []
         if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber {
-            // A part-watched episode's card is short, as Plozz's: S8 · E6 (the strip has the time).
+            // A part-watched episode's card is short: S8 · E6 (the strip has the time).
             parts.append(style == .poster || card.progress != nil ? L("card.episode_code", s, e) : L("card.episode", s, e, item.title))
         } else if let year = item.year {
             parts.append(String(year))
@@ -118,7 +118,7 @@ struct ResumeStrip: View {
 }
 
 /// A content rating (PG-13, TV-14) or a file's quality (4K, DV HDR10) in an outlined box, as
-/// Plozz shows them.
+/// the title pages show them.
 struct OutlinedBadge: View {
     let text: String
 

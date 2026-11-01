@@ -1,6 +1,6 @@
 import Foundation
 
-/// What a title's file is, as short badges for its page (Plozz's 4K, DV HDR10, DD+ 5.1, Atmos):
+/// What a title's file is, as short badges for its page (4K, DV HDR10, DD+ 5.1, Atmos):
 /// labels for the source, not for what this TV will output. The web's `sourceFormats` and
 /// `audioFormat` read the same fields.
 public enum Quality {
@@ -33,7 +33,7 @@ public enum Quality {
         return "SD"
     }
 
-    /// Dolby Vision with its HDR10 base reads "DV HDR10", as Plozz shows it.
+    /// Dolby Vision with its HDR10 base reads "DV HDR10".
     public static func hdr(_ video: MediaStream) -> String? {
         let pq = video.colorTransfer == "smpte2084"
         if video.dolbyVision { return pq ? (video.hdr10Plus ? "DV HDR10+" : "DV HDR10") : "DV" }

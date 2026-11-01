@@ -45,6 +45,9 @@ jobs:
           xcodebuild -project Arc.xcodeproj -scheme ArcTV -configuration Debug \
             -destination 'generic/platform=tvOS' CODE_SIGNING_ALLOWED=NO -quiet build
       - name: Start the stand-in Arc
+        env:
+          # Optional: real posters, backgrounds, logos and cast photos from TMDB for the screenshots.
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: |
           python3 UITests/StandIn/serve.py 8080 > standin.log 2>&1 &
           sleep 2
