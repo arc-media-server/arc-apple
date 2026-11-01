@@ -23,6 +23,7 @@ struct DetailsView: View {
     @State private var seasons: [Season] = []
     @State private var season = 0
     @State private var problem: String?
+    @State private var extra: Extra?
 
     private var shown: Item { item ?? initial }
 
@@ -44,6 +45,7 @@ struct DetailsView: View {
                     if let problem { Text(problem).foregroundStyle(ArcColor.error) }
                     buttons
                     if !seasons.isEmpty { episodes }
+                    if !shown.extras.isEmpty { extras }
                     if !shown.credits.isEmpty { cast }
                     if !shown.collections.isEmpty { collections }
                     if !similar.isEmpty { moreLikeThis }
@@ -53,6 +55,37 @@ struct DetailsView: View {
             }
         }
         .task(id: browse.changes) { await load() }
+        .fullScreenCover(item: $extra) { ExtraPlayerScreen(extra: $0) }
+    }
+
+    /// Trailers and other extras, as Plex's page has them; each plays in a simple player.
+    private var extras: some View {
+        section(L("details.extras")) {
+            ForEach(shown.extras) { e in
+                VStack(alignment: .leading, spacing: 10) {
+                    Button { extra = e } label: {
+                        ZStack {
+                            ArtworkImage(path: shown.images?.backdrop ?? shown.images?.seriesBackdrop).frame(width: 384, height: 216)
+                            Image(systemName: "play.circle.fill").font(.system(size: 54)).foregroundStyle(.white.opacity(0.9))
+                        }
+                        .frame(width: 384, height: 216)
+                        .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
+                    }
+                    .buttonStyle(.card)
+                    Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
+                    Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
+                }
+            }
+        }
+    }
+
+    private func extraKind(_ e: Extra) -> String {
+        var parts = [L("extra." + (["trailer", "featurette", "behindthescenes", "deleted", "interview", "scene", "short"].contains(e.kind) ? e.kind : "other"))]
+        if e.durationMs > 0 {
+            let s = Int(e.durationMs / 1000)
+            parts.append(String(format: "%d:%02d", s / 60, s % 60))
+        }
+        return parts.joined(separator: " · ")
     }
 
     private var meta: String {
