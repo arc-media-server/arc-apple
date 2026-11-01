@@ -81,7 +81,9 @@ struct HeroRows<Header: View>: View {
                 Text(item.isEpisode ? item.seriesTitle ?? item.title : item.title).font(.system(size: 64, weight: .bold)).lineLimit(2)
             }
             Text(heroMeta(item)).font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
-            if let overview = item.overview, !overview.isEmpty {
+            // Under a header there's no room for the overview: the first row would push the
+            // title under the bar. Info has it.
+            if headerHeight == 0, let overview = item.overview, !overview.isEmpty {
                 Text(overview).font(.callout).foregroundStyle(.white.opacity(0.75)).lineLimit(3).frame(maxWidth: 760, alignment: .leading)
             }
             HStack(spacing: 20) {
