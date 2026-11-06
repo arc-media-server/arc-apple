@@ -118,9 +118,10 @@ struct HomeView: View {
 
     private func reload() async {
         guard let api = app.api else { return }
-        async let rooms: Void = browse.together.refreshRooms(api)
+        // The rooms first: a Watch Together row arriving just after the rows took the focus
+        // away from the first card (tvOS gave it to the sidebar).
+        await browse.together.refreshRooms(api)
         await model.load(api) { app.tokenRefused() }
-        await rooms
     }
 }
 
