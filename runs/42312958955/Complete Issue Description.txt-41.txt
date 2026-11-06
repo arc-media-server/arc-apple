@@ -1,0 +1,45 @@
+Failed to get matching snapshot: No matches found for Elements matching predicate '"Watch Together…" IN identifiers' from input {(
+    Button, label: 'J',
+    Button, label: 'Search',
+    Button, label: 'Home',
+    Button, label: 'Bookmark',
+    Button, label: 'Video',
+    Button, label: 'Movie',
+    Button, label: 'Tv',
+    Button, label: 'list.bullet.rectangle',
+    Button, label: 'gearshape',
+    Button, label: 'Recommended', Disabled,
+    Button, label: 'Browse', Selected, Disabled,
+    Button, label: 'Collections', Disabled,
+    Button, Disabled,
+    Button, Disabled,
+    Button, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, label: '18m', Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, Disabled,
+    Button, Disabled,
+    Button, Disabled,
+    Button, Disabled,
+    Button, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, Disabled,
+    Button, label: 'Selected', Selected, Disabled,
+    Button, Disabled
+)}
+Possibly caused by runtime issues:
+Automation type mismatch: computed Button from legacy attributes vs PopUpButton from modern attribute. Input attributes and values: {
+    "XC_kAXXCAttributeAutomationType" = 14;
+    "XC_kAXXCAttributeElementBaseType" = UIResponder;
+    "XC_kAXXCAttributeElementType" = "SwiftUI.AccessibilityNode";
+    "XC_kAXXCAttributeTraits" = 1108101562625;
+}
+See test report attachments for more detail.
