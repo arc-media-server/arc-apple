@@ -9,6 +9,8 @@ import SwiftUI
 struct WatchTogetherRow: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
+    /// The page's focus: the first card takes it when Home opens.
+    var focus: FocusState<String?>.Binding
 
     var body: some View {
         let together = browse.together
@@ -16,8 +18,9 @@ struct WatchTogetherRow: View {
             Text(L("together.title")).font(.headline).padding(.horizontal, 80)
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: 36) {
-                    ForEach(together.rooms) { room in
-                        RoomCard(room: room, item: together.titles[room.item.id])
+                    ForEach(Array(together.rooms.enumerated()), id: \.element.id) { index, room in
+                        RoomCard(room: room, item: together.titles[room.item.id], focus: focus,
+                                 focusKey: index == 0 ? HeroRowsTopFocus : "top|" + room.id)
                     }
                     JoinCodeCard { together.enteringCode = true }
                 }
@@ -36,6 +39,8 @@ private struct RoomCard: View {
     @Environment(Browse.self) private var browse
     let room: ListedRoom
     let item: Item?
+    var focus: FocusState<String?>.Binding
+    let focusKey: String
     @State private var busy = false
 
     private let size = CardStyle.thumb.size
@@ -59,6 +64,7 @@ private struct RoomCard: View {
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
+            .focused(focus, equals: focusKey)
             .accessibilityLabel(L("together.card_label", room.item.title))
             .contextMenu {
                 Button { join() } label: {
