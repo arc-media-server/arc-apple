@@ -40,6 +40,8 @@ timeline is shared. This is the TV design the other apps copy (`docs/plans/watch
   - The live stream is in the app (`WatchTogetherModel`). It splits lines by hand because
     `bytes.lines` drops the blank lines that end Server-Sent Events.
   - `Avatar` takes a name and colour, for people who aren't profiles on this device.
+- **Choosing the place that's showing** in the sidebar starts it afresh, back at the top of its
+  first page (as tvOS apps' tabs do), so Home shows its Watch Together row again.
 
 ## Decisions (logged on arc-media-server#80)
 
