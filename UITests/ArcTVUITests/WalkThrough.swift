@@ -177,12 +177,11 @@ final class WalkThrough: XCTestCase {
 
         // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
         // back to Home, up to the Watch Together row, the host's lobby, then the guest's.
-        remote.press(.menu)
-        pause(1)
-        remote.press(.menu)
-        pause(1)
+        // Through the sidebar rather than Back: Back from the sidebar leaves the app. Search's
+        // focus may be on the keyboard or already on the sidebar's Search.
         let home = app.buttons["Home"]
-        for _ in 0..<4 where !home.hasFocus { press(.down) }
+        let search = app.buttons["Search"]
+        for _ in 0..<8 where !home.hasFocus { press(search.hasFocus ? .down : .left) }
         remote.press(.select)
         pause(5)
         // Home opens on the Watch Together row.
@@ -205,7 +204,7 @@ final class WalkThrough: XCTestCase {
         pause(2)
         remote.press(.select, forDuration: 1.6)
         pause(2)
-        let together = app.buttons["Watch Together…"]
+        let together = app.descendants(matching: .any)["Watch Together…"].firstMatch
         for _ in 0..<6 where !together.hasFocus { press(.down) }
         remote.press(.select)
         pause(3)
