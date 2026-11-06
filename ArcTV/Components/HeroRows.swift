@@ -11,6 +11,8 @@ struct HeroRows<Header: View>: View {
     let rows: [LoadedRow]
     /// Room left at the top of the hero for the floating header.
     var headerHeight: CGFloat = 0
+    /// A row of its own above the titles' rows (Home's Watch Together row).
+    var top: AnyView? = nil
     @ViewBuilder var header: () -> Header
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
@@ -25,6 +27,7 @@ struct HeroRows<Header: View>: View {
             ScrollView(.vertical) {
                 LazyVStack(alignment: .leading, spacing: 44) {
                     if let hero { heroDetails(hero) }
+                    if let top { top }
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 16) {
                             Text(row.title).font(.headline).padding(.horizontal, 80)
@@ -146,7 +149,7 @@ struct HeroRows<Header: View>: View {
 }
 
 extension HeroRows where Header == EmptyView {
-    init(rows: [LoadedRow]) {
-        self.init(rows: rows) { EmptyView() }
+    init(rows: [LoadedRow], top: AnyView? = nil) {
+        self.init(rows: rows, top: top) { EmptyView() }
     }
 }
