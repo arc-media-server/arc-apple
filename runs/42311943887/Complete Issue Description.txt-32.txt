@@ -1,0 +1,33 @@
+Failed to get matching snapshot: No matches found for Elements matching predicate '"Recommended" IN identifiers' from input {(
+    Button, label: 'J',
+    Button, label: 'Search',
+    Button, label: 'Home',
+    Button, label: 'Bookmark',
+    Button, label: 'Video',
+    Button, label: 'Movie',
+    Button, label: 'Tv',
+    Button, label: 'list.bullet.rectangle',
+    Button, label: 'gearshape',
+    Button, label: 'Browse', Selected,
+    Button, label: 'Collections',
+    Button, label: 'Folders',
+    Button,
+    Button,
+    Button,
+    Button,
+    Button,
+    Button,
+    Button,
+    Button,
+    Button, label: 'Watch Together: Blade Runner', Disabled,
+    Button, label: 'Watch Together: Blade Runner 2049', Disabled,
+    Button, label: 'Join with a Code', Disabled
+)}
+Possibly caused by runtime issues:
+Automation type mismatch: computed Button from legacy attributes vs PopUpButton from modern attribute. Input attributes and values: {
+    "XC_kAXXCAttributeAutomationType" = 14;
+    "XC_kAXXCAttributeElementBaseType" = UIResponder;
+    "XC_kAXXCAttributeElementType" = "SwiftUI.AccessibilityNode";
+    "XC_kAXXCAttributeTraits" = 1108101562369;
+}
+See test report attachments for more detail.
