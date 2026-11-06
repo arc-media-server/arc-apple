@@ -108,6 +108,9 @@ struct MainView: View {
     /// While true, an invisible stop at the top left of the page can take the focus: choosing a
     /// place moves the focus there, out of the sidebar, and the next press goes on into the page.
     @State private var landingArmed = false
+    /// Choosing the place that's showing starts its first page afresh (back at the top, as
+    /// tvOS apps' tabs do): each place's page is rebuilt when its count goes up.
+    @State private var fresh: [String: Int] = [:]
 
     /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
@@ -138,6 +141,7 @@ struct MainView: View {
                 ForEach(places.filter { opened.contains($0.id) }) { place in
                     let showing = place.id == tab
                     page(for: place)
+                        .id(place.id + "#" + String(fresh[place.id] ?? 0))
                         .opacity(showing ? 1 : 0)
                         .disabled(!showing)
                         .accessibilityHidden(!showing)
@@ -237,6 +241,7 @@ struct MainView: View {
             }
             ForEach(places) { place in
                 Button {
+                    if tab == place.id { fresh[place.id, default: 0] += 1 }
                     tab = place.id
                     opened.insert(place.id)
                     handOver()
