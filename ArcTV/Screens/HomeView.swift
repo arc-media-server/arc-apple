@@ -101,16 +101,26 @@ struct HomeView: View {
             } else if model.rows.isEmpty {
                 RowsMessage(title: L("home.empty_title"), message: L("home.empty_body"), retry: nil)
             } else {
-                HeroRows(rows: model.rows)
+                HeroRows(rows: model.rows, top: browse.together.rooms.isEmpty ? nil : AnyView(WatchTogetherRow()))
             }
         }
         // Read again after playing or a change of watch state, so Continue Watching is current.
         .task(id: browse.changes) { await reload() }
+        // Watch Together rooms come and go while Home is showing (someone invites this profile):
+        // look again every half minute. (Live updates from Arc's events stream are still to come.)
+        .task {
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(30))
+                if let api = app.api { await browse.together.refreshRooms(api) }
+            }
+        }
     }
 
     private func reload() async {
         guard let api = app.api else { return }
+        async let rooms: Void = browse.together.refreshRooms(api)
         await model.load(api) { app.tokenRefused() }
+        await rooms
     }
 }
 

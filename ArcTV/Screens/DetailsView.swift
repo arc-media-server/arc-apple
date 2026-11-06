@@ -5,7 +5,9 @@ import SwiftUI
 struct PlayRequest: Identifiable, Hashable {
     let item: Item
     let startMs: Int64
-    var id: String { item.id + "@\(startMs)" }
+    /// Played in a Watch Together room: the room decides where and whether it plays.
+    var together = false
+    var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") }
 }
 
 /// A title's page: its background, logo or title, details, Play and its actions; a show's seasons

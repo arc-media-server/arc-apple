@@ -169,6 +169,46 @@ final class WalkThrough: XCTestCase {
         }
         pause(4)
         shot("21-search-results")
+
+        // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
+        // back to Home, up to the Watch Together row, the host's lobby, then the guest's.
+        remote.press(.menu)
+        pause(1)
+        remote.press(.menu)
+        pause(1)
+        let home = app.buttons["Home"]
+        for _ in 0..<4 where !home.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(5)
+        press(.up)
+        pause(2)
+        shot("22-home-watch-together")
+        remote.press(.select)
+        pause(5)
+        shot("23-lobby-host")
+        // Back closes the player, which leaves the room; then the next room, as a guest.
+        remote.press(.menu)
+        pause(3)
+        press(.right)
+        remote.press(.select)
+        pause(5)
+        shot("24-lobby-guest")
+        remote.press(.menu)
+        pause(3)
+
+        // Inviting: hold Select on a title, Watch Together…, and choose someone.
+        press(.down)
+        pause(2)
+        remote.press(.select, forDuration: 1.6)
+        pause(2)
+        let together = app.buttons["Watch Together…"]
+        for _ in 0..<6 where !together.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(3)
+        shot("25-invite-panel")
+        remote.press(.select)
+        pause(1)
+        shot("26-invite-chosen")
     }
 
     private func press(_ button: XCUIRemote.Button, _ times: Int = 1) {

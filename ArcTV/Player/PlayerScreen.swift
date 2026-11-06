@@ -19,8 +19,18 @@ struct PlayerScreen: View {
     @State private var countdown: Int?
     @State private var upNextDismissed = false
     @FocusState private var focus: PlayerFocus?
+    /// Watch Together: the lobby has gone (the room has played), and the loop that follows the room.
+    @State private var lobbyDone = false
+    @State private var follow: Task<Void, Never>?
+    @State private var owner = UUID()
 
-    enum PlayerFocus: Hashable { case surface, skip, upNext, option(String) }
+    enum PlayerFocus: Hashable { case surface, skip, upNext, lobbyStart, option(String) }
+
+    private var together: WatchTogetherModel { browse.together }
+    /// The room this player follows, while it's in one.
+    private var room: WatchRoom? { request.together ? together.room : nil }
+    /// The lobby shows until the room first plays (or was under way when this player joined).
+    private var lobby: Bool { room.map { $0.available && !lobbyDone } ?? false }
 
     var body: some View {
         ZStack {
@@ -31,31 +41,44 @@ struct PlayerScreen: View {
                     SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls || options)
                 }
                 if let problem = model.problem {
-                    ProblemPane(message: problem, retry: { model.retry() }, close: { dismiss() })
+                    ProblemPane(message: problem, retry: { model.retry() }, close: { close() })
                 } else {
                     // The surface takes the remote while nothing else has the focus.
                     Color.clear
                         .contentShape(Rectangle())
-                        .focusable(!options)
+                        .focusable(!options && !lobby && together.inviting == nil)
                         .focused($focus, equals: .surface)
                         .onMoveCommand { move($0) }
-                        .onTapGesture { model.togglePlay(); showControls() }
+                        .onTapGesture { togglePlay(); showControls() }
                     if model.loading || model.waiting { ProgressView().scaleEffect(1.6) }
                     PlayerControls(model: model).opacity(controls && !options ? 1 : 0).animation(.easeInOut(duration: 0.25), value: controls)
                     corner(model)
                     if options { optionsPanel(model) }
+                    if let room, lobby {
+                        LobbyPanel(room: room, code: together.lobbyCode, focus: $focus,
+                                   start: { Task { await together.play() } },
+                                   invite: { inviteMore(room) },
+                                   leave: { close() })
+                    }
+                    if request.together, let target = together.inviting {
+                        InvitePanel(target: target)
+                    }
                 }
             }
+            if request.together, let notice = together.notice { NoticeCapsule(text: notice) }
         }
-        .onPlayPauseCommand { model?.togglePlay(); showControls() }
+        .animation(.easeInOut(duration: 0.25), value: together.notice)
+        .onPlayPauseCommand { togglePlay(); showControls() }
         .onExitCommand {
-            if options {
+            if request.together && together.inviting != nil {
+                together.inviting = nil
+            } else if options {
                 options = false
                 focus = .surface
-            } else if controls && model?.playing == true {
+            } else if controls && model?.playing == true && !lobby {
                 controls = false
             } else {
-                dismiss()
+                close()
             }
         }
         .onAppear {
@@ -65,14 +88,33 @@ struct PlayerScreen: View {
             m.start()
             focus = .surface
             showControls()
+            if request.together { startFollowing(m) }
         }
         .onDisappear {
             hideTask?.cancel()
+            follow?.cancel()
+            if together.reporterOwner == owner { together.reporter = nil }
             model?.close()
         }
         .onChange(of: model?.ended ?? false) { _, ended in
             guard ended else { return }
+            if let room {
+                // In a room the host's Up Next moves everyone on; the others wait for the room.
+                if room.isHost, let next = model?.next, model?.prefs?.autoPlay != false, !upNextDismissed { playNext(next) }
+                return
+            }
             if let next = model?.next, model?.prefs?.autoPlay != false, !upNextDismissed { playNext(next) } else { dismiss() }
+        }
+        .onChange(of: together.room) { _, now in
+            guard request.together, let now else { return }
+            if !lobbyDone && (now.state != "paused" || now.positionMs > 0) {
+                lobbyDone = true
+                focus = .surface
+                showControls()
+            }
+        }
+        .onChange(of: lobby) { _, showing in
+            if showing { Task { @MainActor in focus = .lobbyStart } }
         }
         // Skip Intro takes the focus when it appears, so Select skips (as Plex).
         .onChange(of: model?.marker?.startMs) { _, now in
@@ -80,7 +122,7 @@ struct PlayerScreen: View {
             else if focus == .skip { focus = .surface }
         }
         .onChange(of: model?.upNextDue ?? false) { _, due in
-            guard due, !upNextDismissed, !options else { return }
+            guard due, !upNextDismissed, !options, room?.isHost ?? true else { return }
             focus = .upNext
             if model?.prefs?.autoPlay != false { startCountdown() }
         }
@@ -88,8 +130,8 @@ struct PlayerScreen: View {
 
     private func move(_ direction: MoveCommandDirection) {
         switch direction {
-        case .left: model?.seek(by: -10_000)
-        case .right: model?.seek(by: 10_000)
+        case .left: seek(by: -10_000)
+        case .right: seek(by: 10_000)
         case .down:
             if let model {
                 options = true
@@ -107,14 +149,14 @@ struct PlayerScreen: View {
             Spacer()
             HStack {
                 Spacer()
-                if model.upNextDue, !upNextDismissed, let next = model.next {
+                if model.upNextDue, !upNextDismissed, room?.isHost ?? true, let next = model.next {
                     UpNextCard(next: next, countdown: countdown, focus: $focus, play: { playNext(next) }, dismiss: {
                         upNextDismissed = true
                         countdown = nil
                         focus = .surface
                     })
                 } else if let marker = model.marker, marker.kind != "credits" || model.next == nil {
-                    Button { model.skipMarker(); focus = .surface } label: {
+                    Button { model.skipMarker(); sendSeek(); focus = .surface } label: {
                         Text(L(marker.kind == "credits" ? "player.skip_credits" : marker.kind == "recap" ? "player.skip_recap" : "player.skip_intro"))
                             .font(.headline)
                     }
@@ -133,6 +175,18 @@ struct PlayerScreen: View {
     private func optionsPanel(_ model: PlayerModel) -> some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 32) {
+                if let room {
+                    optionSection(L("together.title")) {
+                        PeopleList(room: room)
+                        if room.isHost {
+                            optionButton(L("together.invite"), selected: false, key: "t:invite") { inviteMore(room) }
+                        }
+                        optionButton(L("together.leave"), selected: false, key: "t:leave") { close() }
+                        if room.isHost {
+                            optionButton(L("together.end"), selected: false, key: "t:end") { Task { await together.end() } }
+                        }
+                    }
+                }
                 if !model.subtitleTracks.isEmpty {
                     optionSection(L("player.subtitles")) {
                         optionButton(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
@@ -166,6 +220,7 @@ struct PlayerScreen: View {
                         ForEach(Array(model.chapters.enumerated()), id: \.offset) { i, c in
                             optionButton(chapterName(c, i), selected: model.chapter == c, key: "c:\(i)") {
                                 model.jump(to: c)
+                                sendSeek()
                                 options = false
                                 focus = .surface
                             }
@@ -209,8 +264,86 @@ struct PlayerScreen: View {
 
     private func playNext(_ next: Item) {
         countdown = nil
+        if room != nil {
+            // The room moves on, and every player in it follows (this one included).
+            ArcLogApp.info("moving the room to the next episode")
+            Task { await together.changeItem(next.id) }
+            return
+        }
         ArcLogApp.info("playing the next episode")
         browse.play(PlayRequest(item: next, startMs: next.resumeMs))
+    }
+
+    // MARK: - Watch Together
+
+    /// Play/Pause: in a room it goes to the room (and plays or pauses here at once).
+    private func togglePlay() {
+        guard let model else { return }
+        guard let room else { model.togglePlay(); return }
+        if room.state == "playing" {
+            model.setPlaying(false)
+            Task { await together.pause() }
+        } else {
+            model.setPlaying(true)
+            Task { await together.play() }
+        }
+    }
+
+    /// Moves here at once, and takes the room there.
+    private func seek(by deltaMs: Int64) {
+        guard !lobby else { return }
+        model?.seek(by: deltaMs)
+        sendSeek()
+    }
+
+    private func sendSeek() {
+        guard room != nil, let ms = model?.positionMs else { return }
+        Task { await together.seek(toMs: ms) }
+    }
+
+    private func inviteMore(_ room: WatchRoom) {
+        guard let id = room.itemId else { return }
+        options = false
+        together.inviting = .init(itemId: id, title: room.item?.title ?? model?.item.title ?? "", roomId: room.id)
+    }
+
+    /// Closing the player leaves the room (the others carry on).
+    private func close() {
+        if request.together { together.leave() }
+        dismiss()
+    }
+
+    /// Reports this player to the room, and keeps it in step: plays and pauses with the room,
+    /// plays a little faster or slower to catch up, and jumps when it's far out.
+    private func startFollowing(_ m: PlayerModel) {
+        if room.map({ $0.state != "paused" || $0.positionMs > 0 }) == true { lobbyDone = true }
+        together.reporterOwner = owner
+        together.reporter = {
+            RoomReport(positionMs: m.positionMs, state: m.busy ? "waiting" : (m.playing ? "playing" : "paused"), ready: !m.loading)
+        }
+        let together = self.together, itemId = request.item.id
+        follow = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let room = together.room, room.available, room.itemId == itemId, !m.loading else { continue }
+                let expected = together.expectedMs()
+                if room.state == "playing" {
+                    if !m.playing { m.setPlaying(true) }
+                    switch WatchSync.correction(localMs: Double(m.positionMs), expectedMs: expected) {
+                    case .none: m.setRate(1)
+                    case .rate(let rate): m.setRate(Float(rate))
+                    case .seek(let to):
+                        m.setRate(1)
+                        m.seek(toMs: Int64(to))
+                    }
+                } else {
+                    // Paused, or waiting for someone to load: hold here, at the room's place.
+                    if m.playing { m.setPlaying(false) }
+                    m.setRate(1)
+                    if abs(Double(m.positionMs) - expected) > 1500 { m.seek(toMs: Int64(expected)) }
+                }
+            }
+        }
     }
 
     private func startCountdown() {

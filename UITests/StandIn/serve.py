@@ -34,6 +34,36 @@ for _v in answers.values():
             people[str(_c.get("person_id"))] = _c.get("name")
 real = {}
 
+# Watch Together: two rooms on Home's row (one this profile hosts, one Jo invited it to), for the
+# first two films recorded. Joining one gives a paused room at the start (the lobby); commands
+# change it; its live stream sends it once and stays open.
+import threading, time
+_films = []
+for _v in answers.values():
+    _b = _v.get("body")
+    for _d in ([_b] if isinstance(_b, dict) else []) + [x for x in ((_b or {}).get("items") or [] if isinstance(_b, dict) else []) if isinstance(x, dict)]:
+        if _d.get("kind") == "movie" and _d.get("id") and _d["id"] not in [f["id"] for f in _films]:
+            _films.append({"id": _d["id"], "title": _d.get("title", ""), "kind": "movie"})
+wt_lock = threading.Lock()
+wt_rooms = {}
+for _i, (_rid, _hosting) in enumerate([("wt-hosting", True), ("wt-invited", False)]):
+    if _i < len(_films):
+        wt_rooms[_rid] = {"hosting": _hosting, "item": _films[_i], "revision": 1, "generation": 1, "state": "paused",
+                          "position_ms": 0, "at_ms": int(time.time() * 1000), "joined": False}
+
+def wt_listed(rid, r):
+    return {"id": rid, "state": r["state"], "position_ms": r["position_ms"], "created_at_ms": 1, "host_name": "Admin" if r["hosting"] else "Jo",
+            "hosting": r["hosting"], "joined": r["joined"], "item": r["item"],
+            "participants": ["Admin"] if r["joined"] else [], "invited": ["Sam"] if r["hosting"] else []}
+
+def wt_room(rid, r):
+    me = {"id": "me", "name": "Admin", "available": True, "ready": True, "state": "playing" if r["state"] == "playing" else "paused"}
+    people = [me] if r["hosting"] else [me, {"id": "sam", "name": "Sam", "available": True, "ready": True, "state": "paused"}]
+    return {"id": rid, "revision": r["revision"], "generation": r["generation"], "state": r["state"], "position_ms": r["position_ms"],
+            "at_ms": r["at_ms"], "rate": 1, "server_time_ms": int(time.time() * 1000), "host_id": "me" if r["hosting"] else "",
+            "host_name": "Admin" if r["hosting"] else "Jo", "self_id": "me", "available": True, "item_id": r["item"]["id"],
+            "item": r["item"], "participants": people, "invited": [{"name": "Sam"}] if r["hosting"] else []}
+
 def tmdb(path, **query):
     q = dict(query)
     headers = {"Accept": "application/json"}
@@ -147,6 +177,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             wide = "backdrop" in path or "thumb" in path or (parts[0] == "items" and path.endswith("primary") and query.get("ep") == "1")
             w, h = (320, 180) if wide else (200, 300)
             return self.send(200, png(path.split("/images/")[0], w, h), "image/png", {"Cache-Control": "max-age=3600"})
+        if path.startswith("watch-together"):
+            return self.watch_together(method, parts, query, body)
         # Sign-in with a code: the code is "approved" on the third check, so its screen can be seen.
         if method == "POST" and path == "auth/link":
             return self.json(200, {"code": "K7Q2", "poll": "standin"})
@@ -232,6 +264,74 @@ class Handler(http.server.BaseHTTPRequestHandler):
             doc = dict(doc, extras=[{"id": "e1" + parts[1][:6], "kind": "trailer", "title": "Official Trailer", "duration_ms": 12000, "stream_url": "/api/extras/e1/stream"},
                                     {"id": "e2" + parts[1][:6], "kind": "featurette", "title": "Making Of", "duration_ms": 12000, "stream_url": "/api/extras/e2/stream"}])
         return self.json(a["status"], doc)
+
+    def watch_together(self, method, parts, query, body):
+        now = int(time.time() * 1000)
+        if len(parts) == 3 and parts[2] == "events":
+            # The room once, then the stream stays open (outside the lock) with keep-alives.
+            with wt_lock:
+                r = wt_rooms.get(parts[1])
+                doc = json.dumps(wt_room(parts[1], r)) if r else None
+            if doc is None:
+                return self.json(404, {"error": "room or playable invitation not found"})
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.end_headers()
+            try:
+                self.wfile.write(f"id: 1\nevent: room\ndata: {doc}\n\n".encode())
+                self.wfile.flush()
+                for _ in range(6):
+                    time.sleep(5)
+                    self.wfile.write(b": keep-alive\n\n")
+                    self.wfile.flush()
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+            self.close_connection = True
+            return
+        with wt_lock:
+            if parts == ["watch-together", "rooms"] and method == "GET":
+                return self.json(200, {"rooms": [wt_listed(k, r) for k, r in wt_rooms.items()]})
+            if parts == ["watch-together", "rooms"] and method == "POST":
+                r = {"hosting": True, "item": next((f for f in _films if f["id"] == (body or {}).get("item_id")), _films[0] if _films else {"id": "", "title": ""}),
+                     "revision": 1, "generation": 1, "state": "paused", "position_ms": 0, "at_ms": now, "joined": False}
+                wt_rooms["wt-new"] = r
+                return self.json(201, {"room": wt_listed("wt-new", r), "invite_code": "K7Q2M4XP", "invite_expires_at_ms": now + 900_000})
+            if parts == ["watch-together", "people"]:
+                return self.json(200, {"people": [{"id": "sam", "name": "Sam", "color": "blue", "friend": False, "can_watch": True},
+                                                   {"id": "jo", "name": "Jo", "color": "rose", "friend": True, "can_watch": True},
+                                                   {"id": "kid", "name": "Kid", "color": "amber", "friend": False, "can_watch": False}]})
+            if parts == ["watch-together", "time"]:
+                return self.json(200, {"client_sent_ms": int(query.get("client_sent_ms", 0)), "server_received_ms": now, "server_sent_ms": now})
+            if parts == ["watch-together", "current"]:
+                return self.json(404, {"error": "room or playable invitation not found"})
+            if len(parts) == 4 and parts[1] == "rooms" and parts[2] in wt_rooms:
+                r = wt_rooms[parts[2]]
+                if parts[3] == "join":
+                    r["joined"] = True
+                    return self.json(200, wt_room(parts[2], r))
+                if parts[3] == "dismiss":
+                    wt_rooms.pop(parts[2], None)
+                    return self.send(204, b"")
+            if len(parts) >= 2 and parts[1] in wt_rooms:
+                rid, r = parts[1], wt_rooms[parts[1]]
+                action = parts[2] if len(parts) > 2 else ""
+                if action == "commands":
+                    a = (body or {}).get("action")
+                    pos = r["position_ms"] + (now - r["at_ms"] if r["state"] == "playing" else 0)
+                    if a == "play": r.update(state="playing", position_ms=pos, at_ms=now)
+                    elif a == "pause": r.update(state="paused", position_ms=pos, at_ms=now)
+                    elif a == "seek": r.update(position_ms=int((body or {}).get("position_ms") or 0), at_ms=now, generation=r["generation"] + 1)
+                    elif a == "end": r.update(state="ended")
+                    r["revision"] += 1
+                    return self.json(200, wt_room(rid, r))
+                if action == "heartbeat":
+                    return self.json(200, wt_room(rid, r))
+                if action == "leave":
+                    r["joined"] = False
+                    return self.send(204, b"")
+                if not action:
+                    return self.json(200, wt_room(rid, r))
+        return self.json(404, {"error": "room or playable invitation not found"})
 
     def media(self):
         size = len(sample)
