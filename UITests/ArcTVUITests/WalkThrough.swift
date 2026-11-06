@@ -31,6 +31,11 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(6)
         shot("04-home")
+        // With rooms on the stand-in, Home opens on its Watch Together row: down to the titles.
+        if app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together:'")).firstMatch.hasFocus {
+            press(.down)
+            pause(2)
+        }
         press(.right)
         pause(3)
         shot("05-home-focus-moved")
@@ -180,8 +185,7 @@ final class WalkThrough: XCTestCase {
         for _ in 0..<4 where !home.hasFocus { press(.down) }
         remote.press(.select)
         pause(5)
-        press(.up)
-        pause(2)
+        // Home opens on the Watch Together row.
         shot("22-home-watch-together")
         remote.press(.select)
         pause(5)

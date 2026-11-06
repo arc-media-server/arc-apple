@@ -101,7 +101,7 @@ struct HomeView: View {
             } else if model.rows.isEmpty {
                 RowsMessage(title: L("home.empty_title"), message: L("home.empty_body"), retry: nil)
             } else {
-                HeroRows(rows: model.rows, top: browse.together.rooms.isEmpty ? nil : AnyView(WatchTogetherRow()))
+                HeroRows(rows: model.rows, top: browse.together.rooms.isEmpty ? nil : { focus in AnyView(WatchTogetherRow(focus: focus)) })
             }
         }
         // Read again after playing or a change of watch state, so Continue Watching is current.

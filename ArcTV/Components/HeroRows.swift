@@ -11,8 +11,10 @@ struct HeroRows<Header: View>: View {
     let rows: [LoadedRow]
     /// Room left at the top of the hero for the floating header.
     var headerHeight: CGFloat = 0
-    /// A row of its own above the titles' rows (Home's Watch Together row).
-    var top: AnyView? = nil
+    /// A row of its own above the titles' rows (Home's Watch Together row). It gets the page's
+    /// focus binding and should mark its first card with `HeroRowsTopFocus`, which takes the focus
+    /// when the page opens.
+    var top: ((FocusState<String?>.Binding) -> AnyView)? = nil
     @ViewBuilder var header: () -> Header
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
@@ -27,7 +29,7 @@ struct HeroRows<Header: View>: View {
             ScrollView(.vertical) {
                 LazyVStack(alignment: .leading, spacing: 44) {
                     if let hero { heroDetails(hero) }
-                    if let top { top }
+                    if let top { top($focused) }
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 16) {
                             Text(row.title).font(.headline).padding(.horizontal, 80)
@@ -69,7 +71,10 @@ struct HeroRows<Header: View>: View {
     private func focusFirst() {
         guard focused == nil, let row = rows.first, let card = row.cards.first else { return }
         if hero == nil { hero = card }
-        Task { @MainActor in focused = row.id + "|" + card.id }
+        // A top row starts with the focus: the first titles' row may be below the screen, not
+        // yet built, and focusing it then leaves the focus to tvOS (which picks the sidebar).
+        let key = top == nil ? row.id + "|" + card.id : HeroRowsTopFocus
+        Task { @MainActor in focused = key }
     }
 
     /// The hero's words over the background; the first row starts just under it.
@@ -149,7 +154,10 @@ struct HeroRows<Header: View>: View {
 }
 
 extension HeroRows where Header == EmptyView {
-    init(rows: [LoadedRow], top: AnyView? = nil) {
+    init(rows: [LoadedRow], top: ((FocusState<String?>.Binding) -> AnyView)? = nil) {
         self.init(rows: rows, top: top) { EmptyView() }
     }
 }
+
+/// The focus key of a top row's first card (see `HeroRows.top`).
+let HeroRowsTopFocus = "top|first"
