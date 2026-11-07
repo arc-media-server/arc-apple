@@ -193,7 +193,9 @@ struct MainView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             sidebar
-                .opacity(stepsAside ? 0 : 1)
+                // A mask, not opacity: tvOS won't move the focus to a fully transparent view, and
+                // in Search the sidebar must stay reachable (Left from the keyboard).
+                .mask(Rectangle().opacity(stepsAside ? 0 : 1))
                 .disabled(deep)
         }
         .animation(.easeOut(duration: 0.25), value: sidebarOpen)
