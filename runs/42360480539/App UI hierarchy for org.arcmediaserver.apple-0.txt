@@ -1,0 +1,18 @@
+Application, 0x102249930, pid: 6993, label: 'Arc' <App element pid: 6993>
+  Window (Main), 0x102244b70, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 6993, elementOrHash.elementID: 4382070640.8>
+    Other, 0x102258640, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 6993, elementOrHash.elementID: 4383181104.9>
+      Other, 0x10225cc40, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 6993, elementOrHash.elementID: 4383184688.10>
+        Other, 0x102046b60, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 6993, elementOrHash.elementID: 4383174096.11>
+          Other, 0x102044950, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 6993, elementOrHash.elementID: 4383208256.12>
+            StaticText, 0x102046f80, {{900.0, 152.0}, {121.0, 91.0}}, label: 'Arc' <AX element pid: 6993, elementOrHash.elementID: 4660739184.509>
+            StaticText, 0x10204abb0, {{741.0, 291.0}, {439.0, 69.0}}, label: 'Who's watching?' <AX element pid: 6993, elementOrHash.elementID: 4660740672.510>
+            StaticText, 0x102049360, {{850.0, 368.0}, {221.0, 35.0}}, label: 'Arc Media Server' <AX element pid: 6993, elementOrHash.elementID: 4660741136.511>
+            Button, 0x102049480, {{684.0, 476.0}, {248.0, 314.0}}, label: 'J, Jon' <AX element pid: 6993, elementOrHash.elementID: 4382530672.508>
+              StaticText, 0x1020495a0, {{789.0, 557.0}, {39.0, 86.0}}, label: 'J' <AX element pid: 6993, elementOrHash.elementID: 4660744832.514>
+              StaticText, 0x1020496c0, {{777.0, 720.0}, {63.0, 46.0}}, label: 'Jon' <AX element pid: 6993, elementOrHash.elementID: 4660307856.515>
+            Button, 0x1020497e0, {{988.0, 451.0}, {248.0, 364.0}}, label: 'K, Kids, Has a PIN' <AX element pid: 6993, elementOrHash.elementID: 4660028080.512>
+              StaticText, 0x102105e00, {{1089.0, 532.0}, {46.0, 86.0}}, label: 'K' <AX element pid: 6993, elementOrHash.elementID: 4659976144.516>
+              StaticText, 0x10212cc90, {{1075.0, 695.0}, {74.0, 46.0}}, label: 'Kids' <AX element pid: 6993, elementOrHash.elementID: 4660376896.517>
+              Image, 0x10211fae0, {{1040.0, 763.0}, {18.0, 25.0}}, identifier: 'lock.fill', label: 'Lock' <AX element pid: 6993, elementOrHash.elementID: 4659977904.518>
+              StaticText, 0x10212c940, {{1040.0, 761.0}, {148.0, 30.0}}, label: 'Has a PIN' <AX element pid: 6993, elementOrHash.elementID: 4659937552.519>
+            Button, 0x10212c5e0, {{874.0, 863.0}, {172.0, 66.0}}, label: 'Sign Out' <AX element pid: 6993, elementOrHash.elementID: 4660744048.513>
