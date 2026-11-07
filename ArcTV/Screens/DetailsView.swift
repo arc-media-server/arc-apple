@@ -26,22 +26,33 @@ struct DetailsView: View {
     @State private var season = 0
     /// The season tabs: coming into them lands on the season showing.
     @Namespace private var seasonTabs
+    /// The backdrop's own colour, for the wash behind a show's episodes.
+    @State private var tone: Color?
+    /// The artwork has slid away for a show's episodes. It stays away below them (Related, Cast)
+    /// and comes back only with the hero.
+    @State private var receded = false
     @State private var problem: String?
     @State private var extra: Extra?
 
     private var shown: Item { item ?? initial }
+    private var backdropPath: String? { shown.images?.backdrop ?? shown.images?.seriesBackdrop }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            ArtworkImage(path: shown.images?.backdrop ?? shown.images?.seriesBackdrop)
+            // Behind the artwork, a wash in its own colour: what's left when the artwork slides
+            // away for a show's episodes.
+            LinearGradient(colors: [(tone ?? ArcColor.background).opacity(0.85), ArcColor.background],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+            ArtworkImage(path: backdropPath)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .overlay(LinearGradient(colors: [.clear, ArcColor.background.opacity(0.85), ArcColor.background], startPoint: .top, endPoint: .bottom))
                 .overlay(LinearGradient(colors: [ArcColor.background.opacity(0.9), .clear], startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
-            // While a show's seasons and episodes have the focus the artwork darkens a little and
-            // the show's logo sits small and centred at the top, over the season tabs.
-            Color.black.opacity(browsing ? 0.35 : 0).ignoresSafeArea().allowsHitTesting(false)
-                .animation(.easeInOut(duration: 0.3), value: browsing)
+                // The episode browser: the artwork slides up and away, on the page's own clock.
+                .offset(y: receded ? -1200 : 0)
+                .opacity(receded ? 0 : 1)
+                .animation(Self.recede, value: receded)
             ScrollViewReader { proxy in
                 ScrollView(.vertical) {
                     VStack(alignment: .leading, spacing: 28) {
@@ -69,10 +80,16 @@ struct DetailsView: View {
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
                     if nowBrowsing && !wasBrowsing {
-                        withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.browserAnchor, anchor: .top) }
+                        withAnimation(Self.recede) {
+                            receded = true
+                            proxy.scrollTo(Self.browserAnchor, anchor: .top)
+                        }
                     } else if !nowBrowsing && old?.hasPrefix("season|") == true && new == nil {
                         // Up from the season tabs is the hero's buttons: back to the top.
-                        withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
+                        withAnimation(Self.recede) {
+                            receded = false
+                            proxy.scrollTo(Self.heroAnchor, anchor: .top)
+                        }
                     }
                 }
             }
@@ -81,13 +98,20 @@ struct DetailsView: View {
                     .frame(maxWidth: 560, maxHeight: 150)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .padding(.top, 50)
+                    // It trails in from a little lower, and leaves quicker than it came, so it's
+                    // gone before the hero is back.
+                    .offset(y: browsing ? 0 : 100)
                     .opacity(browsing ? 1 : 0)
-                    .animation(.easeInOut(duration: 0.3), value: browsing)
+                    .animation(browsing ? Self.recede : .easeInOut(duration: 0.35), value: browsing)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
         }
         .task(id: browse.changes) { await load() }
+        .task(id: backdropPath) {
+            guard let path = backdropPath, let api = app.api, let url = api.absolute(path) else { return }
+            if let color = await ArtworkLoader.shared.tone(url, headers: api.authorization) { tone = Color(color) }
+        }
         .fullScreenCover(item: $extra) { ExtraPlayerScreen(extra: $0) }
     }
 
@@ -345,6 +369,9 @@ struct DetailsView: View {
         return available.first { !$0.watched } ?? available.first
     }
 
+    /// The one clock the move between a show's overview and its episodes runs on: a slow,
+    /// gentle 0.9 s, everything (the page, the artwork, the logo) together.
+    static let recede = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.9)
     static let heroAnchor = "details|hero"
     static let browserAnchor = "details|browser"
     /// Room above the season tabs for the show's logo while browsing episodes.
