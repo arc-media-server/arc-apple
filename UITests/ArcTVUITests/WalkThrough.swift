@@ -185,6 +185,12 @@ final class WalkThrough: XCTestCase {
         for _ in 0..<4 where !home.hasFocus { press(.down) }
         remote.press(.select)
         pause(2)
+        // Home still has the title opened earlier, and the sidebar steps aside on opened pages:
+        // Back closes them until Home's first page (where the sidebar's buttons work again).
+        for _ in 0..<4 where !home.isEnabled {
+            remote.press(.menu)
+            pause(1.5)
+        }
         // Home keeps its place from earlier steps; choosing it again (Left reopens the sidebar on
         // it) starts it afresh at the top, on the Watch Together row.
         press(.left)

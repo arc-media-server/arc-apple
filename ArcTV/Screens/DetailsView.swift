@@ -100,7 +100,7 @@ struct DetailsView: View {
                 }
                 HStack(spacing: 12) {
                     if !facts.isEmpty { Text(facts) }
-                    ForEach(Quality.badges(Quality.file(of: shown)), id: \.self) { OutlinedBadge(text: $0) }
+                    ForEach(Array(Quality.capsules(Quality.file(of: shown)).enumerated()), id: \.offset) { QualityCapsule(capsule: $0.element) }
                 }
                 .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
                 if let problem { Text(problem).foregroundStyle(ArcColor.error) }
@@ -205,7 +205,7 @@ struct DetailsView: View {
         let file = Quality.file(of: shown)
         let details: [(String, String)] = [
             (L("details.released"), shown.releaseDate.flatMap(releaseDate) ?? shown.year.map(String.init) ?? ""),
-            (L("details.runtime"), shown.isSeries ? "" : shown.runtimeMin.map { formatMinutes($0) } ?? ""),
+            (L("details.runtime_label"), shown.isSeries ? "" : shown.runtimeMin.map { runtimeText($0) } ?? ""),
             (L("details.content_rating"), shown.contentRating ?? ""),
             (L("details.genres"), ListFormatter.localizedString(byJoining: shown.genres)),
             (L("details.original_title"), shown.originalTitle.flatMap { $0 == shown.title ? nil : $0 } ?? ""),
@@ -234,10 +234,6 @@ struct DetailsView: View {
         .padding(.vertical, 24)
     }
 
-    private func formatMinutes(_ m: Int) -> String {
-        m >= 60 ? (m % 60 == 0 ? L("details.hours", m / 60) : L("details.hours_minutes", m / 60, m % 60)) : L("card.minutes_short", m)
-    }
-
     private func lines(_ pairs: [(String, String)]) -> some View {
         ForEach(pairs, id: \.0) { pair in
             VStack(alignment: .leading, spacing: 2) {
@@ -260,8 +256,9 @@ struct DetailsView: View {
             let parts = [Quality.audioCodec(a), Quality.channels(a.channels), Quality.objectAudio(a)].compactMap { $0 }
             if !parts.isEmpty { out.append((L("details.audio"), parts.joined(separator: " "))) }
         }
+        // ffprobe's overall bitrate, in bits a second.
         if let bitrate = file.bitrate, bitrate > 0 {
-            out.append((L("details.bitrate"), L("details.mbps", Double(bitrate) / 1000)))
+            out.append((L("details.bitrate"), L("details.mbps", Double(bitrate) / 1_000_000)))
         }
         if let size = file.size, size > 0 {
             out.append((L("details.size"), ByteCountFormatter.string(fromByteCount: size, countStyle: .file)))

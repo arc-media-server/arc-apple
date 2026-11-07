@@ -9,7 +9,7 @@ struct TitleGrid: View {
     @Environment(\.openRoute) private var openRoute
     @FocusState private var focused: String?
 
-    static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 36, alignment: .top)]
+    static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 28, alignment: .top)]
 
     var body: some View {
         LazyVGrid(columns: Self.columns, alignment: .leading, spacing: 56) {

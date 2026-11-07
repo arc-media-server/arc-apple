@@ -22,4 +22,14 @@ final class QualityTests: XCTestCase {
         XCTAssertEqual(Quality.badges(try file("")), [])
         XCTAssertEqual(Quality.badges(nil), [])
     }
+
+    func testCapsulesAsTheTitlePageDrawsThem() throws {
+        let f = try file(#"{"kind":"video","codec":"hevc","width":3840,"height":1600,"color_transfer":"smpte2084","dolby_vision":true},{"kind":"audio","codec":"eac3","profile":"Dolby Digital Plus + Dolby Atmos","channels":6,"is_default":true}"#)
+        XCTAssertEqual(Quality.capsules(f), [.init(["4K"], filled: true), .init(["DV", "HDR10"]), .init(["DD+", "5.1"]), .init(["Atmos"])])
+        let g = try file(#"{"kind":"video","codec":"h264","width":1920,"height":800},{"kind":"audio","codec":"aac","channels":2}"#)
+        XCTAssertEqual(Quality.capsules(g), [.init(["1080p"], filled: true), .init(["SDR"]), .init(["AAC", "2.0"])])
+        XCTAssertEqual(Quality.capsules(try file(#"{"kind":"video","codec":"h264","width":1280,"height":720,"hdr10_plus":true}"#)),
+                       [.init(["720p"], filled: true), .init(["HDR10+"])])
+        XCTAssertEqual(Quality.capsules(nil), [])
+    }
 }

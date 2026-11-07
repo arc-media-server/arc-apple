@@ -4,7 +4,7 @@ The first two steps of `docs/plans/reference-look.md`.
 
 ## What changed
 
-- **Bigger cards everywhere.** Posters are 250x375 (were 200x300), wide cards 512x288 (were
+- **Bigger cards everywhere.** Posters are 236x354 (were 200x300), wide cards 512x288 (were
   384x216): about four wide cards or six posters across the screen, as the reference design
   has them, so art and names read from a sofa. Card names and row titles are a size up. The
   library grid still fits six posters a row.
@@ -17,12 +17,25 @@ The first two steps of `docs/plans/reference-look.md`.
     - Playback: Server, Profile, Video, Audio, Bitrate, Size, Edition and the file's name.
   - The cards no longer scroll sideways.
 - ArcKit's `MediaFile` reads the file's `path` (already in /api/v1), for the file's name.
+- **Quality badges are capsules**, as the reference design draws them: the resolution filled
+  white ("4K", "1080p", "720p", "SD"), then outlined capsules split by a line ("DV | HDR10",
+  "DD+ | 5.1", "Atmos"), and "SDR" for a picture without HDR (`Quality.capsules`, with tests).
+- **Library posters:** a show's episodes still to watch in a dark tab at the top right (the tick
+  once all are watched), and the year and length under the name ("2011 · 25m"). Filter's button
+  names what's shown: All, Unwatched, a genre, or Filtered for several.
+- **Continue Watching and Up Next show the show's own picture** with its logo on it, rather than
+  the episode's still, so a row of shows is easy to tell apart (`MediaCard.withShowArt`).
 
 ## Decisions
 
 - No Ratings card: Arc's ratings are paused.
 - The Playback card says which profile is watching ("Profile"), and leaves out the connection
   (home network or remote), which the app doesn't know for certain yet.
+
+## Walk-through
+
+Home keeps a title opened earlier, and the sidebar now steps aside on opened pages, so the
+walk-through presses Back until Home's first page before choosing Home again.
 
 ## Logging
 
