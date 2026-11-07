@@ -9,7 +9,7 @@ struct TitleGrid: View {
     @Environment(\.openRoute) private var openRoute
     @FocusState private var focused: String?
 
-    static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 40, alignment: .top)]
+    static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 36, alignment: .top)]
 
     var body: some View {
         LazyVGrid(columns: Self.columns, alignment: .leading, spacing: 56) {
@@ -43,8 +43,8 @@ struct TileButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
-            Text(title).font(.caption).lineLimit(1).frame(width: size.width, alignment: .leading)
-            if let subtitle { Text(subtitle).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
+            Text(title).font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
+            if let subtitle { Text(subtitle).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
         }
     }
 }
