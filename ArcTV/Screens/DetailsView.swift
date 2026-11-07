@@ -29,6 +29,9 @@ struct DetailsView: View {
     /// The artwork has slid away for a show's episodes. It stays away below them (Related, Cast)
     /// and comes back only with the hero.
     @State private var receded = false
+    /// The page opens on its artwork alone; the hero's words fade in a moment later, as the
+    /// reference does. (A mask, so Play can take the focus straight away.)
+    @State private var entered = false
     @State private var problem: String?
     @State private var extra: Extra?
 
@@ -58,7 +61,7 @@ struct DetailsView: View {
                             // Hidden while browsing a show's episodes, as the reference does: a
                             // mask rather than opacity, so Up from the season tabs still reaches
                             // its buttons (tvOS won't focus a fully transparent view).
-                            .mask(Rectangle().opacity(browsing ? 0 : 1))
+                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1))
                             .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
                             .id(Self.heroAnchor)
                         if !seasons.isEmpty { episodes }
@@ -76,12 +79,19 @@ struct DetailsView: View {
                         if old?.hasPrefix("season|") == true {
                             // Moving along the season tabs shows that season's episodes; no Select.
                             withAnimation(.easeInOut(duration: 0.2)) { season = index }
+                        } else if old == nil, let next = seasonNextUp {
+                            // Down from the hero's buttons lands on the episode to watch next, as the
+                            // reference does; the tabs are Up from there.
+                            Task { @MainActor in focused = "ep|" + next.id }
                         } else {
                             // Coming into the tabs (from the episodes or the hero) lands on the
                             // season showing, whichever tab is nearest. (A step later: tvOS
                             // ignores a focus change made while it's moving the focus.)
                             Task { @MainActor in focused = "season|\(season)" }
                         }
+                    }
+                    if old == nil, new == "season|\(season)", let next = seasonNextUp {
+                        Task { @MainActor in focused = "ep|" + next.id }
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
                     if nowBrowsing && !wasBrowsing {
@@ -111,6 +121,10 @@ struct DetailsView: View {
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
             }
+        }
+        .onAppear {
+            guard !entered else { return }
+            withAnimation(.easeOut(duration: 0.4).delay(0.35)) { entered = true }
         }
         .task(id: browse.changes) { await load() }
         .task(id: backdropPath) {
@@ -398,13 +412,21 @@ struct DetailsView: View {
     /// The season tabs over one row of a season's episodes, as the reference design has them:
     /// moving along the tabs shows that season, coming into them lands on the season showing,
     /// and the focused episode shows its overview under it.
+    /// The season showing's episode to watch next: one part-way through, else the first not
+    /// watched, else the first. Down from the hero lands on it.
+    private var seasonNextUp: Item? {
+        guard seasons.indices.contains(season) else { return nil }
+        let eps = seasons[season].episodes
+        return eps.first { $0.available && $0.resumeMs > 0 } ?? eps.first { $0.available && !$0.watched } ?? eps.first
+    }
+
     private var episodes: some View {
         VStack(alignment: .leading, spacing: 20) {
             ScrollView(.horizontal) {
                 HStack(spacing: 20) {
                     ForEach(Array(seasons.enumerated()), id: \.element.id) { index, s in
                         Button(s.name.isEmpty ? L("details.season", s.seasonNumber) : s.name) { season = index }
-                            .arcGlassButton(prominent: index == season)
+                            .buttonStyle(SeasonTabStyle(chosen: index == season))
                             .focused($focused, equals: "season|\(index)")
                     }
                 }
@@ -473,9 +495,9 @@ struct EpisodeCard: View {
                 ZStack(alignment: .bottomLeading) {
                     ArtworkImage(path: episode.images?.primary ?? episode.images?.seriesBackdrop)
                         .frame(width: size.width, height: size.height).clipped()
-                        .opacity(episode.available ? 1 : 0.35)
+                        .opacity(episode.available ? 1 : 0.25)
                     if let releases {
-                        Label(L("details.releases", releases.formatted(.dateTime.day().month(.abbreviated))), systemImage: "clock")
+                        Label(L("details.releases", Item.releaseDay(releases)), systemImage: "clock")
                             .font(.caption.weight(.semibold))
                             .padding(.horizontal, 14).padding(.vertical, 8)
                             .background(Capsule().fill(.black.opacity(0.6)))
@@ -531,5 +553,28 @@ struct InfoCard<Content: View>: View {
         .animation(.easeOut(duration: 0.15), value: focused)
         .focusable()
         .focused($focused)
+    }
+}
+
+/// A season tab, as the reference draws them: plain words, the chosen season in a soft glass
+/// capsule, and the focused one white with black words.
+struct SeasonTabStyle: ButtonStyle {
+    let chosen: Bool
+    @Environment(\.isFocused) private var isFocused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.callout.weight(chosen || isFocused ? .semibold : .medium))
+            .padding(.horizontal, 22).padding(.vertical, 10)
+            .foregroundStyle(isFocused ? Color.black : chosen ? Color.white : Color.white.opacity(0.7))
+            .background {
+                if isFocused {
+                    Capsule().fill(.white)
+                } else if chosen {
+                    Capsule().fill(.ultraThinMaterial).overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1.5))
+                }
+            }
+            .scaleEffect(isFocused ? 1.06 : configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.15), value: isFocused)
     }
 }
