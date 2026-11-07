@@ -9,6 +9,11 @@ options:
 packages:
   ArcKit:
     path: ArcKit
+  # mpv and FFmpeg, patched for Apple TV (Dolby Vision, HDR10+, frame pacing), as XCFrameworks.
+  # GPL-3.0; pinned by commit (docs/plans/arc-engine.md).
+  MPVKit:
+    url: https://github.com/edde746/mpv-build
+    revision: 6dbda06021b128b7adc30161bf7870977e575135
 targets:
   ArcTV:
     type: application
@@ -17,6 +22,8 @@ targets:
       - path: ArcTV
     dependencies:
       - package: ArcKit
+      - package: MPVKit
+        product: MPVKit
     info:
       path: ArcTV/Info.plist
       properties:

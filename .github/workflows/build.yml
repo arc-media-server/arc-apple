@@ -44,6 +44,9 @@ jobs:
           set -o pipefail
           xcodebuild -project Arc.xcodeproj -scheme ArcTV -configuration Debug \
             -destination 'generic/platform=tvOS' CODE_SIGNING_ALLOWED=NO -quiet build
+          # What the app weighs (a Debug build, so larger than a release), kept with the screenshots.
+          du -sh ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-appletvos/Arc.app | tee app-size.txt
+          du -sh ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-appletvos/Arc.app/Frameworks 2>/dev/null | tee -a app-size.txt || true
       - name: Start the stand-in Arc
         env:
           # Optional: real posters, backgrounds, logos and cast photos from TMDB for the screenshots.
@@ -98,6 +101,7 @@ jobs:
           for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null || true; rm "$f"; done
           cp standin.log small/ 2>/dev/null || true
           cp screenshots/*.ips small/ 2>/dev/null || true
+          cp app-size.txt small/ 2>/dev/null || true
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           dir="runs/${{ github.run_id }}"

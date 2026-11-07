@@ -17,6 +17,13 @@ build. Building them again would take months. Those parts are:
 - frame-pacing fixes;
 - TrueHD/DTS decoding to 7.1 LPCM (and tvOS 26's spatial path).
 
+Why not AetherEngine, which the reference app uses: it is younger and depends on one
+developer. mpv has years of use behind it, and the same core runs on Android if Arc's Android app
+ever needs it.
+
+The player screen is Arc's own SwiftUI screen in Apple's style, over both engines. AVKit's
+ready-made screen needs AVPlayer, so mpv can't use it.
+
 ## Licence
 
 The build is GPL-3.0, with FFmpeg's GPL parts enabled. Arc is AGPL-3.0-only, which may be
@@ -36,7 +43,9 @@ it is GPL too, and could be combined, but our wrapper is built for Arc's `Playba
 ## Steps
 
 1. **Add the package.** Pin a commit of mpv-build. Check the app size and that the tvOS build links
-   in the macOS workflow.
+   in the macOS workflow. Done on `claude/apple-engine`: `ArcTV/Player/MPVEngine.swift`
+   implements `PlaybackEngine`, not yet chosen for any file. The build writes `app-size.txt`
+   beside the screenshots.
 2. **`MPVEngine: PlaybackEngine`**, using libmpv's C API:
    - set the options (`vo=avfoundation`, `hwdec=videotoolbox`, the audio outputs);
    - observe properties (time-pos, pause, demuxer cache, track-list) on a serial queue;
