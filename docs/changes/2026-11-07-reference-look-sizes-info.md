@@ -59,3 +59,50 @@ None: layout only.
 `swift test --package-path ArcKit` passes. The walk-through screenshots (04-06 Home, 07-08b the
 title page, 17-18 a library) show the new sizes and the About section. Not yet seen on an
 Apple TV.
+
+## The episode row peeks under a show's hero (7 November, later)
+
+From the owner's photos of the reference app on their TV. On a show's hero, the season tabs are
+folded away and the top of the episode thumbnails peeks in at the bottom of the screen. Down brings
+the tabs back with the episodes, under the logo. Arc showed the tabs there and no episodes. The
+tabs now fold to no height and are masked while the hero has the focus, with the same 0.9 s curve
+as the rest of the move.
+
+A film's hero has nothing peeking under it, as in the owner's photo of the reference. A spacer below
+the hero starts the next row (Trailers & Extras, Related…) just under the screen, and Down scrolls
+to it as before.
+
+The cast row now comes first under the hero, above Trailers & Extras, Related and the rest. For a
+show it comes straight after the episodes.
+
+## The walk-through uses the owner's titles
+
+So screenshots compare directly with the owner's photos of the reference, the stand-in's recorded
+Interstellar is now **Spider-Man: Brand New Day** (TMDB 969681) and Firefly is **Dexter:
+Resurrection** (TMDB 259909). Their pictures come from TMDB as before.
+- Dexter has Season 1 (ten episodes, watched, named "Episode n") and Season 2:
+  - E1 Risky Business, ready to watch;
+  - E2 Young Blood, releasing 8 November;
+  - E3 Fallen, releasing 15 November.
+- The walk-through picks Dexter on Home. On the season tabs it moves Left, from Season 2 (where
+  the show opens, on its next episode) to Season 1.
+- Re-recording the fixtures with `record.py` would bring the scratch library's titles back.
+
+On a film, Down from the hero now brings the first row (the cast) up under the hero's buttons,
+which stay in view at the top, as in the owner's photo. Up goes back to the whole hero. tvOS's own
+scroll had moved the hero off the screen. To tell the hero from the rows, the cast and the
+trailers carry focus keys (`cast|…`, `extra|…`).
+
+A title's page opens with Play focused, as the reference does. tvOS had been picking the nearest
+button, and on a show that was the watched tick. Play carries the focus key `hero|play`. The
+page's logic treats that key, or no key, as "on the hero". The walk-through's 08 is now taken after
+one Down, the view in the owner's photo.
+
+The hero's mask now reaches 80 points past the hero. It used to sit right at the buttons, and it
+cut off the bottom of a focused button's lift and shadow. The artwork's fade is gentler, as in the
+owner's photos of the reference:
+- top to bottom, full until 60% of the way down, then to 45% (it was 15% at 60% and gone at the
+  bottom);
+- left to right, from 50% on the left to full past the middle (it was 12%).
+
+Before, the page read as a dark panel over the overview and the peeking episodes.
