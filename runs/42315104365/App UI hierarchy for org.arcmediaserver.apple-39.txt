@@ -1,0 +1,247 @@
+Application, 0x101b80db0, pid: 5705, label: 'Arc' <App element pid: 5705>
+  Window (Main), 0x101b87da0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4324540064.8>
+    Other, 0x101b868c0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323677616.9>
+      Other, 0x101b85640, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323680128.10>
+        Other, 0x101b83d30, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323510256.11>
+          Other, 0x101b85f80, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4322416976.12>
+            Other, 0x101b8bbf0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4322723136.327>
+              Other, 0x101b8bd10, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323210640.328>
+                Other, 0x101b8be30, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4579857344.329>
+                  Other, 0x101b8bf50, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4324248512.330>
+                    Other, 0x101b8c0a0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4322370672.331>
+                      Other, 0x101b8c1c0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4427287200.332>
+                        Other, 0x101b8c3f0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4427289568.334>
+                        Other, 0x101b8c510, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4324198464.335>
+                          Other, 0x101b8c630, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323021504.337>
+                            Other, 0x101b8c750, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323023648.344>
+                              Other, 0x101b8c870, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4322788352.369>
+                                Other, 0x101b8c990, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323124256.383>
+                                  Other, 0x101b8cbc0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4579688912.388>
+                                    ScrollView, 0x101b8cce0, {{960.0, 0.0}, {0.0, 1080.0}}, label: 'Search results' <AX element pid: 5705, elementOrHash.elementID: 4366050304.397>
+                                      Other, 0x101b8ce00, {{960.0, 306.0}, {0.0, 80.0}} <AX element pid: 5705, elementOrHash.elementID: 4325297120.400>
+                                      Other, 0x101b8cf20, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4598404016.401>
+                                      Other, 0x101b8d040, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4598404016.401>
+                            Other, 0x101b8d160, {{0.0, 60.0}, {1920.0, 245.5}} <AX element pid: 5705, elementOrHash.elementID: 4427841840.345>
+                              Other, 0x101b8d280, {{80.0, 60.0}, {1760.0, 70.0}} <AX element pid: 5705, elementOrHash.elementID: 4427307328.370>
+                                Other, 0x101b8d3a0, {{80.0, 60.0}, {1760.0, 70.0}} <AX element pid: 5705, elementOrHash.elementID: 4427141760.384>
+                                  SearchField, 0x101b8d4c0, {{76.0, 59.8}, {1768.0, 70.3}}, label: 'Movies, shows, people and collections', placeholderValue: 'Movies, shows, people and collections' <AX element pid: 5705, elementOrHash.elementID: 4345396224.389>
+                                  StaticText, 0x101b8d5e0, {{1840.0, 95.0}, {0.0, 0.0}} <AX element pid: 5705, elementOrHash.elementID: 4427319280.444>
+                              Other, 0x101b8d700, {{80.0, 165.0}, {1760.0, 66.0}} <AX element pid: 5705, elementOrHash.elementID: 4324377104.371>
+                                Other, 0x101b8d820, {{80.0, 165.0}, {1760.0, 66.0}} <AX element pid: 5705, elementOrHash.elementID: 4325231536.385>
+                                  Other, 0x101b8d940, {{80.0, 165.0}, {1760.0, 66.0}} <AX element pid: 5705, elementOrHash.elementID: 4427108112.392>
+                                    Keyboard, 0x101b8da60, {{80.0, 165.0}, {1760.0, 66.0}}, label: 'Keyboard' <AX element pid: 5705, elementOrHash.elementID: 4325089824.399>
+                                      Other, 0x101b8db80, {{80.0, 165.0}, {1760.0, 66.0}} <AX element pid: 5705, elementOrHash.elementID: 4323213504.402>
+                                        Other, 0x101b8dca0, {{80.0, 165.0}, {1760.0, 66.0}}, identifier: 'UIKeyboardLayoutStar Preview' <AX element pid: 5705, elementOrHash.elementID: 4356898304.404>
+                                          Key, 0x101b8ddc0, {{117.0, 165.0}, {89.0, 64.0}}, label: 'Numbers' <AX element pid: 5705, elementOrHash.elementID: 105553151674000.405>
+                                          Key, 0x101b8dee0, {{206.0, 165.0}, {119.0, 64.0}}, label: 'SPACE' <AX element pid: 5705, elementOrHash.elementID: 105553151673280.406>
+                                          Key, 0x101b8e000, {{325.0, 165.0}, {54.0, 64.0}}, label: 'a' <AX element pid: 5705, elementOrHash.elementID: 105553151686160.407>
+                                          Key, 0x101b8e120, {{379.0, 165.0}, {54.0, 64.0}}, label: 'b' <AX element pid: 5705, elementOrHash.elementID: 105553151681760.408>
+                                          Key, 0x101b8e240, {{433.0, 165.0}, {54.0, 64.0}}, label: 'c' <AX element pid: 5705, elementOrHash.elementID: 105553151675120.409>
+                                          Key, 0x101b8e360, {{487.0, 165.0}, {54.0, 64.0}}, label: 'd' <AX element pid: 5705, elementOrHash.elementID: 105553151683520.410>
+                                          Key, 0x101b8e480, {{541.0, 165.0}, {54.0, 64.0}}, label: 'e' <AX element pid: 5705, elementOrHash.elementID: 105553151680640.411>
+                                          Key, 0x101b8e5a0, {{595.0, 165.0}, {54.0, 64.0}}, label: 'f' <AX element pid: 5705, elementOrHash.elementID: 105553151676000.412>
+                                          Key, 0x101b8e6c0, {{649.0, 165.0}, {54.0, 64.0}}, label: 'g' <AX element pid: 5705, elementOrHash.elementID: 105553151684720.413>
+                                          Key, 0x101b8e7e0, {{703.0, 165.0}, {54.0, 64.0}}, label: 'h' <AX element pid: 5705, elementOrHash.elementID: 105553151686560.414>
+                                          Key, 0x101b8e900, {{757.0, 165.0}, {54.0, 64.0}}, label: 'i' <AX element pid: 5705, elementOrHash.elementID: 105553151680400.415>
+                                          Key, 0x101b8ea20, {{811.0, 165.0}, {54.0, 64.0}}, label: 'j' <AX element pid: 5705, elementOrHash.elementID: 105553151679120.416>
+                                          Key, 0x101b8eb40, {{865.0, 165.0}, {54.0, 64.0}}, label: 'k' <AX element pid: 5705, elementOrHash.elementID: 105553151681120.417>
+                                          Key, 0x101b8ec60, {{919.0, 165.0}, {54.0, 64.0}}, label: 'l' <AX element pid: 5705, elementOrHash.elementID: 105553151687840.418>
+                                          Key, 0x101b8ed80, {{973.0, 165.0}, {54.0, 64.0}}, label: 'm' <AX element pid: 5705, elementOrHash.elementID: 105553151674960.419>
+                                          Key, 0x101b8eea0, {{1027.0, 165.0}, {54.0, 64.0}}, label: 'n' <AX element pid: 5705, elementOrHash.elementID: 105553151676400.420>
+                                          Key, 0x101b8efc0, {{1081.0, 165.0}, {54.0, 64.0}}, label: 'o' <AX element pid: 5705, elementOrHash.elementID: 105553151680080.421>
+                                          Key, 0x101b8f0e0, {{1135.0, 165.0}, {54.0, 64.0}}, label: 'p' <AX element pid: 5705, elementOrHash.elementID: 105553151678240.422>
+                                          Key, 0x101b8f200, {{1189.0, 165.0}, {54.0, 64.0}}, label: 'q' <AX element pid: 5705, elementOrHash.elementID: 105553151676080.423>
+                                          Key, 0x101b8f320, {{1243.0, 165.0}, {54.0, 64.0}}, label: 'r' <AX element pid: 5705, elementOrHash.elementID: 105553151680240.424>
+                                          Key, 0x101b8f440, {{1297.0, 165.0}, {54.0, 64.0}}, label: 's' <AX element pid: 5705, elementOrHash.elementID: 105553151687520.425>
+                                          Key, 0x101b8f560, {{1351.0, 165.0}, {54.0, 64.0}}, label: 't' <AX element pid: 5705, elementOrHash.elementID: 105553151680480.426>
+                                          Key, 0x101b8f680, {{1405.0, 165.0}, {54.0, 64.0}}, label: 'u' <AX element pid: 5705, elementOrHash.elementID: 105553151687360.427>
+                                          Key, 0x101b8f7a0, {{1459.0, 165.0}, {54.0, 64.0}}, label: 'v' <AX element pid: 5705, elementOrHash.elementID: 105553151688400.428>
+                                          Key, 0x101b8f8c0, {{1513.0, 165.0}, {54.0, 64.0}}, label: 'w' <AX element pid: 5705, elementOrHash.elementID: 105553151679440.429>
+                                          Key, 0x101b8f9e0, {{1567.0, 165.0}, {54.0, 64.0}}, label: 'x' <AX element pid: 5705, elementOrHash.elementID: 105553151677120.430>
+                                          Key, 0x101b8fb00, {{1621.0, 165.0}, {54.0, 64.0}}, label: 'y' <AX element pid: 5705, elementOrHash.elementID: 105553151673600.431>
+                                          Key, 0x101b8fd70, {{1675.0, 165.0}, {54.0, 64.0}}, label: 'z' <AX element pid: 5705, elementOrHash.elementID: 105553151680160.432>
+                                          Key, 0x101b8fe90, {{1729.0, 165.0}, {74.0, 64.0}}, identifier: 'delete', label: 'delete' <AX element pid: 5705, elementOrHash.elementID: 105553151676160.433>
+                              Other, 0x101b901b0, {{80.0, 274.5}, {1760.0, 1.0}} <AX element pid: 5705, elementOrHash.elementID: 4427840400.372>
+            Other, 0x101b902d0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4324766560.13>
+              Other, 0x101b903f0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323712416.25>
+                Other, 0x101b90510, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323724592.44>
+                  Other, 0x101b90630, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323743504.45>
+                    Other, 0x101b90750, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4427909984.135>
+                      Image, 0x101b90870, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323987120.47>
+                      ScrollView, 0x101b90990, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4355591168.48>
+                        Other, 0x101b90ab0, {{0.0, -1472.0}, {1840.0, 3522.0}} <AX element pid: 5705, elementOrHash.elementID: 4323848064.49>
+                          Other, 0x101b90bd0, {{0.0, -346.0}, {1920.0, 1852.0}} <AX element pid: 5705, elementOrHash.elementID: 4324015056.51>
+                            StaticText, 0x101b90cf0, {{160.0, -346.0}, {320.0, 46.0}}, label: 'Continue Watching' <AX element pid: 5705, elementOrHash.elementID: 4323994448.58>
+                            ScrollView, 0x101b90e10, {{0.0, -284.0}, {1920.0, 326.0}} <AX element pid: 5705, elementOrHash.elementID: 4355445760.59>
+                              Other, 0x101b90f30, {{80.0, -284.0}, {544.0, 326.0}} <AX element pid: 5705, elementOrHash.elementID: 4323917952.62>
+                                Other, 0x101b91050, {{160.0, -264.0}, {384.0, 286.0}} <AX element pid: 5705, elementOrHash.elementID: 4324181312.66>
+                                  Button, 0x101b91170, {{160.0, -264.0}, {384.0, 216.0}}, label: '18m' <AX element pid: 5705, elementOrHash.elementID: 4323740624.76>
+                                    Image, 0x101b91290, {{160.0, -264.0}, {384.0, 216.0}} <AX element pid: 5705, elementOrHash.elementID: 4325037408.457>
+                                    Image, 0x101b913b0, {{177.0, -82.0}, {18.0, 20.0}}, identifier: 'play.fill', label: 'Play' <AX element pid: 5705, elementOrHash.elementID: 4598026960.458>
+                                    StaticText, 0x101b914d0, {{285.0, -86.0}, {46.0, 28.0}}, label: '18m' <AX element pid: 5705, elementOrHash.elementID: 4598027776.459>
+                                  StaticText, 0x101b915f0, {{317.0, -38.0}, {71.0, 30.0}}, label: 'Firefly' <AX element pid: 5705, elementOrHash.elementID: 4324205648.173>
+                                  StaticText, 0x101b91710, {{319.0, -6.0}, {67.0, 28.0}}, label: 'S1 · E7' <AX element pid: 5705, elementOrHash.elementID: 4324166048.174>
+                              Other, 0x101b91830, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4322987728.436>
+                                Other, 0x101b91950, {{1299.0, 36.0}, {538.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4323237040.440>
+                              Other, 0x101b91a70, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4322987728.436>
+                                Other, 0x101b91b90, {{1299.0, 36.0}, {538.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4323237040.440>
+                            StaticText, 0x101b91cb0, {{160.0, 86.0}, {156.0, 46.0}}, label: 'Watchlist' <AX element pid: 5705, elementOrHash.elementID: 4323807568.149>
+                            ScrollView, 0x101b91dd0, {{0.0, 148.0}, {1920.0, 410.0}} <AX element pid: 5705, elementOrHash.elementID: 4363975680.150>
+                              Other, 0x101b91ef0, {{80.0, 148.0}, {360.0, 410.0}} <AX element pid: 5705, elementOrHash.elementID: 4325015024.159>
+                                Other, 0x101b92010, {{160.0, 168.0}, {200.0, 370.0}} <AX element pid: 5705, elementOrHash.elementID: 4323955520.166>
+                                  Button, 0x101b92130, {{160.0, 168.0}, {200.0, 300.0}}, label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4579331920.445>
+                                    Image, 0x101b92250, {{160.0, 168.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4324852976.460>
+                                    Image, 0x101b92370, {{160.0, 168.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4598063312.461>
+                                  StaticText, 0x101b92490, {{199.0, 478.0}, {122.0, 30.0}}, label: 'Interstellar' <AX element pid: 5705, elementOrHash.elementID: 4322719248.176>
+                                  StaticText, 0x101b925b0, {{234.0, 510.0}, {53.0, 28.0}}, label: '2014' <AX element pid: 5705, elementOrHash.elementID: 4322639696.177>
+                              Other, 0x101b926d0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4322861296.437>
+                                Other, 0x101b927f0, {{1483.0, 552.0}, {354.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4322988224.441>
+                              Other, 0x101b92910, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4322861296.437>
+                                Other, 0x101b92a30, {{1483.0, 552.0}, {354.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4322988224.441>
+                            StaticText, 0x101b92b50, {{160.0, 602.0}, {536.0, 46.0}}, label: 'Recently Added in Home Videos' <AX element pid: 5705, elementOrHash.elementID: 4325186960.151>
+                            ScrollView, 0x101b92c70, {{0.0, 664.0}, {1920.0, 326.0}} <AX element pid: 5705, elementOrHash.elementID: 4363397120.152>
+                              Other, 0x101b92d90, {{80.0, 664.0}, {2644.0, 326.0}} <AX element pid: 5705, elementOrHash.elementID: 4325160032.160>
+                                Other, 0x101b92eb0, {{160.0, 684.0}, {2064.0, 286.0}} <AX element pid: 5705, elementOrHash.elementID: 4324323488.167>
+                                  Button, 0x101b92fd0, {{160.0, 684.0}, {384.0, 216.0}} <AX element pid: 5705, elementOrHash.elementID: 4598041296.446>
+                                  StaticText, 0x101b930f0, {{301.0, 910.0}, {102.0, 30.0}}, label: 'Old town' <AX element pid: 5705, elementOrHash.elementID: 4325190048.179>
+                                  StaticText, 0x101b93210, {{324.0, 942.0}, {56.0, 28.0}}, label: '2026' <AX element pid: 5705, elementOrHash.elementID: 4322619040.180>
+                                  Button, 0x101b93330, {{580.0, 684.0}, {384.0, 216.0}} <AX element pid: 5705, elementOrHash.elementID: 4322498944.447>
+                                  StaticText, 0x101b93450, {{713.0, 910.0}, {119.0, 30.0}}, label: 'Beach day' <AX element pid: 5705, elementOrHash.elementID: 4324306976.182>
+                                  StaticText, 0x101b93570, {{744.0, 942.0}, {56.0, 28.0}}, label: '2026' <AX element pid: 5705, elementOrHash.elementID: 4324307440.183>
+                                  Button, 0x101b93690, {{1000.0, 684.0}, {384.0, 216.0}} <AX element pid: 5705, elementOrHash.elementID: 4323232384.448>
+                                  StaticText, 0x101b937b0, {{1151.0, 910.0}, {83.0, 30.0}}, label: 'Surfing' <AX element pid: 5705, elementOrHash.elementID: 4324310528.185>
+                                  StaticText, 0x101d29cc0, {{1164.0, 942.0}, {56.0, 28.0}}, label: '2026' <AX element pid: 5705, elementOrHash.elementID: 4324310992.186>
+                                  Button, 0x101d29950, {{1420.0, 684.0}, {384.0, 216.0}} <AX element pid: 5705, elementOrHash.elementID: 4322909584.449>
+                                  StaticText, 0x101d295c0, {{1512.0, 910.0}, {200.0, 30.0}}, label: 'Garden timelapse' <AX element pid: 5705, elementOrHash.elementID: 4324314080.188>
+                                  StaticText, 0x101d29270, {{1584.0, 942.0}, {56.0, 28.0}}, label: '2026' <AX element pid: 5705, elementOrHash.elementID: 4324314544.189>
+                                  Button, 0x101d28f10, {{1840.0, 684.0}, {384.0, 216.0}} <AX element pid: 5705, elementOrHash.elementID: 4598090160.450>
+                                  StaticText, 0x101d28bb0, {{1953.0, 910.0}, {159.0, 30.0}}, label: 'Grandad 80th' <AX element pid: 5705, elementOrHash.elementID: 4324317920.191>
+                                  StaticText, 0x101d28850, {{2004.0, 942.0}, {56.0, 28.0}}, label: '2026' <AX element pid: 5705, elementOrHash.elementID: 4324318384.192>
+                              Other, 0x101d284d0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4322420608.438>
+                                Other, 0x101d28170, {{83.0, 984.0}, {1201.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4322718816.442>
+                              Other, 0x101d27e20, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4322420608.438>
+                                Other, 0x101d27a90, {{83.0, 984.0}, {1201.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4322718816.442>
+                            StaticText, 0x101d27040, {{160.0, 1034.0}, {432.0, 46.0}}, label: 'Recently Added in Movies' <AX element pid: 5705, elementOrHash.elementID: 4325036480.153>
+                            ScrollView, 0x101d2d000, {{0.0, 1096.0}, {1920.0, 410.0}} <AX element pid: 5705, elementOrHash.elementID: 4347158528.154>
+                              Other, 0x101d2cc90, {{80.0, 1096.0}, {1776.0, 410.0}} <AX element pid: 5705, elementOrHash.elementID: 4322911360.161>
+                                Other, 0x101d2c930, {{160.0, 1116.0}, {1616.0, 370.0}} <AX element pid: 5705, elementOrHash.elementID: 4323239104.168>
+                                  Button, 0x101d2c5d0, {{160.0, 1116.0}, {200.0, 300.0}}, label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4598042624.451>
+                                    Image, 0x101d2c260, {{160.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4598029024.462>
+                                    Image, 0x101d2bec0, {{160.0, 1116.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4322763312.463>
+                                  StaticText, 0x101d2bb40, {{200.0, 1426.0}, {121.0, 30.0}}, label: 'The Matrix' <AX element pid: 5705, elementOrHash.elementID: 4324786816.194>
+                                  StaticText, 0x101d2b7f0, {{233.0, 1458.0}, {55.0, 28.0}}, label: '1999' <AX element pid: 5705, elementOrHash.elementID: 4579763904.195>
+                                  Button, 0x101d2b490, {{396.0, 1116.0}, {200.0, 300.0}}, label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4598491856.452>
+                                    Image, 0x101d2b100, {{396.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4598089056.464>
+                                    Image, 0x101d2adb0, {{396.0, 1116.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4322926608.465>
+                                  StaticText, 0x101d2aa60, {{435.0, 1426.0}, {122.0, 30.0}}, label: 'Interstellar' <AX element pid: 5705, elementOrHash.elementID: 4325248944.197>
+                                  StaticText, 0x101d2a6f0, {{470.0, 1458.0}, {53.0, 28.0}}, label: '2014' <AX element pid: 5705, elementOrHash.elementID: 4325245696.198>
+                                  Button, 0x101d2d350, {{632.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4323066624.453>
+                                  StaticText, 0x101d2d6b0, {{679.0, 1426.0}, {107.0, 30.0}}, label: 'Inception' <AX element pid: 5705, elementOrHash.elementID: 4325134416.200>
+                                  StaticText, 0x101d2da10, {{706.0, 1458.0}, {53.0, 28.0}}, label: '2010' <AX element pid: 5705, elementOrHash.elementID: 4322787616.201>
+                                  Button, 0x101d2dd90, {{868.0, 1116.0}, {200.0, 300.0}}, label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4323067552.454>
+                                    Image, 0x101d2e120, {{868.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4598038160.466>
+                                    Image, 0x101d2e490, {{868.0, 1116.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4324170032.467>
+                                  StaticText, 0x101d2e820, {{941.0, 1426.0}, {55.0, 30.0}}, label: 'Heat' <AX element pid: 5705, elementOrHash.elementID: 4322789360.203>
+                                  StaticText, 0x101d2ebb0, {{941.0, 1458.0}, {54.0, 28.0}}, label: '1995' <AX element pid: 5705, elementOrHash.elementID: 4322790176.204>
+                                  Button, 0x101d2f6b0, {{1104.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4322791312.205>
+                                  StaticText, 0x101d2fa40, {{1105.0, 1426.0}, {199.0, 30.0}}, label: 'Broken Download' <AX element pid: 5705, elementOrHash.elementID: 4323231168.206>
+                                  StaticText, 0x101d2fda0, {{1178.0, 1458.0}, {53.0, 28.0}}, label: '2010' <AX element pid: 5705, elementOrHash.elementID: 4323231632.207>
+                                  Button, 0x101d30120, {{1340.0, 1116.0}, {200.0, 300.0}}, label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4598039088.455>
+                                    Image, 0x101d304a0, {{1340.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4598038624.468>
+                                    Image, 0x101d30830, {{1340.0, 1116.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected <AX element pid: 5705, elementOrHash.elementID: 4427248384.469>
+                                  StaticText, 0x101d30ba0, {{1346.0, 1426.0}, {189.0, 30.0}}, label: 'Blade Runner 2049' <AX element pid: 5705, elementOrHash.elementID: 4323233984.209>
+                                  StaticText, 0x101d30f20, {{1414.0, 1458.0}, {52.0, 28.0}}, label: '2017' <AX element pid: 5705, elementOrHash.elementID: 4323234800.210>
+                                  Button, 0x101d31290, {{1576.0, 1116.0}, {200.0, 300.0}} <AX element pid: 5705, elementOrHash.elementID: 4598040368.456>
+                                  StaticText, 0x101d315f0, {{1600.0, 1426.0}, {152.0, 30.0}}, label: 'Blade Runner' <AX element pid: 5705, elementOrHash.elementID: 4323238176.212>
+                                  StaticText, 0x101d31950, {{1649.0, 1458.0}, {54.0, 28.0}}, label: '1982' <AX element pid: 5705, elementOrHash.elementID: 4323238640.213>
+                              Other, 0x101d31cd0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4324135904.439>
+                                Other, 0x101d32050, {{83.0, 1500.0}, {1740.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4324111936.443>
+                              Other, 0x101d323b0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4324135904.439>
+                                Other, 0x101d32720, {{83.0, 1500.0}, {1740.0, 3.0}} <AX element pid: 5705, elementOrHash.elementID: 4324111936.443>
+                        Other, 0x101d32aa0, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4324132576.434>
+                          Other, 0x101d32e00, {{1834.0, 461.0}, {3.0, 294.0}} <AX element pid: 5705, elementOrHash.elementID: 4427258704.435>
+                        Other, 0x101d33170, {{0.0, 0.0}, {0.0, 0.0}}, label: '0 pages', value: 0% <AX element pid: 5705, elementOrHash.elementID: 4324132576.434>
+                          Other, 0x101d334e0, {{1834.0, 461.0}, {3.0, 294.0}} <AX element pid: 5705, elementOrHash.elementID: 4427258704.435>
+            Other, 0x101d33840, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4322925040.131>
+              Other, 0x101d33bb0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323220256.132>
+                Other, 0x101d33f50, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4323278144.133>
+                  Other, 0x101d342b0, {{0.0, 0.0}, {1920.0, 1080.0}} <AX element pid: 5705, elementOrHash.elementID: 4427147520.134>
+                    Other, 0x101d34630, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4322923072.136>
+                      ScrollView, 0x101d349d0, {{0.0, 0.0}, {1920.0, 1080.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4365699072.333>
+                        Other, 0x101d34d70, {{0.0, 60.0}, {1840.0, 998.0}} <AX element pid: 5705, elementOrHash.elementID: 4579376592.336>
+                          Button, 0x101d350f0, {{168.0, 108.0}, {272.0, 66.0}}, label: 'Recommended', Disabled <AX element pid: 5705, elementOrHash.elementID: 4324867056.323>
+                          Button, 0x101d35490, {{448.0, 108.0}, {172.0, 66.0}}, label: 'Browse', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324764896.338>
+                          Button, 0x101d35800, {{628.0, 108.0}, {221.0, 66.0}}, label: 'Collections', Disabled <AX element pid: 5705, elementOrHash.elementID: 4324378592.339>
+                          StaticText, 0x101d35b80, {{1277.0, 123.0}, {92.0, 37.0}}, label: '7 titles', Disabled <AX element pid: 5705, elementOrHash.elementID: 4579761120.340>
+                          Button, 0x101d35f00, {{1393.0, 108.0}, {170.0, 66.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579741168.341>
+                            Other, 0x101d36270, {{1393.0, 108.0}, {170.0, 66.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4427560016.346>
+                              Other, 0x101d36610, {{1393.0, 108.0}, {170.0, 66.0}} <AX element pid: 5705, elementOrHash.elementID: 4427560576.373>
+                                Other, 0x101d369a0, {{1393.0, 108.0}, {170.0, 66.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579223360.386>
+                                  Image, 0x101d36d00, {{1427.0, 127.0}, {34.0, 28.0}}, identifier: 'arrow.up.arrow.down', label: 'Sort', Disabled <AX element pid: 5705, elementOrHash.elementID: 4579308976.393>
+                                  StaticText, 0x101d37050, {{1393.0, 108.0}, {170.0, 66.0}}, label: 'Title', Disabled <AX element pid: 5705, elementOrHash.elementID: 4579521424.394>
+                          Button, 0x101d37b60, {{1587.0, 108.0}, {173.0, 66.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4325166336.342>
+                            Other, 0x101d37eb0, {{1587.0, 108.0}, {173.0, 66.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4323764704.347>
+                              Other, 0x101d38220, {{1587.0, 108.0}, {173.0, 66.0}} <AX element pid: 5705, elementOrHash.elementID: 4427397968.374>
+                                Other, 0x101d38570, {{1587.0, 108.0}, {173.0, 66.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4598376400.387>
+                                  Image, 0x101d388c0, {{1620.0, 126.0}, {30.0, 30.0}}, identifier: 'line.3.horizontal.decrease.circle', label: 'Filter', Disabled <AX element pid: 5705, elementOrHash.elementID: 4598465376.395>
+                                  StaticText, 0x101d38c30, {{1587.0, 108.0}, {173.0, 66.0}}, label: 'Filter', Disabled <AX element pid: 5705, elementOrHash.elementID: 4598466864.396>
+                          Other, 0x101d38fa0, {{160.0, 222.0}, {1400.0, 796.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4323083216.343>
+                            Button, 0x101d392f0, {{160.0, 222.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324716592.348>
+                            StaticText, 0x101d39660, {{184.0, 532.0}, {152.0, 30.0}}, label: 'Blade Runner', Disabled <AX element pid: 5705, elementOrHash.elementID: 4323054112.349>
+                            StaticText, 0x101d399c0, {{233.0, 564.0}, {54.0, 28.0}}, label: '1982', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322259680.350>
+                            Button, 0x101d39d20, {{400.0, 222.0}, {200.0, 300.0}}, label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324442592.351>
+                              Image, 0x101d3a080, {{400.0, 222.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324815776.375>
+                              Image, 0x101d3a3e0, {{400.0, 222.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324915072.376>
+                            StaticText, 0x101d3a780, {{406.0, 532.0}, {189.0, 30.0}}, label: 'Blade Runner 2049', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322490176.352>
+                            StaticText, 0x101d3ab20, {{474.0, 564.0}, {52.0, 28.0}}, label: '2017', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322791776.353>
+                            Button, 0x101d3aeb0, {{640.0, 222.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4322710336.354>
+                            StaticText, 0x101d3b230, {{641.0, 532.0}, {199.0, 30.0}}, label: 'Broken Download', Disabled <AX element pid: 5705, elementOrHash.elementID: 4323091760.355>
+                            StaticText, 0x101d3b5a0, {{714.0, 564.0}, {53.0, 28.0}}, label: '2010', Disabled <AX element pid: 5705, elementOrHash.elementID: 4323092224.356>
+                            Button, 0x101d3b940, {{880.0, 222.0}, {200.0, 300.0}}, label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579216320.357>
+                              Image, 0x101d3bcc0, {{880.0, 222.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579354432.377>
+                              Image, 0x101d3c020, {{880.0, 222.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579777952.378>
+                            StaticText, 0x101d3c390, {{953.0, 532.0}, {55.0, 30.0}}, label: 'Heat', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322470448.358>
+                            StaticText, 0x101d3c700, {{953.0, 564.0}, {54.0, 28.0}}, label: '1995', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322470912.359>
+                            Button, 0x101d3ca80, {{1120.0, 222.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579684560.360>
+                            StaticText, 0x101d3ce10, {{1167.0, 532.0}, {107.0, 30.0}}, label: 'Inception', Disabled <AX element pid: 5705, elementOrHash.elementID: 4323172208.361>
+                            StaticText, 0x101d3d190, {{1194.0, 564.0}, {53.0, 28.0}}, label: '2010', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322905024.362>
+                            Button, 0x101d3d500, {{1360.0, 222.0}, {200.0, 300.0}}, label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324745616.363>
+                              Image, 0x101d3d880, {{1360.0, 222.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579549360.379>
+                              Image, 0x101d3dc00, {{1360.0, 222.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579459664.380>
+                            StaticText, 0x101d3df70, {{1399.0, 532.0}, {122.0, 30.0}}, label: 'Interstellar', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322723856.364>
+                            StaticText, 0x101d3e2f0, {{1434.0, 564.0}, {53.0, 28.0}}, label: '2014', Disabled <AX element pid: 5705, elementOrHash.elementID: 4322724672.365>
+                            Button, 0x101d3e690, {{160.0, 648.0}, {200.0, 300.0}}, label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579390080.366>
+                              Image, 0x101d3e9f0, {{160.0, 648.0}, {200.0, 300.0}}, Disabled <AX element pid: 5705, elementOrHash.elementID: 4579336960.381>
+                              Image, 0x101d3ed50, {{160.0, 648.0}, {200.0, 300.0}}, identifier: 'checkmark.circle.fill', label: 'Selected', Selected, Disabled <AX element pid: 5705, elementOrHash.elementID: 4324392864.382>
+                            StaticText, 0x101d3f0d0, {{200.0, 958.0}, {121.0, 30.0}}, label: 'The Matrix', Disabled <AX element pid: 5705, elementOrHash.elementID: 4323095280.367>
+                            StaticText, 0x101d3f440, {{233.0, 990.0}, {55.0, 28.0}}, label: '1999', Disabled <AX element pid: 5705, elementOrHash.elementID: 4323096096.368>
+            Other, 0x101d3f7a0, {{258.0, 120.0}, {4.0, 4.0}} <AX element pid: 5705, elementOrHash.elementID: 4322475776.14>
+            Other, 0x101d3fb10, {{42.0, 70.0}, {64.0, 1.0}} <AX element pid: 5705, elementOrHash.elementID: 4322297456.15>
+            Button, 0x101d3fe60, {{42.0, 79.0}, {108.0, 64.0}}, label: 'J' <AX element pid: 5705, elementOrHash.elementID: 4322546160.16>
+              StaticText, 0x101d401e0, {{42.0, 79.0}, {108.0, 64.0}}, label: 'J' <AX element pid: 5705, elementOrHash.elementID: 4322371600.26>
+              StaticText, 0x101d40550, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Jon' <AX element pid: 5705, elementOrHash.elementID: 4322459984.27>
+            Button, 0x101d408c0, {{42.0, 163.0}, {108.0, 64.0}}, label: 'Search' <AX element pid: 5705, elementOrHash.elementID: 4322597824.17>
+              Image, 0x101d40c30, {{42.0, 163.0}, {108.0, 64.0}}, identifier: 'magnifyingglass', label: 'Search' <AX element pid: 5705, elementOrHash.elementID: 4322455216.28>
+              StaticText, 0x101d40f80, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Search' <AX element pid: 5705, elementOrHash.elementID: 4322597360.29>
+            Button, 0x101d41a80, {{42.0, 235.0}, {108.0, 64.0}}, label: 'Home' <AX element pid: 5705, elementOrHash.elementID: 4322491088.6>
+              Image, 0x101d41e00, {{42.0, 235.0}, {108.0, 64.0}}, identifier: 'house', label: 'Home' <AX element pid: 5705, elementOrHash.elementID: 4322450736.30>
+              StaticText, 0x101d42150, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Home' <AX element pid: 5705, elementOrHash.elementID: 4322599072.31>
+            Button, 0x101d424c0, {{42.0, 307.0}, {108.0, 64.0}}, label: 'Bookmark' <AX element pid: 5705, elementOrHash.elementID: 4322480832.18>
+              Image, 0x101d42830, {{42.0, 307.0}, {108.0, 64.0}}, identifier: 'bookmark', label: 'Bookmark' <AX element pid: 5705, elementOrHash.elementID: 4322450192.32>
+              StaticText, 0x101d42ba0, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Watchlist' <AX element pid: 5705, elementOrHash.elementID: 4322556688.33>
+            Button, 0x101d42f10, {{42.0, 379.0}, {108.0, 64.0}}, label: 'Video' <AX element pid: 5705, elementOrHash.elementID: 4322476240.19>
+              Image, 0x101d43270, {{42.0, 379.0}, {108.0, 64.0}}, identifier: 'video', label: 'Video' <AX element pid: 5705, elementOrHash.elementID: 4322620640.34>
+              StaticText, 0x101d43d90, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Home Videos' <AX element pid: 5705, elementOrHash.elementID: 4322640224.35>
+            Button, 0x101d44120, {{42.0, 451.0}, {108.0, 64.0}}, label: 'Movie' <AX element pid: 5705, elementOrHash.elementID: 4322638448.20>
+              Image, 0x101d44490, {{42.0, 451.0}, {108.0, 64.0}}, identifier: 'film', label: 'Movie' <AX element pid: 5705, elementOrHash.elementID: 4322608224.36>
+              StaticText, 0x101d44800, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Movies' <AX element pid: 5705, elementOrHash.elementID: 4322608688.37>
+            Button, 0x101d44b80, {{42.0, 523.0}, {108.0, 64.0}}, label: 'Tv' <AX element pid: 5705, elementOrHash.elementID: 4322613840.21>
+              Image, 0x101d456e0, {{42.0, 523.0}, {108.0, 64.0}}, identifier: 'tv', label: 'Tv' <AX element pid: 5705, elementOrHash.elementID: 4322456512.38>
+              StaticText, 0x101d45a30, {{0.0, 0.0}, {0.0, 0.0}}, label: 'TV' <AX element pid: 5705, elementOrHash.elementID: 4322611248.39>
+            Button, 0x101d45da0, {{42.0, 595.0}, {108.0, 64.0}}, label: 'list.bullet.rectangle' <AX element pid: 5705, elementOrHash.elementID: 4322481760.22>
+              Image, 0x101d46120, {{42.0, 595.0}, {108.0, 64.0}}, identifier: 'list.bullet.rectangle', label: 'list.bullet.rectangle' <AX element pid: 5705, elementOrHash.elementID: 4322556144.40>
+              StaticText, 0x101d464a0, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Playlists' <AX element pid: 5705, elementOrHash.elementID: 4322482304.41>
+            Button, 0x101d467f0, {{42.0, 667.0}, {108.0, 64.0}}, label: 'gearshape' <AX element pid: 5705, elementOrHash.elementID: 4322382464.23>
+              Image, 0x101d46b60, {{42.0, 667.0}, {108.0, 64.0}}, identifier: 'gearshape', label: 'gearshape' <AX element pid: 5705, elementOrHash.elementID: 4322471408.42>
+              StaticText, 0x101d46ef0, {{0.0, 0.0}, {0.0, 0.0}}, label: 'Settings' <AX element pid: 5705, elementOrHash.elementID: 4322382000.43>
+            Other, 0x101d47260, {{42.0, 739.0}, {64.0, 1.0}} <AX element pid: 5705, elementOrHash.elementID: 4322486256.24>
