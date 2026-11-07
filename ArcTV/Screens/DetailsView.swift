@@ -74,6 +74,7 @@ struct DetailsView: View {
                         } else {
                             // A film's hero has nothing peeking under it, as the reference: the
                             // next row starts just below the screen, and Down scrolls to it.
+                            Color.clear.frame(height: 1).id(Self.restAnchor)
                             Color.clear.frame(height: 150).accessibilityHidden(true)
                         }
                         // The cast first, above every other row (owner, 7 November).
@@ -104,6 +105,16 @@ struct DetailsView: View {
                         Task { @MainActor in
                             try? await Task.sleep(for: .milliseconds(80))
                             focused = "ep|" + next.id
+                        }
+                    }
+                    // A film: Down from the hero brings the first row up under the hero's buttons,
+                    // which stay at the top, as the reference does; Up goes back to the whole hero.
+                    // (The first row's cards carry focus keys, so nil here is the hero.)
+                    if seasons.isEmpty {
+                        if Self.isFirstRow(new), !Self.isFirstRow(old), old == nil {
+                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.restAnchor, anchor: Self.restPoint) }
+                        } else if Self.isFirstRow(old), new == nil {
+                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
                         }
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
@@ -164,6 +175,7 @@ struct DetailsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
                     }
                     .buttonStyle(.card)
+                    .focused($focused, equals: "extra|" + e.id)
                     Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
                     Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
                 }
@@ -274,7 +286,8 @@ struct DetailsView: View {
     private var cast: some View {
         section(L("details.cast")) {
             ForEach(actors.prefix(30)) { credit in
-                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image) {
+                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image,
+                             focus: $focused, focusKey: "cast|\(credit.personId)") {
                     openRoute(.person(id: credit.personId, name: credit.name))
                 }
             }
@@ -411,6 +424,17 @@ struct DetailsView: View {
     /// leaving the top for the show's logo (scrollTo lines this point of the tabs up with the
     /// same point of the screen).
     static let tabsAnchor = UnitPoint(x: 0.5, y: 0.25)
+
+    static let restAnchor = "details|rest"
+    /// Where the line under a film's hero sits once Down has moved on: near the top, so the
+    /// hero's buttons stay in view above the first row.
+    static let restPoint = UnitPoint(x: 0.5, y: 0.14)
+
+    /// A card in the rows straight under a film's hero (the cast, then trailers and extras).
+    static func isFirstRow(_ key: String?) -> Bool {
+        guard let key else { return false }
+        return key.hasPrefix("cast|") || key.hasPrefix("extra|")
+    }
 
     static func isBrowser(_ key: String?) -> Bool {
         guard let key else { return false }
