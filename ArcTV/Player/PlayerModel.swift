@@ -50,7 +50,9 @@ final class PlayerModel {
     /// When the viewer last moved through the timeline (the thumbnail shows for a moment after).
     private(set) var seekedAt: Date?
 
-    let engine: PlaybackEngine
+    /// mpv by default; Apple's player when this Apple TV is set to it, or after mpv couldn't play
+    /// a file (the screen shows whichever is current).
+    private(set) var engine: PlaybackEngine
     private let api: ArcAPI
     /// The version the viewer chose (nil: Arc's choice).
     private var fileChoice: Int64?
@@ -74,7 +76,7 @@ final class PlayerModel {
         self.item = item
         self.engine = engine
         self.onRefused = onRefused
-        caps = DeviceCaps.apple()
+        caps = Self.caps(for: engine)
         positionMs = startMs
         engine.onEvent = { [weak self] in self?.handle($0) }
     }
@@ -128,6 +130,7 @@ final class PlayerModel {
                     throw UnexpectedAnswer()
                 }
                 guard !Task.isCancelled else { return }
+                engine.prepareDisplay(displayHint(for: p))
                 engine.load(url, headers: headers, startSeconds: Double(PlaybackClock.playerStart(p, fileMs: fileMs)) / 1000)
             } catch is CancellationError {
             } catch let error as APIError where error.status == 401 {
@@ -289,6 +292,13 @@ final class PlayerModel {
     private func onStreamError(_ reason: String) {
         guard let p = plan else { return }
         log.warn("the stream didn't play (\(p.method), \(reason))")
+        // mpv couldn't play it: the same position with Apple's player (and what it plays), once.
+        if engine is MPVEngine {
+            log.warn("mpv couldn't play this file; Apple's player instead")
+            switchToApple()
+            load(at: positionMs)
+            return
+        }
         if !retried && p.method != "transcode" {
             retried = true
             caps = caps.fallback(after: p.method)
@@ -359,8 +369,32 @@ final class PlayerModel {
 
     func retry() {
         retried = false
-        caps = DeviceCaps.apple()
+        caps = Self.caps(for: engine)
         load(at: positionMs)
+    }
+
+    /// What the server should send for this engine.
+    private static func caps(for engine: PlaybackEngine) -> PlayerCaps {
+        engine is MPVEngine ? DeviceCaps.mpv() : DeviceCaps.apple()
+    }
+
+    private func switchToApple() {
+        engine.onEvent = nil
+        engine.stop()
+        let apple = AVPlayerEngine()
+        apple.onEvent = { [weak self] in self?.handle($0) }
+        engine = apple
+        caps = DeviceCaps.apple()
+        retried = false
+    }
+
+    /// What the TV should switch to for the stream being played: the file's own picture when it's
+    /// sent as it is or repackaged, plain SDR when Arc converts the video (to H.264, tone-mapped).
+    private func displayHint(for p: PlaybackPlan) -> DisplayHint? {
+        guard p.method != "transcode" else { return .sdr }
+        let file = item.files.first { $0.id == p.fileId } ?? Quality.file(of: item)
+        guard let video = file?.streams.first(where: { $0.kind == "video" }) else { return nil }
+        return DisplayHint(video)
     }
 
     func close() {

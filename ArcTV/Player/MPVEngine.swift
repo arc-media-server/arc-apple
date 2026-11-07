@@ -9,8 +9,9 @@ import UIKit
 /// Vision reach the TV as they are. Audio goes out as multichannel PCM, or for Dolby Digital (Plus)
 /// to Apple's own decoder (Atmos kept).
 ///
-/// Not wired to playback yet: step 1 of docs/plans/arc-engine.md only checks it builds and what
-/// it adds to the app. Picking it per file, Match Content and tracks come next.
+/// The default engine (EngineChoice); Apple's player takes over if mpv can't play a file. Before
+/// the picture starts it asks the TV for the stream's mode (Match Content: dynamic range and frame
+/// rate, from the file as the server read it) and waits for the switch.
 @MainActor
 final class MPVEngine: PlaybackEngine {
     var onEvent: ((EngineEvent) -> Void)?
@@ -24,6 +25,10 @@ final class MPVEngine: PlaybackEngine {
     private var rate: Float = 1
     private(set) var currentSeconds: Double = 0
     private(set) var availableSeconds: Double = 0
+    private var hint: DisplayHint?
+    private var modeTask: Task<Void, Never>?
+
+    func prepareDisplay(_ hint: DisplayHint?) { self.hint = hint }
 
     init() { surface.backgroundColor = .black }
 
@@ -47,6 +52,8 @@ final class MPVEngine: PlaybackEngine {
         // Dolby Digital (Plus) to Apple's decoder, so Atmos survives; the rest is decoded to PCM.
         set("audio-spdif", "ac3,eac3")
         set("keep-open", "yes")
+        // Loaded paused: it plays once the TV has switched to the stream's mode.
+        set("pause", "yes")
         set("cache", "yes")
         set("demuxer-max-bytes", "150MiB")
         set("start", String(format: "%.3f", max(0, startSeconds)))
@@ -91,13 +98,38 @@ final class MPVEngine: PlaybackEngine {
         command(["seek", String(format: "%.3f", max(0, seconds)), "absolute+exact"])
     }
 
-    func stop() { stopCore() }
+    func stop() {
+        stopCore()
+        DisplayMode.request(nil, near: surface)
+    }
+
+    /// Asks the TV for the stream's mode, waits while it switches (up to 6 s), then plays.
+    private func startAfterModeSwitch() {
+        let criteria = hint?.criteria
+        if let criteria { DisplayMode.request(criteria, near: surface) }
+        modeTask = Task { [weak self] in
+            if criteria != nil {
+                // The switch starts a moment after the request; then wait for it to finish.
+                try? await Task.sleep(for: .milliseconds(300))
+                var waited = 0
+                while let self, DisplayMode.switching(near: self.surface), waited < 6000, !Task.isCancelled {
+                    try? await Task.sleep(for: .milliseconds(100))
+                    waited += 100
+                }
+            }
+            guard let self, !Task.isCancelled, self.mpv != nil else { return }
+            self.play()
+            self.onEvent?(.ready)
+        }
+    }
 
     // MARK: mpv
 
     private let wakeBox = WakeBox()
 
     private func stopCore() {
+        modeTask?.cancel()
+        modeTask = nil
         wakeBox.engine = nil
         if let handle = mpv {
             mpv_set_wakeup_callback(handle, nil, nil)
@@ -119,8 +151,7 @@ final class MPVEngine: PlaybackEngine {
             switch event.event_id {
             case MPV_EVENT_FILE_LOADED where !started:
                 started = true
-                play()
-                onEvent?(.ready)
+                startAfterModeSwitch()
             case MPV_EVENT_END_FILE:
                 if let end = event.data?.assumingMemoryBound(to: mpv_event_end_file.self).pointee,
                    end.reason == MPV_END_FILE_REASON_ERROR {

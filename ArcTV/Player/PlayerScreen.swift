@@ -37,6 +37,8 @@ struct PlayerScreen: View {
             Color.black.ignoresSafeArea()
             if let model {
                 EngineSurface(engine: model.engine).ignoresSafeArea()
+                    // A new surface when Apple's player takes over from mpv.
+                    .id(ObjectIdentifier(model.engine))
                 if let caption = model.caption, model.subtitle?.image != true {
                     SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls || options)
                 }
@@ -83,7 +85,7 @@ struct PlayerScreen: View {
         }
         .onAppear {
             guard model == nil, let api = app.api else { return }
-            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: AVPlayerEngine()) { app.tokenRefused() }
+            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: EngineChoice.make()) { app.tokenRefused() }
             model = m
             m.start()
             focus = .surface
