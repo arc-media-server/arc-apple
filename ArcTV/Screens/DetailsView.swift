@@ -24,8 +24,6 @@ struct DetailsView: View {
     @FocusState private var focused: String?
     @State private var seasons: [Season] = []
     @State private var season = 0
-    /// The season tabs: coming into them lands on the season showing.
-    @Namespace private var seasonTabs
     /// The backdrop's own colour, for the wash behind a show's episodes.
     @State private var tone: Color?
     /// The artwork has slid away for a show's episodes. It stays away below them (Related, Cast)
@@ -75,8 +73,15 @@ struct DetailsView: View {
                 }
                 .onChange(of: focused) { old, new in
                     if let new, new.hasPrefix("season|"), let index = Int(new.dropFirst(7)), index != season {
-                        // Moving along the season tabs shows that season's episodes; no Select.
-                        withAnimation(.easeInOut(duration: 0.2)) { season = index }
+                        if old?.hasPrefix("season|") == true {
+                            // Moving along the season tabs shows that season's episodes; no Select.
+                            withAnimation(.easeInOut(duration: 0.2)) { season = index }
+                        } else {
+                            // Coming into the tabs (from the episodes or the hero) lands on the
+                            // season showing, whichever tab is nearest. (A step later: tvOS
+                            // ignores a focus change made while it's moving the focus.)
+                            Task { @MainActor in focused = "season|\(season)" }
+                        }
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
                     if nowBrowsing && !wasBrowsing {
@@ -401,14 +406,12 @@ struct DetailsView: View {
                         Button(s.name.isEmpty ? L("details.season", s.seasonNumber) : s.name) { season = index }
                             .arcGlassButton(prominent: index == season)
                             .focused($focused, equals: "season|\(index)")
-                            .prefersDefaultFocus(index == season, in: seasonTabs)
                     }
                 }
                 .padding(.vertical, 12)
             }
             .scrollClipDisabled()
             .focusSection()
-            .focusScope(seasonTabs)
             .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
