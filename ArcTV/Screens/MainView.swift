@@ -136,6 +136,13 @@ struct MainView: View {
     /// A page is open on top of the place showing (a title, a collection, a person): the sidebar
     /// and its margin step aside so the page fills the screen; Back returns to the first page.
     private var deep: Bool { (depths[tab] ?? 0) > 0 }
+    /// Back asked for the sidebar: it shows (and can take the focus) before the focus moves to it.
+    @State private var sidebarAsked = false
+    /// Search is tvOS's own screen (the keyboard and results across the top): while its page has
+    /// the focus the sidebar steps aside too, and Back brings it back.
+    private var searching: Bool { tab == "search" && !sidebarOpen && !sidebarAsked }
+    /// The sidebar and its margin step aside: on an opened page, and in Search.
+    private var stepsAside: Bool { deep || searching }
 
     /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
@@ -173,8 +180,11 @@ struct MainView: View {
                         .accessibilityHidden(!showing)
                 }
             }
-            .safeAreaPadding(.leading, deep ? 0 : Sidebar.collapsedWidth - 20)
-            .environment(\.openSidebar, OpenSidebar { focused = tab })
+            .safeAreaPadding(.leading, stepsAside ? 0 : Sidebar.collapsedWidth - 20)
+            .environment(\.openSidebar, OpenSidebar {
+                sidebarAsked = true
+                Task { @MainActor in focused = tab }
+            })
 
             Color.clear
                 .frame(width: 4, height: 4)
@@ -187,12 +197,14 @@ struct MainView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
             sidebar
-                .opacity(deep ? 0 : 1)
-                .disabled(deep)
+                .opacity(stepsAside ? 0 : 1)
+                .disabled(stepsAside)
         }
         .animation(.easeOut(duration: 0.25), value: sidebarOpen)
-        .animation(.easeOut(duration: 0.25), value: deep)
+        .animation(.easeOut(duration: 0.25), value: stepsAside)
         .onChange(of: focused) { old, new in
+            // In the sidebar now: the request is done.
+            if sidebarAsked && sidebarOpen { sidebarAsked = false }
             // Leaving the stop on the page: it can't be reached again until the next choice.
             if old == Sidebar.landing { landingArmed = false }
             // Coming into the sidebar from a page starts on the place showing, wherever the focus
