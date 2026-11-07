@@ -67,3 +67,7 @@ folded away and the top of the episode thumbnails peeks in at the bottom of the 
 the tabs back with the episodes, under the logo. Arc showed the tabs there and no episodes. The
 tabs now fold to no height and are masked while the hero has the focus, with the same 0.9 s curve
 as the rest of the move.
+
+A film's hero has nothing peeking under it, as in the owner's photo of the reference. A spacer below
+the hero starts the next row (Trailers & Extras, Related…) just under the screen, and Down scrolls
+to it as before.

@@ -69,7 +69,13 @@ struct DetailsView: View {
                             .mask(Rectangle().opacity(browsing || !entered ? 0 : 1))
                             .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
                             .id(Self.heroAnchor)
-                        if !seasons.isEmpty { episodes }
+                        if !seasons.isEmpty {
+                            episodes
+                        } else {
+                            // A film's hero has nothing peeking under it, as the reference: the
+                            // next row starts just below the screen, and Down scrolls to it.
+                            Color.clear.frame(height: 150).accessibilityHidden(true)
+                        }
                         if !shown.extras.isEmpty { extras }
                         if !similar.isEmpty { related }
                         if !actors.isEmpty { cast }
