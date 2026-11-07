@@ -56,7 +56,13 @@ struct DetailsView: View {
             ScrollViewReader { proxy in
                 ScrollView(.vertical) {
                     VStack(alignment: .leading, spacing: 28) {
-                        hero.id(Self.heroAnchor)
+                        hero
+                            // Hidden while browsing a show's episodes, as the reference does: a
+                            // mask rather than opacity, so Up from the season tabs still reaches
+                            // its buttons (tvOS won't focus a fully transparent view).
+                            .mask(Rectangle().opacity(browsing ? 0 : 1))
+                            .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
+                            .id(Self.heroAnchor)
                         if !seasons.isEmpty { episodes }
                         if !shown.extras.isEmpty { extras }
                         if !similar.isEmpty { related }
@@ -160,6 +166,9 @@ struct DetailsView: View {
                 .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
                 if let problem { Text(problem).foregroundStyle(ArcColor.error) }
                 buttons
+                    // Out of reach while an episode has the focus, so Up from the episodes always
+                    // lands on the season tabs; from the tabs, Up reaches them again.
+                    .disabled(focused?.hasPrefix("ep|") == true)
             }
             Spacer(minLength: 0)
             people
