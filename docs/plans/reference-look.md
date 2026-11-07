@@ -6,6 +6,15 @@ pages and a few touches the app lacks. Not every option the reference app has is
 look and direction. Each step below is its own change with walk-through screenshots; the other
 TV apps copy the result once it's settled.
 
+## Sources, in order (owner, 7 November)
+
+1. **The owner's own screenshots and recordings** of the reference app, as it's set up on their
+   Apple TV. These decide what the app should look like and how it should move.
+2. **The reference app's code**, to see how a screen works (its focus rules, timings, layout
+   constants) once the owner's pictures show what it should be.
+3. Never the reference project's own example screenshots: they're sometimes out of date, or
+   show settings the owner doesn't use.
+
 ## What already matches
 
 - The icon sidebar: icons always showing, profile on top, a glass panel when open, no dimming,
