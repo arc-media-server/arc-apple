@@ -142,6 +142,14 @@
 "browse.videos_count" = "%d videos";
 "browse.collection_empty" = "This collection has nothing you can watch yet.";
 "browse.playlist_empty" = "This playlist is empty. Add titles to it in Arc in a browser.";
+"person.titles_count" = "%d titles in your libraries";
+"person.as" = "as %@";
+"person.movies" = "Movies";
+"person.shows" = "TV Shows";
+"person.behind_camera" = "Behind the Camera";
+"person.role_director" = "Director";
+"person.role_writer" = "Writer";
+"person.role_producer" = "Producer";
 "browse.person_empty" = "Nothing in your libraries has them in it.";
 "browse.folder_empty" = "This folder is empty.";
 "browse.watchlist_empty" = "Your Watchlist is empty. Hold Select on a movie or show and choose Add to Watchlist.";
@@ -168,7 +176,20 @@
 "settings.sign_out_title" = "Sign this Apple TV out?";
 "settings.sign_out_body" = "You'll need a new code from Arc to sign in again.";
 "settings.not_saved" = "That change wasn't saved. Check Arc is running and try again.";
-"settings.version" = "Arc for Apple TV %@";
+"settings.version" = "Version %@";
+"settings.about" = "About";
+"about.for_apple_tv" = "Arc for Apple TV";
+"about.this_app" = "This App";
+"about.version" = "Version";
+"about.player" = "Player";
+"about.server" = "Server";
+"about.server_name" = "Name";
+"about.server_version" = "Arc Version";
+"about.api" = "API";
+"about.address" = "Address";
+"about.licences" = "Licences";
+"about.open_source" = "Open Source Licences";
+"about.licences_note" = "Arc for Apple TV is free software. Its source, and the source of the open source code it is built with, is at github.com/arc-media-server.";
 "settings.attribution" = "Metadata and artwork from TMDB and TheTVDB. This product uses the TMDB API but is not endorsed or certified by TMDB.";
 
 "player.failed_title" = "This can't play right now";

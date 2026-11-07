@@ -282,6 +282,9 @@ public struct Prefs: Codable, Sendable {
 public struct CollectionRef: Codable, Sendable, Hashable, Identifiable {
     public let id: String
     public let title: String
+    /// On a collection's own page (collections/{id}).
+    public var overview: String?
+    public var images: Images?
 }
 
 public struct CollectionPage: Codable, Sendable {

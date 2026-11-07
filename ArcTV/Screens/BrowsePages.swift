@@ -1,26 +1,50 @@
 import ArcKit
 import SwiftUI
 
-/// A collection's titles.
+/// A collection, laid out as a library's Browse page: its name at the top with a sort pill at
+/// the right (Release Date, as Arc lists it, or Title), its overview, then the poster grid.
 struct CollectionView: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     let id: String
     let title: String
-    @State private var items: [Item] = []
+    @State private var page: CollectionPage?
     @State private var loading = true
     @State private var problem: String?
+    @State private var byTitle = false
 
     var body: some View {
-        PageScaffold(title: title, loading: loading, problem: problem, empty: items.isEmpty ? L("browse.collection_empty") : nil) {
+        PageScaffold(title: page?.collection.title ?? title, loading: loading, problem: problem,
+                     empty: page?.items.isEmpty == true ? L("browse.collection_empty") : nil,
+                     accessory: (page?.items.count ?? 0) > 1 ? AnyView(sortPill) : nil) {
+            if let overview = page?.collection.overview, !overview.isEmpty {
+                Text(overview).font(.callout).foregroundStyle(ArcColor.muted).lineLimit(3).frame(maxWidth: 1100, alignment: .leading)
+            }
             TitleGrid(items: items)
         }
         .task(id: browse.changes) {
-            let (page, failed) = await loadPage(app, "collection") { try await $0.collection(id) }
-            if let page { items = page.items }
+            let (answer, failed) = await loadPage(app, "collection") { try await $0.collection(id) }
+            page = answer ?? page
             problem = failed
             loading = false
         }
+    }
+
+    private var items: [Item] {
+        let all = page?.items ?? []
+        return byTitle ? all.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending } : all
+    }
+
+    private var sortPill: some View {
+        Menu {
+            Picker(L("watchlist.sort"), selection: $byTitle) {
+                Text(L("library.sort_released")).tag(false)
+                Text(L("library.sort_title")).tag(true)
+            }
+        } label: {
+            Label(L(byTitle ? "library.sort_title" : "library.sort_released"), systemImage: "arrow.up.arrow.down")
+        }
+        .arcGlassButton().buttonBorderShape(.capsule)
     }
 }
 
@@ -41,33 +65,6 @@ struct PlaylistView: View {
         .task(id: browse.changes) {
             let (page, failed) = await loadPage(app, "playlist") { try await $0.playlist(id) }
             if let page { items = page.entries.map(\.item) }
-            problem = failed
-            loading = false
-        }
-    }
-}
-
-/// Someone's picture and name, and the titles in the libraries they're in.
-struct PersonView: View {
-    @Environment(AppModel.self) private var app
-    let id: Int64
-    let name: String
-    @State private var page: PersonPage?
-    @State private var loading = true
-    @State private var problem: String?
-
-    var body: some View {
-        PageScaffold(title: name, loading: loading, problem: problem, empty: page?.credits.isEmpty == true ? L("browse.person_empty") : nil) {
-            if let page {
-                if let known = page.person.knownFor, !known.isEmpty {
-                    Text(known).foregroundStyle(ArcColor.muted)
-                }
-                TitleGrid(items: page.credits.map(\.item))
-            }
-        }
-        .task {
-            let (answer, failed) = await loadPage(app, "person") { try await $0.person(id) }
-            page = answer ?? page
             problem = failed
             loading = false
         }

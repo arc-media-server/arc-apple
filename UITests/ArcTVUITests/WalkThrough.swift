@@ -51,6 +51,15 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(2)
         shot("08-title-page-scrolled")
+        // The first person in the cast: their page, then back.
+        remote.press(.select)
+        pause(4)
+        shot("08a-person")
+        press(.right)
+        pause(2)
+        shot("08a-person-focus-moved")
+        remote.press(.menu)
+        pause(2)
         // The foot of the page: Cast, then the About, Details, Crew and Playback cards.
         press(.down, 4)
         pause(2)
@@ -170,6 +179,20 @@ final class WalkThrough: XCTestCase {
             shot(String(format: "16-tab-%02d", i))
         }
 
+        // Settings (the last place), then About inside it; Back twice returns to the sidebar.
+        remote.press(.select)
+        pause(3)
+        press(.right)
+        let about = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'About'")).firstMatch
+        for _ in 0..<12 where !about.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(3)
+        shot("16b-about")
+        remote.press(.menu)
+        pause(1)
+        remote.press(.menu)
+        pause(2)
+
         // A library opens on Recommended: a hero and rows, the pill bar above. Then up to the pill
         // bar and Browse: sort and filters, the grid, and holding Select on a title.
         // (The sidebar only highlights as the focus moves; Select opens the place and shuts it.)
@@ -204,6 +227,19 @@ final class WalkThrough: XCTestCase {
         shot("19-title-actions")
         remote.press(.menu)
         pause(1)
+        // The library's Collections, laid out as its grid, and inside one: then back.
+        let collectionsPill = app.buttons["Collections"]
+        for _ in 0..<6 where !collectionsPill.hasFocus && !browse.hasFocus { press(.up) }
+        for _ in 0..<3 where !collectionsPill.hasFocus { press(.right) }
+        remote.press(.select)
+        pause(3)
+        shot("19a-library-collections")
+        press(.down)
+        remote.press(.select)
+        pause(4)
+        shot("19b-collection")
+        remote.press(.menu)
+        pause(2)
 
         // Search, at the top of the sidebar (Back from the library opens it): type a few letters;
         // results follow the typing.
