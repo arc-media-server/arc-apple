@@ -97,3 +97,12 @@ A title's page opens with Play focused, as the reference does. tvOS had been pic
 button, and on a show that was the watched tick. Play carries the focus key `hero|play`. The
 page's logic treats that key, or no key, as "on the hero". The walk-through's 08 is now taken after
 one Down, the view in the owner's photo.
+
+The hero's mask now reaches 80 points past the hero. It used to sit right at the buttons, and it
+cut off the bottom of a focused button's lift and shadow. The artwork's fade is gentler, as in the
+owner's photos of the reference:
+- top to bottom, full until 60% of the way down, then to 45% (it was 15% at 60% and gone at the
+  bottom);
+- left to right, from 50% on the left to full past the middle (it was 12%).
+
+Before, the page read as a dark panel over the overview and the peeking episodes.
