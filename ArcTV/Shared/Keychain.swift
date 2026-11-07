@@ -1,7 +1,10 @@
+import ArcKit
 import Foundation
 import Security
 
-/// The device token, kept in the Keychain (never in UserDefaults or logs).
+/// The device token, kept in the Keychain (never in UserDefaults or logs). The app and its Top
+/// Shelf extension share it: both list the same keychain access group first in their
+/// entitlements, so the item lands in that group and both can read it.
 enum Keychain {
     private static let query: [String: Any] = [
         kSecClass as String: kSecClassGenericPassword,
@@ -24,7 +27,13 @@ enum Keychain {
         q[kSecValueData as String] = Data(token.utf8)
         q[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
         let status = SecItemAdd(q as CFDictionary, nil)
-        if status != errSecSuccess { ArcLogApp.warn("saving the sign-in failed: \(status)") }
+        if status != errSecSuccess { ArcLog.shared.warn("saving the sign-in failed: \(status)") }
+    }
+
+    /// Saves the token again, so one kept before the Top Shelf existed moves into the shared group.
+    static func share() {
+        guard let token = read() else { return }
+        save(token)
     }
 
     static func delete() {

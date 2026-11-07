@@ -39,6 +39,9 @@ protocol PlaybackEngine: AnyObject {
     /// What the next stream's picture is, so the TV can switch mode (Match Content) before it
     /// starts. Apple's player reads it from the stream itself and ignores this.
     func prepareDisplay(_ hint: DisplayHint?)
+    /// Zoom Mode: false shows the whole picture (bars where the shapes differ), true fills the
+    /// screen and cuts the edges.
+    func setZoom(_ on: Bool)
 }
 
 extension PlaybackEngine {

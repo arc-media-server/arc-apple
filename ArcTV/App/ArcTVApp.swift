@@ -30,5 +30,9 @@ struct RootView: View {
             }
         }
         .task { await app.launch() }
+        // The Top Shelf's Select (open the title) and Play.
+        .onOpenURL { url in
+            if let link = Shared.link(url) { app.pendingLink = link }
+        }
     }
 }

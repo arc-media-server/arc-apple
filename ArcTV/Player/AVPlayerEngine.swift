@@ -97,6 +97,10 @@ final class AVPlayerEngine: PlaybackEngine {
 
     func pause() { player.pause() }
 
+    func setZoom(_ on: Bool) {
+        surface.playerLayer.videoGravity = on ? .resizeAspectFill : .resizeAspect
+    }
+
     func setRate(_ rate: Float) {
         guard rate != self.rate else { return }
         self.rate = rate

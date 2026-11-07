@@ -94,6 +94,12 @@ final class MPVEngine: PlaybackEngine {
         set("speed", String(rate), runtime: true)
     }
 
+    /// The display layer scales the frames mpv hands it (the avfoundation output passes them on
+    /// whole), so zooming is the layer's: fill the screen, or fit the whole picture.
+    func setZoom(_ on: Bool) {
+        surface.displayLayer.videoGravity = on ? .resizeAspectFill : .resizeAspect
+    }
+
     func seek(to seconds: Double) {
         command(["seek", String(format: "%.3f", max(0, seconds)), "absolute+exact"])
     }
