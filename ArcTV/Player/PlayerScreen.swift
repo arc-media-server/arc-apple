@@ -60,6 +60,8 @@ struct PlayerScreen: View {
                     PlayerOSD(model: model, room: room, menu: menu, tab: tab, active: osdActive, focus: $focus,
                               openMenu: { openMenu($0) },
                               jump: { c in model.jump(to: c); sendSeek(); leaveOSD() },
+                              play: { playNext($0) },
+                              restart: { model.restart(); sendSeek(); leaveOSD() },
                               invite: { if let room { inviteMore(room) } },
                               leave: { close() },
                               end: { Task { await together.end() } })
@@ -157,7 +159,7 @@ struct PlayerScreen: View {
         }
     }
 
-    /// On the picture: Left and Right skip 10 s, Up goes to the track buttons, Down opens the
+    /// On the picture: Left and Right skip 10 s, Up goes to the round buttons (Subtitles), Down opens the
     /// Info card (its tab focused), as the reference player.
     private func move(_ direction: MoveCommandDirection) {
         switch direction {
@@ -165,7 +167,7 @@ struct PlayerScreen: View {
         case .right: seek(by: 10_000)
         case .up:
             osdActive = true
-            Task { @MainActor in focus = .control(model?.subtitleTracks.isEmpty == false ? .subtitles : model?.audioTracks.count ?? 0 > 1 ? .audio : .playback) }
+            Task { @MainActor in focus = .control(.subtitles) }
         case .down:
             osdActive = true
             tab = .info
@@ -183,7 +185,7 @@ struct PlayerScreen: View {
         switch m {
         case .subtitles: key = model.subtitle.map { "s:" + $0.id } ?? "s:off"
         case .audio: key = "a:\(model.audioStream)"
-        case .playback: key = "q:" + (model.maxKbps.map(String.init) ?? "original")
+        case .playback: key = "p:zoom"
         }
         Task { @MainActor in focus = .option(key) }
         showControls()

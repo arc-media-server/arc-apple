@@ -120,23 +120,84 @@ struct FolderContents: View {
     }
 }
 
-/// The profile's Watchlist, most recently added first.
+/// The profile's Watchlist: All, Movies or TV Shows, by Date Added (newest first, as Arc lists
+/// it), Title or Release Date, from the pills at the right of the title.
 struct WatchlistView: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @State private var items: [Item] = []
     @State private var loading = true
     @State private var problem: String?
+    @State private var kind: Kind = .all
+    @State private var sort: Sort = .added
+
+    enum Kind: CaseIterable { case all, movies, shows }
+    enum Sort: CaseIterable { case added, title, released }
 
     var body: some View {
-        PageScaffold(title: L("tab.watchlist"), loading: loading, problem: problem, empty: items.isEmpty ? L("browse.watchlist_empty") : nil) {
-            TitleGrid(items: items)
+        PageScaffold(title: L("tab.watchlist"), loading: loading, problem: problem,
+                     empty: items.isEmpty ? L("browse.watchlist_empty") : shown.isEmpty ? L("browse.watchlist_none_of_kind") : nil,
+                     accessory: items.isEmpty ? nil : AnyView(controls)) {
+            TitleGrid(items: shown)
         }
         .task(id: browse.changes) {
             let (answer, failed) = await loadPage(app, "watchlist") { try await $0.watchlist() }
             if let answer { items = answer }
             problem = failed
             loading = false
+        }
+    }
+
+    private var shown: [Item] {
+        let kept = items.filter { item in
+            switch kind {
+            case .all: return true
+            case .movies: return item.kind == "movie"
+            case .shows: return item.kind != "movie"
+            }
+        }
+        switch sort {
+        case .added: return kept
+        case .title: return kept.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        // Newest first; titles without a date go last.
+        case .released: return kept.sorted { ($0.releaseDate ?? $0.year.map(String.init) ?? "") > ($1.releaseDate ?? $1.year.map(String.init) ?? "") }
+        }
+    }
+
+    private var controls: some View {
+        HStack(spacing: 20) {
+            Menu {
+                Picker(L("watchlist.show"), selection: $kind) {
+                    ForEach(Kind.allCases, id: \.self) { Text(name($0)).tag($0) }
+                }
+            } label: {
+                Text(name(kind)).padding(.horizontal, 8)
+            }
+            .arcGlassButton().buttonBorderShape(.capsule)
+            Menu {
+                Picker(L("watchlist.sort"), selection: $sort) {
+                    ForEach(Sort.allCases, id: \.self) { Text(name($0)).tag($0) }
+                }
+            } label: {
+                Text(name(sort)).padding(.horizontal, 8)
+            }
+            .arcGlassButton().buttonBorderShape(.capsule)
+        }
+    }
+
+    private func name(_ kind: Kind) -> String {
+        switch kind {
+        case .all: return L("library.all")
+        case .movies: return L("watchlist.movies")
+        case .shows: return L("watchlist.shows")
+        }
+    }
+
+    private func name(_ sort: Sort) -> String {
+        switch sort {
+        case .added: return L("library.sort_added")
+        case .title: return L("library.sort_title")
+        case .released: return L("library.sort_released")
         }
     }
 }

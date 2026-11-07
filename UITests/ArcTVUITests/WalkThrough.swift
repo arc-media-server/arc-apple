@@ -91,17 +91,27 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(3)
         shot("10c-player-subtitles")
-        // Back to the button, along to Playback: Quality and Version.
+        // Back to the button, along to Playback (the first): Zoom Mode, Speed, Quality.
         remote.press(.menu)
         pause(1)
-        press(.right, 2)
+        press(.left, 2)
         remote.press(.select)
         pause(1)
-        shot("10d-player-quality")
-        // Back closes the menu, Back again leaves the controls, Back closes the (paused) player,
-        // and Back leaves the title page for Home. (One more would leave the app.)
+        shot("10d-player-playback")
+        // Then the Cast card: Back closes the menu, Back leaves the controls, Down opens Info, and
+        // along the tabs to Cast.
         remote.press(.menu)
         pause(1)
+        remote.press(.menu)
+        pause(1)
+        press(.down)
+        pause(1)
+        let castTab = app.buttons["Cast"]
+        for _ in 0..<4 where !castTab.hasFocus { press(.right) }
+        pause(2)
+        shot("10e-player-cast")
+        // Back leaves the controls, Back closes the (paused) player, and Back leaves the title
+        // page for Home. (One more would open the sidebar.)
         remote.press(.menu)
         pause(1)
         remote.press(.menu)

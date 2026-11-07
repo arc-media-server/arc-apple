@@ -51,6 +51,18 @@ final class PlayerModel {
     var engineName: String { engine is MPVEngine ? L("player.engine_mpv") : L("player.engine_apple") }
     /// The quality limit chosen (nil: the original), and the limits worth offering for this file.
     private(set) var maxKbps: Int?
+    /// The controls' Cast and Episodes cards: the title's cast (an episode's, else its show's),
+    /// and the episodes of its season.
+    private(set) var cast: [Credit] = []
+    private(set) var seasonEpisodes: [Item] = []
+    /// The episode before this one in its season, for the Info card's Previous button.
+    var previous: Item? {
+        guard let i = seasonEpisodes.firstIndex(where: { $0.id == item.id }), i > 0 else { return nil }
+        return seasonEpisodes[i - 1]
+    }
+    /// Playback Speed and Zoom Mode (the Playback menu), kept when the stream or engine changes.
+    private(set) var speed: Float = 1
+    private(set) var zoomed = false
     var qualities: [Int] {
         let offered = offeredQualities(sourceKbps: plan?.sourceKbps ?? 0)
         guard let limit = plan?.serverLimitKbps, limit > 0 else { return offered }
@@ -167,7 +179,44 @@ final class PlayerModel {
         if item.isEpisode {
             do { next = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
         }
+        await loadCastAndEpisodes()
     }
+
+    private func loadCastAndEpisodes() async {
+        func actors(_ credits: [Credit]) -> [Credit] { credits.filter { $0.role == "actor" || $0.role.isEmpty } }
+        do {
+            cast = actors(try await api.item(item.id).credits)
+            if cast.isEmpty, item.isEpisode, let show = item.parentId {
+                cast = actors(try await api.item(show).credits)
+            }
+        } catch {
+            log.debug("cast unavailable in the player: \(type(of: error))")
+        }
+        guard item.isEpisode, let show = item.parentId else { return }
+        do {
+            let seasons = try await api.seasons(seriesId: show).seasons
+            let id = item.id
+            let season = seasons.first { season in season.episodes.contains { $0.id == id } }
+            seasonEpisodes = (season?.episodes ?? []).filter(\.available)
+        } catch {
+            log.debug("episodes unavailable in the player: \(type(of: error))")
+        }
+    }
+
+    /// Playback Speed: the viewer's own choice (Watch Together sets the rate itself instead).
+    func chooseSpeed(_ speed: Float) {
+        self.speed = speed
+        engine.setRate(speed)
+    }
+
+    /// Zoom Mode: the whole picture (Normal), or the screen filled and the edges cut (Zoom).
+    func chooseZoom(_ on: Bool) {
+        zoomed = on
+        engine.setZoom(on)
+    }
+
+    /// Back to the start (the Info card's Restart).
+    func restart() { seek(toMs: 0) }
 
     /// Turns on the subtitles the profile's preferences ask for, once both are known.
     private func settleSubtitles() {
@@ -396,6 +445,8 @@ final class PlayerModel {
         apple.onEvent = { [weak self] in self?.handle($0) }
         engine = apple
         caps = DeviceCaps.apple()
+        if speed != 1 { apple.setRate(speed) }
+        if zoomed { apple.setZoom(true) }
         retried = false
     }
 
