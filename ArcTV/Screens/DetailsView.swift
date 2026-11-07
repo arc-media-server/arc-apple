@@ -51,9 +51,12 @@ struct DetailsView: View {
             // a colour on top, so the blend shows through).
             ArtworkImage(path: backdropPath)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black.opacity(0.15), location: 0.6),
-                                             .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom))
-                .mask(LinearGradient(colors: [.black.opacity(0.12), .black], startPoint: .leading, endPoint: .trailing))
+                // Gentle, as the reference: the picture stays bright to near the bottom and only
+                // softens behind the words on the left.
+                .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.6),
+                                             .init(color: .black.opacity(0.45), location: 1)], startPoint: .top, endPoint: .bottom))
+                .mask(LinearGradient(stops: [.init(color: .black.opacity(0.5), location: 0), .init(color: .black, location: 0.55)],
+                                     startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
                 // The episode browser: the artwork slides up and away, on the page's own clock.
                 .offset(y: receded ? -1200 : 0)
@@ -66,7 +69,8 @@ struct DetailsView: View {
                             // Hidden while browsing a show's episodes, as the reference does: a
                             // mask rather than opacity, so Up from the season tabs still reaches
                             // its buttons (tvOS won't focus a fully transparent view).
-                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1))
+                            // Larger than the hero, so a focused button's lift and shadow aren't cut off.
+                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1).padding(-80))
                             .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
                             .id(Self.heroAnchor)
                         if !seasons.isEmpty {
