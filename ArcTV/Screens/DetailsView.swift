@@ -441,6 +441,12 @@ struct DetailsView: View {
             // Out of reach from the hero's buttons, so Down from Play goes straight into the
             // episodes (as the reference does); Up from the episodes reaches them.
             .disabled(focused == nil)
+            // On the hero the tabs are folded away, so the top of the episode row peeks in at the
+            // bottom of the screen (as the reference does); Down brings them back with the
+            // episodes. A mask rather than opacity, as for the hero.
+            .frame(maxHeight: browsing ? nil : 0, alignment: .top)
+            .mask(Rectangle().opacity(browsing ? 1 : 0).padding(-40))
+            .animation(Self.recede, value: browsing)
             .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {

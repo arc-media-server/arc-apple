@@ -59,3 +59,11 @@ None: layout only.
 `swift test --package-path ArcKit` passes. The walk-through screenshots (04-06 Home, 07-08b the
 title page, 17-18 a library) show the new sizes and the About section. Not yet seen on an
 Apple TV.
+
+## The episode row peeks under a show's hero (7 November, later)
+
+From the owner's photos of the reference app on their TV. On a show's hero, the season tabs are
+folded away and the top of the episode thumbnails peeks in at the bottom of the screen. Down brings
+the tabs back with the episodes, under the logo. Arc showed the tabs there and no episodes. The
+tabs now fold to no height and are masked while the hero has the focus, with the same 0.9 s curve
+as the rest of the move.
