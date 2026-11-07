@@ -178,6 +178,16 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     public var resumeMs: Int64 { userData.map { $0.played ? 0 : $0.positionMs } ?? 0 }
 
     public var watched: Bool { isSeries ? unwatchedCount == 0 : userData?.played == true }
+
+    /// The day an episode not yet on the server airs, when that's after `today` ("Releases
+    /// 8 Nov" on its card); nil once it's out or when Arc has its file.
+    public func upcomingRelease(asOf today: Date = Date(), calendar: Calendar = .current) -> Date? {
+        guard !available, let iso = releaseDate else { return nil }
+        let parts = iso.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3,
+              let day = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2])) else { return nil }
+        return day > calendar.startOfDay(for: today) ? day : nil
+    }
 }
 
 public struct ItemPage: Codable, Sendable {

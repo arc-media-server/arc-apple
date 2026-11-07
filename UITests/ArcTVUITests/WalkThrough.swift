@@ -103,6 +103,19 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(4)
         shot("13-third-row-title")
+        // Down from Play: the episode browser comes up (the logo small at the top, the season
+        // tabs, the episodes); along it, the focused episode shows its overview; along the
+        // tabs, the episodes follow.
+        press(.down)
+        pause(2)
+        shot("13a-episodes")
+        press(.right)
+        pause(1)
+        shot("13b-episode-focused")
+        press(.up)
+        press(.right)
+        pause(2)
+        shot("13c-next-season")
         press(.down, 6)
         pause(3)
         shot("14-title-page-rows")

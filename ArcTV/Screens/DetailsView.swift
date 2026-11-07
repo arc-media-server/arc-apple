@@ -24,6 +24,8 @@ struct DetailsView: View {
     @FocusState private var focused: String?
     @State private var seasons: [Season] = []
     @State private var season = 0
+    /// The season tabs: coming into them lands on the season showing.
+    @Namespace private var seasonTabs
     @State private var problem: String?
     @State private var extra: Extra?
 
@@ -36,18 +38,53 @@ struct DetailsView: View {
                 .overlay(LinearGradient(colors: [.clear, ArcColor.background.opacity(0.85), ArcColor.background], startPoint: .top, endPoint: .bottom))
                 .overlay(LinearGradient(colors: [ArcColor.background.opacity(0.9), .clear], startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
-            ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 28) {
-                    hero
-                    if !seasons.isEmpty { episodes }
-                    if !shown.extras.isEmpty { extras }
-                    if !similar.isEmpty { related }
-                    if !actors.isEmpty { cast }
-                    if !shown.collections.isEmpty { collections }
-                    infoCards
+            // While a show's seasons and episodes have the focus the artwork darkens a little and
+            // the show's logo sits small and centred at the top, over the season tabs.
+            Color.black.opacity(browsing ? 0.35 : 0).ignoresSafeArea().allowsHitTesting(false)
+                .animation(.easeInOut(duration: 0.3), value: browsing)
+            ScrollViewReader { proxy in
+                ScrollView(.vertical) {
+                    VStack(alignment: .leading, spacing: 28) {
+                        hero.id(Self.heroAnchor)
+                        if !seasons.isEmpty {
+                            // The point the page scrolls to for the episode browser: room above the
+                            // season tabs for the logo. (Negative padding keeps it out of the layout.)
+                            Color.clear.frame(height: Self.browserLogoRoom).id(Self.browserAnchor)
+                                .padding(.top, -Self.browserLogoRoom)
+                            episodes
+                        }
+                        if !shown.extras.isEmpty { extras }
+                        if !similar.isEmpty { related }
+                        if !actors.isEmpty { cast }
+                        if !shown.collections.isEmpty { collections }
+                        infoCards
+                    }
+                    .padding(.horizontal, 80)
+                    .padding(.bottom, 60)
                 }
-                .padding(.horizontal, 80)
-                .padding(.bottom, 60)
+                .onChange(of: focused) { old, new in
+                    if let new, new.hasPrefix("season|"), let index = Int(new.dropFirst(7)), index != season {
+                        // Moving along the season tabs shows that season's episodes; no Select.
+                        withAnimation(.easeInOut(duration: 0.2)) { season = index }
+                    }
+                    let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
+                    if nowBrowsing && !wasBrowsing {
+                        withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.browserAnchor, anchor: .top) }
+                    } else if !nowBrowsing && old?.hasPrefix("season|") == true && new == nil {
+                        // Up from the season tabs is the hero's buttons: back to the top.
+                        withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
+                    }
+                }
+            }
+            if !seasons.isEmpty {
+                TitleLogo(path: shown.images?.logo, title: shown.title)
+                    .frame(maxWidth: 560, maxHeight: 150)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 50)
+                    .opacity(browsing ? 1 : 0)
+                    .animation(.easeInOut(duration: 0.3), value: browsing)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
             }
         }
         .task(id: browse.changes) { await load() }
@@ -308,28 +345,52 @@ struct DetailsView: View {
         return available.first { !$0.watched } ?? available.first
     }
 
+    static let heroAnchor = "details|hero"
+    static let browserAnchor = "details|browser"
+    /// Room above the season tabs for the show's logo while browsing episodes.
+    static let browserLogoRoom: CGFloat = 230
+
+    static func isBrowser(_ key: String?) -> Bool {
+        guard let key else { return false }
+        return key.hasPrefix("season|") || key.hasPrefix("ep|")
+    }
+
+    /// Whether the season tabs or an episode has the focus (the episode browser is up).
+    private var browsing: Bool { Self.isBrowser(focused) }
+
+    /// The season tabs over one row of a season's episodes, as the reference design has them:
+    /// moving along the tabs shows that season, coming into them lands on the season showing,
+    /// and the focused episode shows its overview under it.
     private var episodes: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 20) {
             ScrollView(.horizontal) {
-                HStack(spacing: 24) {
+                HStack(spacing: 20) {
                     ForEach(Array(seasons.enumerated()), id: \.element.id) { index, s in
                         Button(s.name.isEmpty ? L("details.season", s.seasonNumber) : s.name) { season = index }
                             .arcGlassButton(prominent: index == season)
+                            .focused($focused, equals: "season|\(index)")
+                            .prefersDefaultFocus(index == season, in: seasonTabs)
                     }
                 }
                 .padding(.vertical, 12)
             }
             .scrollClipDisabled()
+            .focusSection()
+            .focusScope(seasonTabs)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: 40) {
                         ForEach(seasons[season].episodes) { ep in
-                            EpisodeCard(episode: ep) { play(PlayRequest(item: ep, startMs: ep.resumeMs)) }
+                            EpisodeCard(episode: ep, focus: $focused, focusKey: "ep|" + ep.id,
+                                        showsOverview: focused == "ep|" + ep.id) {
+                                play(PlayRequest(item: ep, startMs: ep.resumeMs))
+                            }
                         }
                     }
                     .padding(.vertical, 24)
                 }
                 .scrollClipDisabled()
+                .id(season) // another season starts at its first episode
             }
         }
     }
@@ -356,32 +417,58 @@ struct DetailsView: View {
     }
 }
 
-/// An episode in a season: its still, number and title, with how far through.
+/// An episode in a season: its still (with its length, or how far through), its number and
+/// name, and its overview while it has the focus. One that hasn't aired yet is dimmed with the day
+/// it releases; it can take the focus but doesn't play.
 struct EpisodeCard: View {
     let episode: Item
+    var focus: FocusState<String?>.Binding
+    let focusKey: String
+    var showsOverview = false
     let action: () -> Void
+
+    private var size: CGSize { CardStyle.thumb.size }
 
     var body: some View {
         let card = MediaCard(item: episode)
+        let releases = episode.upcomingRelease()
         VStack(alignment: .leading, spacing: 10) {
-            Button(action: action) {
+            Button { if episode.available { action() } } label: {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: episode.images?.primary).frame(width: 384, height: 216).clipped()
-                    if let progress = card.progress { ProgressBar(fraction: progress).padding(12) }
+                    ArtworkImage(path: episode.images?.primary ?? episode.images?.seriesBackdrop)
+                        .frame(width: size.width, height: size.height).clipped()
+                        .opacity(episode.available ? 1 : 0.35)
+                    if let releases {
+                        Label(L("details.releases", releases.formatted(.dateTime.day().month(.abbreviated))), systemImage: "clock")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 14).padding(.vertical, 8)
+                            .background(Capsule().fill(.black.opacity(0.6)))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    if let progress = card.progress {
+                        ResumeStrip(fraction: progress, minutesLeft: card.minutesLeft)
+                    } else if episode.available, let m = episode.runtimeMin, m > 0 {
+                        Text(runtimeText(m)).font(.callout.weight(.semibold))
+                            .shadow(color: .black.opacity(0.7), radius: 4)
+                            .padding(16)
+                    }
                     if episode.watched {
                         Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.black, .white)
                             .padding(10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }
                 }
-                .frame(width: 384, height: 216)
+                .frame(width: size.width, height: size.height)
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
-            .disabled(!episode.available)
-            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title)).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
-            if let overview = episode.overview {
-                Text(overview).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(2).frame(width: 384, alignment: .leading)
-            }
+            .focused(focus, equals: focusKey)
+            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
+                .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
+            // Kept in the layout so the row doesn't jump as the focus moves.
+            Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
+                .lineLimit(3, reservesSpace: true).frame(width: size.width, alignment: .leading)
+                .opacity(showsOverview ? 1 : 0)
+                .animation(.easeInOut(duration: 0.2), value: showsOverview)
         }
     }
 }
