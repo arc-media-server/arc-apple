@@ -57,13 +57,7 @@ struct DetailsView: View {
                 ScrollView(.vertical) {
                     VStack(alignment: .leading, spacing: 28) {
                         hero.id(Self.heroAnchor)
-                        if !seasons.isEmpty {
-                            // The point the page scrolls to for the episode browser: room above the
-                            // season tabs for the logo. (Negative padding keeps it out of the layout.)
-                            Color.clear.frame(height: Self.browserLogoRoom).id(Self.browserAnchor)
-                                .padding(.top, -Self.browserLogoRoom)
-                            episodes
-                        }
+                        if !seasons.isEmpty { episodes }
                         if !shown.extras.isEmpty { extras }
                         if !similar.isEmpty { related }
                         if !actors.isEmpty { cast }
@@ -82,7 +76,7 @@ struct DetailsView: View {
                     if nowBrowsing && !wasBrowsing {
                         withAnimation(Self.recede) {
                             receded = true
-                            proxy.scrollTo(Self.browserAnchor, anchor: .top)
+                            proxy.scrollTo(Self.browserAnchor, anchor: Self.tabsAnchor)
                         }
                     } else if !nowBrowsing && old?.hasPrefix("season|") == true && new == nil {
                         // Up from the season tabs is the hero's buttons: back to the top.
@@ -374,8 +368,10 @@ struct DetailsView: View {
     static let recede = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.9)
     static let heroAnchor = "details|hero"
     static let browserAnchor = "details|browser"
-    /// Room above the season tabs for the show's logo while browsing episodes.
-    static let browserLogoRoom: CGFloat = 230
+    /// Where the season tabs sit while browsing episodes: a quarter of the way down the screen,
+    /// leaving the top for the show's logo (scrollTo lines this point of the tabs up with the
+    /// same point of the screen).
+    static let tabsAnchor = UnitPoint(x: 0.5, y: 0.25)
 
     static func isBrowser(_ key: String?) -> Bool {
         guard let key else { return false }
@@ -404,6 +400,7 @@ struct DetailsView: View {
             .scrollClipDisabled()
             .focusSection()
             .focusScope(seasonTabs)
+            .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: 40) {
