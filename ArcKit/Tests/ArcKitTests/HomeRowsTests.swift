@@ -50,4 +50,19 @@ final class HomeRowsTests: XCTestCase {
         let film = MediaCard(item: Item(id: "m1", kind: "movie", title: "Heat", images: Images(primary: "/p", backdrop: "/b")))
         XCTAssertEqual(film.withShowArt().art(.thumb, seasonPosters: false), "/b")
     }
+
+    func testAnEpisodeNotOutYetSaysWhenItReleases() throws {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let today = try XCTUnwrap(cal.date(from: DateComponents(year: 2026, month: 11, day: 7)))
+        var ep = Item(id: "e2", kind: "episode", title: "Young Blood")
+        ep.releaseDate = "2026-11-08"
+        ep.available = false
+        XCTAssertEqual(ep.upcomingRelease(asOf: today, calendar: cal), cal.date(from: DateComponents(year: 2026, month: 11, day: 8)))
+        ep.releaseDate = "2026-11-07" // out today
+        XCTAssertNil(ep.upcomingRelease(asOf: today, calendar: cal))
+        ep.releaseDate = "2026-11-08"
+        ep.available = true // already on the server
+        XCTAssertNil(ep.upcomingRelease(asOf: today, calendar: cal))
+    }
 }

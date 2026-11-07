@@ -42,13 +42,24 @@ TV apps copy the result once it's settled.
 5. **Continue Watching art:** a show's own picture with its logo on it, rather than the
    episode's still, so a row of shows is easy to tell apart. The episode is named under it.
 
+6. **A show's seasons and episodes** (asked for again, 7 November), as the reference moves from
+   a show's overview to its episodes:
+   - at rest the hero fills the screen, the top of the episodes peeking below;
+   - Down from the buttons brings the episode browser up: the page scrolls so the season tabs sit
+     under the show's logo, small and centred at the top, and the artwork darkens a little;
+   - moving along the season tabs shows that season (no Select), and coming back to the tabs
+     lands on the season showing;
+   - one row of large episode cards (the length on the picture, or the resume strip); the focused
+     one shows its overview; one not out yet is dimmed with "Releases 8 Nov";
+   - Up from the tabs returns to the hero; Down past the episodes goes on to Related and Cast.
+
 ## Not taken from the reference
 
 - The choice of navigation styles, themes and card styles (Arc keeps one good default).
 - Colour in the interface (a blue tick for watched): Arc's controls stay white.
 - Ratings (paused in Arc).
-- Season pills with large episode cards, the "New season" capsule, and the episode line in
-  Home's hero instead of the overview (not wanted, 7 November).
+- The "New season" capsule, and the episode line in Home's hero instead of the overview (not
+  wanted, 7 November).
 - A Trailer button: the Trailers & Extras row already plays a title's trailers. Arc only plays
   trailers that are the owner's own files (a Trailers folder or "-trailer" files beside the
   film), never ones fetched from video sites.

@@ -1,4 +1,4 @@
-# Bigger cards, and the title page's About section
+# The reference look: bigger cards, About, badges, posters and the episode browser
 
 The first two steps of `docs/plans/reference-look.md`.
 
@@ -32,7 +32,20 @@ The first two steps of `docs/plans/reference-look.md`.
 - The Playback card says which profile is watching ("Profile"), and leaves out the connection
   (home network or remote), which the app doesn't know for certain yet.
 
+- **A show's seasons and episodes, as the reference moves to them.** Down from a show's buttons,
+  the page scrolls so the season tabs sit under the show's logo (small, centred at the top) and
+  the artwork darkens a little. Moving along the tabs shows that season straight away; coming
+  back to them lands on the season showing. Episodes are large cards (512x288) with their
+  length on the picture (or the resume strip), "E1 · Name" under them, and the overview under
+  the focused one only. An episode not out yet is dimmed with "Releases 8 Nov"
+  (`Item.upcomingRelease`, with a test); it takes the focus but doesn't play. Up from the tabs
+  returns to the hero.
+
 ## Walk-through
+
+Steps 13a–13c show the episode browser: coming down to it, an episode focused, and the next
+season chosen from the tabs.
+
 
 Home keeps a title opened earlier, and the sidebar now steps aside on opened pages, so the
 walk-through presses Back until Home's first page before choosing Home again.
