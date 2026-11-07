@@ -118,9 +118,11 @@ final class WalkThrough: XCTestCase {
         pause(1)
         shot("13b-episode-focused")
         press(.up)
+        pause(1)
+        shot("13c-season-tabs")
         press(.right)
         pause(2)
-        shot("13c-next-season")
+        shot("13d-next-season")
         press(.down, 6)
         pause(3)
         shot("14-title-page-rows")
@@ -195,11 +197,12 @@ final class WalkThrough: XCTestCase {
 
         // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
         // back to Home, up to the Watch Together row, the host's lobby, then the guest's.
-        // Back once from Search's first page opens the sidebar on Search (a second Back would
-        // leave the app); Home is the next place down.
-        remote.press(.menu)
-        pause(1)
+        // Search has the whole screen; Left from the keyboard's first key opens the sidebar on
+        // Search (Back belongs to the keyboard there). Home is the next place down.
         let home = app.buttons["Home"]
+        let searchPlace = app.buttons["Search"]
+        for _ in 0..<30 where !(searchPlace.hasFocus || home.hasFocus) { remote.press(.left) }
+        pause(1)
         for _ in 0..<4 where !home.hasFocus { press(.down) }
         remote.press(.select)
         pause(2)
