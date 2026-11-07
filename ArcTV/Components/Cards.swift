@@ -94,15 +94,21 @@ struct MediaCardView: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
+            // VoiceOver (and the walk-through) know a card by its title.
+            .accessibilityLabel(Text(name))
             .contextMenu { TitleActions(item: card.item) }
             // Names centred under the art.
             VStack(alignment: .center, spacing: 2) {
-                Text(card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title)
+                Text(name)
                     .font(.callout.weight(.semibold)).lineLimit(1)
                 if let sub = subtitle { Text(sub).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
             .frame(width: style.size.width, alignment: .center)
         }
+    }
+
+    private var name: String {
+        card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title
     }
 
     private var subtitle: String? {

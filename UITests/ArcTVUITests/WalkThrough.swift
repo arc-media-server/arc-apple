@@ -96,9 +96,13 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("11-back-from-player")
 
-        // A show: down the rows until a show's page has seasons.
-        press(.down)
-        pause(2)
+        // A show: down the rows until a show's card (Recently Added in TV) has the focus.
+        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mushoku' OR label BEGINSWITH 'Firefly'"))
+        for _ in 0..<6 {
+            press(.down)
+            pause(1.5)
+            if shows.allElementsBoundByIndex.contains(where: { $0.hasFocus }) { break }
+        }
         shot("12-home-third-row")
         remote.press(.select)
         pause(4)
