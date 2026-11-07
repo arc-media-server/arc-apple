@@ -87,6 +87,7 @@ struct DetailsView: View {
                     .padding(.horizontal, 80)
                     .padding(.bottom, 60)
                 }
+                .defaultFocus($focused, Self.playKey)
                 .onChange(of: focused) { old, new in
                     if let new, new.hasPrefix("season|"), let index = Int(new.dropFirst(7)), index != season {
                         if old?.hasPrefix("season|") == true {
@@ -101,7 +102,7 @@ struct DetailsView: View {
                     }
                     // Into the episodes from the hero: on to the one to watch next. (After tvOS's
                     // own move has settled: it ignores a change made while it's moving the focus.)
-                    if old == nil, let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
+                    if Self.isHero(old), let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
                         Task { @MainActor in
                             try? await Task.sleep(for: .milliseconds(80))
                             focused = "ep|" + next.id
@@ -109,11 +110,11 @@ struct DetailsView: View {
                     }
                     // A film: Down from the hero brings the first row up under the hero's buttons,
                     // which stay at the top, as the reference does; Up goes back to the whole hero.
-                    // (The first row's cards carry focus keys, so nil here is the hero.)
+                    // (The first row's cards carry focus keys, so the hero is Play's key or nil.)
                     if seasons.isEmpty {
-                        if Self.isFirstRow(new), !Self.isFirstRow(old), old == nil {
+                        if Self.isFirstRow(new), Self.isHero(old) {
                             withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.restAnchor, anchor: Self.restPoint) }
-                        } else if Self.isFirstRow(old), new == nil {
+                        } else if Self.isFirstRow(old), Self.isHero(new) {
                             withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
                         }
                     }
@@ -123,7 +124,7 @@ struct DetailsView: View {
                             receded = true
                             proxy.scrollTo(Self.browserAnchor, anchor: Self.tabsAnchor)
                         }
-                    } else if !nowBrowsing && old?.hasPrefix("season|") == true && new == nil {
+                    } else if !nowBrowsing && old?.hasPrefix("season|") == true && Self.isHero(new) {
                         // Up from the season tabs is the hero's buttons: back to the top.
                         withAnimation(Self.recede) {
                             receded = false
@@ -263,6 +264,7 @@ struct DetailsView: View {
                     PlayLabel(item: shown, episode: shown.isEpisode)
                 }
                 .arcGlassButton()
+                .focused($focused, equals: Self.playKey)
                 if resume > 0 {
                     Button { play(PlayRequest(item: shown, startMs: 0)) } label: {
                         Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise")
@@ -274,6 +276,7 @@ struct DetailsView: View {
                     PlayLabel(item: next, episode: true)
                 }
                 .arcGlassButton()
+                .focused($focused, equals: Self.playKey)
             }
             // The page's other actions are round glass icons, as the Android app's title page.
             TitleActions(item: shown, onPage: true).roundIconButton()
@@ -436,6 +439,12 @@ struct DetailsView: View {
         return key.hasPrefix("cast|") || key.hasPrefix("extra|")
     }
 
+    /// Play's focus key: the page opens on it, as the reference does.
+    static let playKey = "hero|play"
+
+    /// The hero's buttons: Play, or the others (which carry no key).
+    static func isHero(_ key: String?) -> Bool { key == nil || key == playKey }
+
     static func isBrowser(_ key: String?) -> Bool {
         guard let key else { return false }
         return key.hasPrefix("season|") || key.hasPrefix("ep|")
@@ -471,7 +480,7 @@ struct DetailsView: View {
             .focusSection()
             // Out of reach from the hero's buttons, so Down from Play goes straight into the
             // episodes (as the reference does); Up from the episodes reaches them.
-            .disabled(focused == nil)
+            .disabled(Self.isHero(focused))
             // On the hero the tabs are folded away, so the top of the episode row peeks in at the
             // bottom of the screen (as the reference does); Down brings them back with the
             // episodes. A mask rather than opacity, as for the hero.
