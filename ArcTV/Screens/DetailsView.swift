@@ -79,10 +79,6 @@ struct DetailsView: View {
                         if old?.hasPrefix("season|") == true {
                             // Moving along the season tabs shows that season's episodes; no Select.
                             withAnimation(.easeInOut(duration: 0.2)) { season = index }
-                        } else if old == nil, let next = seasonNextUp {
-                            // Down from the hero's buttons lands on the episode to watch next, as the
-                            // reference does; the tabs are Up from there.
-                            Task { @MainActor in focused = "ep|" + next.id }
                         } else {
                             // Coming into the tabs (from the episodes or the hero) lands on the
                             // season showing, whichever tab is nearest. (A step later: tvOS
@@ -90,8 +86,13 @@ struct DetailsView: View {
                             Task { @MainActor in focused = "season|\(season)" }
                         }
                     }
-                    if old == nil, new == "season|\(season)", let next = seasonNextUp {
-                        Task { @MainActor in focused = "ep|" + next.id }
+                    // Into the episodes from the hero: on to the one to watch next. (After tvOS's
+                    // own move has settled: it ignores a change made while it's moving the focus.)
+                    if old == nil, let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(80))
+                            focused = "ep|" + next.id
+                        }
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
                     if nowBrowsing && !wasBrowsing {
@@ -434,6 +435,9 @@ struct DetailsView: View {
             }
             .scrollClipDisabled()
             .focusSection()
+            // Out of reach from the hero's buttons, so Down from Play goes straight into the
+            // episodes (as the reference does); Up from the episodes reaches them.
+            .disabled(focused == nil)
             .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
