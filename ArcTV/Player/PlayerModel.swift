@@ -74,7 +74,7 @@ final class PlayerModel {
         self.item = item
         self.engine = engine
         self.onRefused = onRefused
-        caps = DeviceCaps.current()
+        caps = DeviceCaps.apple()
         positionMs = startMs
         engine.onEvent = { [weak self] in self?.handle($0) }
     }
@@ -359,7 +359,7 @@ final class PlayerModel {
 
     func retry() {
         retried = false
-        caps = DeviceCaps.current()
+        caps = DeviceCaps.apple()
         load(at: positionMs)
     }
 
