@@ -74,3 +74,16 @@ to it as before.
 
 The cast row now comes first under the hero, above Trailers & Extras, Related and the rest. For a
 show it comes straight after the episodes.
+
+## The walk-through uses the owner's titles
+
+So screenshots compare directly with the owner's photos of the reference, the stand-in's recorded
+Interstellar is now **Spider-Man: Brand New Day** (TMDB 969681) and Firefly is **Dexter:
+Resurrection** (TMDB 259909). Their pictures come from TMDB as before.
+- Dexter has Season 1 (ten episodes, watched, named "Episode n") and Season 2:
+  - E1 Risky Business, ready to watch;
+  - E2 Young Blood, releasing 8 November;
+  - E3 Fallen, releasing 15 November.
+- The walk-through picks Dexter on Home. On the season tabs it moves Left, from Season 2 (where
+  the show opens, on its next episode) to Season 1.
+- Re-recording the fixtures with `record.py` would bring the scratch library's titles back.

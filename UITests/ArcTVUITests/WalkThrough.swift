@@ -97,11 +97,17 @@ final class WalkThrough: XCTestCase {
         shot("11-back-from-player")
 
         // A show: down the rows until a show's card (Recently Added in TV) has the focus.
-        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mushoku' OR label BEGINSWITH 'Firefly'"))
+        // Dexter: Resurrection, the show in the owner's photos of the reference, for comparison.
+        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mushoku' OR label BEGINSWITH 'Dexter'"))
+        let dexter = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Dexter'"))
         for _ in 0..<6 {
             press(.down)
             pause(1.5)
             if shows.allElementsBoundByIndex.contains(where: { $0.hasFocus }) { break }
+        }
+        for _ in 0..<8 where !dexter.allElementsBoundByIndex.contains(where: { $0.hasFocus }) {
+            press(.right)
+            pause(1)
         }
         shot("12-home-third-row")
         remote.press(.select)
@@ -119,7 +125,8 @@ final class WalkThrough: XCTestCase {
         press(.up)
         pause(1)
         shot("13c-season-tabs")
-        press(.right)
+        // The show opens on Season 2 (its episode to watch next); Left is Season 1.
+        press(.left)
         pause(2)
         shot("13d-next-season")
         press(.down, 6)
