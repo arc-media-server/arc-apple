@@ -58,6 +58,33 @@ public enum Quality {
         return out
     }
 
+    /// The file's quality in words, for the title page's Playback card: the resolution, the
+    /// picture's HDR, and the sound ("4K · Dolby Vision · Dolby Atmos", "1080p · DTS-HD MA 7.1").
+    public static func summary(_ file: MediaFile?) -> String? {
+        guard let file else { return nil }
+        var parts: [String] = []
+        if let video = file.streams.first(where: { $0.kind == "video" }) {
+            if let res = resolutionLabel(video) { parts.append(res) }
+            if video.dolbyVision {
+                parts.append("Dolby Vision")
+            } else if let h = hdr(video) {
+                parts.append(h)
+            }
+        }
+        let audios = file.streams.filter { $0.kind == "audio" }
+        if let audio = audios.first(where: \.isDefault) ?? audios.first {
+            if objectAudio(audio) == "Atmos" {
+                parts.append("Dolby Atmos")
+            } else if let object = objectAudio(audio) {
+                parts.append(object)
+            } else {
+                let line = [audioCodec(audio), channels(audio.channels)].compactMap { $0 }.joined(separator: " ")
+                if !line.isEmpty { parts.append(line) }
+            }
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
     /// 4K, 1080p, 720p or SD by the picture's size (a scope film's 3840x1600 is still 4K, and
     /// 1920x800 still 1080p).
     public static func resolutionLabel(_ video: MediaStream) -> String? {

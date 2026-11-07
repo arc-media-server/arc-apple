@@ -32,4 +32,19 @@ final class QualityTests: XCTestCase {
                        [.init(["720p"], filled: true), .init(["HDR10+"])])
         XCTAssertEqual(Quality.capsules(nil), [])
     }
+
+    func testTheSummaryInWords() throws {
+        let f = try file(#"{"kind":"video","codec":"hevc","width":3840,"height":2160,"color_transfer":"smpte2084","dolby_vision":true},{"kind":"audio","codec":"eac3","profile":"Dolby Digital Plus + Dolby Atmos","channels":6,"is_default":true}"#)
+        XCTAssertEqual(Quality.summary(f), "4K · Dolby Vision · Dolby Atmos")
+        let g = try file(#"{"kind":"video","codec":"h264","width":1920,"height":1080},{"kind":"audio","codec":"dts","profile":"DTS-HD MA","channels":8}"#)
+        XCTAssertEqual(Quality.summary(g), "1080p · DTS-HD MA 7.1")
+        XCTAssertNil(Quality.summary(nil))
+    }
+
+    func testSignInStatusSaysWhetherTheDeviceIsLocal() throws {
+        let on = try ArcJSON.decoder.decode(AuthStatus.self, from: Data(#"{"signed_in":true,"local":true}"#.utf8))
+        XCTAssertEqual(on.local, true)
+        let unknown = try ArcJSON.decoder.decode(AuthStatus.self, from: Data(#"{"signed_in":true}"#.utf8))
+        XCTAssertNil(unknown.local)
+    }
 }

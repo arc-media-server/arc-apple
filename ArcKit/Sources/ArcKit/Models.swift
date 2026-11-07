@@ -37,6 +37,8 @@ public struct Profile: Codable, Sendable, Hashable, Identifiable {
 
 public struct AuthStatus: Codable, Sendable {
     @Default<Defaults.False> public var signedIn: Bool
+    /// Whether the server sees this device on its local network.
+    public var local: Bool?
     public var profile: Profile?
     @Default<Defaults.List<Profile>> public var profiles: [Profile]
 }
