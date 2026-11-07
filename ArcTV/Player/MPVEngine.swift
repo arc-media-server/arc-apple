@@ -110,7 +110,7 @@ final class MPVEngine: PlaybackEngine {
         paused = true
         currentSeconds = 0
         availableSeconds = 0
-        surface.displayLayer.flushAndRemoveImage()
+        surface.displayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true, completionHandler: nil)
     }
 
     /// Reads every waiting event.
