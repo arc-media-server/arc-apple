@@ -58,10 +58,29 @@ extension EnvironmentValues {
     }
 }
 
+/// Tells the sidebar how many pages are open on top of a place's first page: while any are, the
+/// sidebar and its margin step aside so a title's page fills the screen.
+struct ReportDepth {
+    let action: (Int) -> Void
+    func callAsFunction(_ depth: Int) { action(depth) }
+}
+
+private struct ReportDepthKey: EnvironmentKey {
+    static let defaultValue = ReportDepth { _ in }
+}
+
+extension EnvironmentValues {
+    var reportDepth: ReportDepth {
+        get { self[ReportDepthKey.self] }
+        set { self[ReportDepthKey.self] = newValue }
+    }
+}
+
 /// One place's pages: its first page, then whatever is opened from it, Back going back up. Back on
 /// the first page opens the sidebar.
 struct BrowseStack<Root: View>: View {
     @Environment(\.openSidebar) private var openSidebar
+    @Environment(\.reportDepth) private var reportDepth
     @State private var path = NavigationPath()
     @ViewBuilder let root: () -> Root
 
@@ -74,6 +93,7 @@ struct BrowseStack<Root: View>: View {
                 }
         }
         .environment(\.openRoute, OpenRoute { path.append($0) })
+        .onChange(of: path.count) { _, depth in reportDepth(depth) }
     }
 }
 
@@ -111,6 +131,11 @@ struct MainView: View {
     /// Choosing the place that's showing starts its first page afresh (back at the top, as
     /// tvOS apps' tabs do): each place's page is rebuilt when its count goes up.
     @State private var fresh: [String: Int] = [:]
+    /// How many pages each place has open on top of its first page (see `ReportDepth`).
+    @State private var depths: [String: Int] = [:]
+    /// A page is open on top of the place showing (a title, a collection, a person): the sidebar
+    /// and its margin step aside so the page fills the screen; Back returns to the first page.
+    private var deep: Bool { (depths[tab] ?? 0) > 0 }
 
     /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
@@ -142,12 +167,13 @@ struct MainView: View {
                     let showing = place.id == tab
                     page(for: place)
                         .id(place.id + "#" + String(fresh[place.id] ?? 0))
+                        .environment(\.reportDepth, ReportDepth { depths[place.id] = $0 })
                         .opacity(showing ? 1 : 0)
                         .disabled(!showing)
                         .accessibilityHidden(!showing)
                 }
             }
-            .safeAreaPadding(.leading, Sidebar.collapsedWidth - 20)
+            .safeAreaPadding(.leading, deep ? 0 : Sidebar.collapsedWidth - 20)
             .environment(\.openSidebar, OpenSidebar { focused = tab })
 
             Color.clear
@@ -160,16 +186,12 @@ struct MainView: View {
                 .padding(.top, 60)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 
-            // The page dims behind the open sidebar, so its names read over any artwork.
-            LinearGradient(colors: [.black.opacity(0.75), .black.opacity(0)], startPoint: .leading, endPoint: .trailing)
-                .frame(width: 900)
-                .ignoresSafeArea()
-                .opacity(sidebarOpen ? 1 : 0)
-                .allowsHitTesting(false)
-
             sidebar
+                .opacity(deep ? 0 : 1)
+                .disabled(deep)
         }
         .animation(.easeOut(duration: 0.25), value: sidebarOpen)
+        .animation(.easeOut(duration: 0.25), value: deep)
         .onChange(of: focused) { old, new in
             // Leaving the stop on the page: it can't be reached again until the next choice.
             if old == Sidebar.landing { landingArmed = false }
@@ -241,7 +263,10 @@ struct MainView: View {
             }
             ForEach(places) { place in
                 Button {
-                    if tab == place.id { fresh[place.id, default: 0] += 1 }
+                    if tab == place.id {
+                        fresh[place.id, default: 0] += 1
+                        depths[place.id] = 0
+                    }
                     tab = place.id
                     opened.insert(place.id)
                     handOver()
