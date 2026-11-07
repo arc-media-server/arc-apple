@@ -195,7 +195,8 @@ struct MainView: View {
             sidebar
                 // A mask, not opacity: tvOS won't move the focus to a fully transparent view, and
                 // in Search the sidebar must stay reachable (Left from the keyboard).
-                .mask(Rectangle().opacity(stepsAside ? 0 : 1))
+                // (The mask covers the whole screen: the sidebar draws into the safe area.)
+                .mask { Color.black.opacity(stepsAside ? 0 : 1).ignoresSafeArea() }
                 .disabled(deep)
         }
         .animation(.easeOut(duration: 0.25), value: sidebarOpen)
