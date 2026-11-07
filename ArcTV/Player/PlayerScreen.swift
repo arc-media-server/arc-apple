@@ -1,10 +1,12 @@
 import ArcKit
 import SwiftUI
 
-/// The player: the picture, a spinner while it waits, and Arc's own controls (title, timeline,
-/// times). Play/Pause and the touch surface's click toggle playing, left and right skip 10
-/// seconds, down opens Subtitles and Audio, and Back closes those, hides the controls or closes
-/// the player. Skip Intro and Up Next appear as Plex's do, with the focus on them.
+/// The player: the picture, a spinner while it waits, and Arc's own controls (PlayerOSD).
+/// Play/Pause and the touch surface's click toggle playing; Left and Right clicks skip 10
+/// seconds; a sideways swipe on the touch surface scrubs (paused, with the timeline picture),
+/// and a click or Play plays from there while Back puts it back. Up goes to the round buttons,
+/// Down to the cards, and Back closes those, hides the controls or closes the player. Skip Intro
+/// and Up Next appear as Plex's do, with the focus on them.
 struct PlayerScreen: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
@@ -19,6 +21,13 @@ struct PlayerScreen: View {
     @State private var tab: OSDTab?
     @State private var osdActive = false
     @State private var hideTask: Task<Void, Never>?
+    /// Scrubbing (a swipe across the remote's touch surface): where the marker is now, where the
+    /// swipe started from, and whether it was playing (it plays on from the new point).
+    @State private var scrubMs: Int64?
+    @State private var scrubBase: Int64 = 0
+    @State private var scrubResume = false
+    /// When the last swipe moved: the move commands a swipe also sends are ignored for a moment.
+    @State private var swipedAt = Date.distantPast
     /// Seconds left before the next episode starts (Auto-Play); nil when not counting.
     @State private var countdown: Int?
     @State private var upNextDismissed = false
@@ -55,9 +64,19 @@ struct PlayerScreen: View {
                         .focusable(!osdActive && menu == nil && !lobby && together.inviting == nil)
                         .focused($focus, equals: .surface)
                         .onMoveCommand { move($0) }
-                        .onTapGesture { togglePlay(); showControls() }
+                        .onTapGesture {
+                            if scrubMs != nil { endScrub(commit: true) } else { togglePlay() }
+                            showControls()
+                        }
+                    SwipeCatcher(enabled: !osdActive && menu == nil && !lobby && !model.loading && model.problem == nil
+                                    && together.inviting == nil && model.durationMs > 0,
+                                 began: { beginScrub() },
+                                 changed: { scrub($0) },
+                                 ended: { swipedAt = Date() })
+                        .frame(width: 0, height: 0)
+                        .allowsHitTesting(false)
                     if model.loading || model.waiting { ProgressView().scaleEffect(1.6) }
-                    PlayerOSD(model: model, room: room, menu: menu, tab: tab, active: osdActive, focus: $focus,
+                    PlayerOSD(model: model, room: room, menu: menu, tab: tab, active: osdActive, scrubMs: scrubMs, focus: $focus,
                               openMenu: { openMenu($0) },
                               jump: { c in model.jump(to: c); sendSeek(); leaveOSD() },
                               play: { playNext($0) },
@@ -82,9 +101,15 @@ struct PlayerScreen: View {
             if request.together, let notice = together.notice { NoticeCapsule(text: notice) }
         }
         .animation(.easeInOut(duration: 0.25), value: together.notice)
-        .onPlayPauseCommand { togglePlay(); showControls() }
+        .onPlayPauseCommand {
+            if scrubMs != nil { endScrub(commit: true, play: true) } else { togglePlay() }
+            showControls()
+        }
         .onExitCommand {
-            if request.together && together.inviting != nil {
+            if scrubMs != nil {
+                // Back puts the marker where it was.
+                endScrub(commit: false)
+            } else if request.together && together.inviting != nil {
                 together.inviting = nil
             } else if let open = menu {
                 // A menu closes back to its button.
@@ -162,7 +187,13 @@ struct PlayerScreen: View {
     /// On the picture: Left and Right skip 10 s, Up goes to the round buttons (Subtitles), Down opens the
     /// Info card (its tab focused), as the reference player.
     private func move(_ direction: MoveCommandDirection) {
+        // A swipe sends move commands too; it scrubs instead.
+        if direction == .left || direction == .right, Date().timeIntervalSince(swipedAt) < 0.5 { return }
+        // Up or Down leaves scrubbing for the buttons or the cards, the marker back where it was.
+        if direction == .up || direction == .down, scrubMs != nil { endScrub(commit: false) }
         switch direction {
+        case .left where scrubMs != nil: nudgeScrub(-10_000)
+        case .right where scrubMs != nil: nudgeScrub(10_000)
         case .left: seek(by: -10_000)
         case .right: seek(by: 10_000)
         case .up:
@@ -175,6 +206,52 @@ struct PlayerScreen: View {
         default: break
         }
         showControls()
+    }
+
+    // MARK: - Scrubbing
+
+    /// A sideways swipe began: the video pauses and the marker moves with the finger, from where
+    /// the last swipe left it.
+    private func beginScrub() {
+        guard let model else { return }
+        swipedAt = Date()
+        if scrubMs == nil {
+            scrubResume = model.playing
+            if model.playing { togglePlay() }
+        }
+        scrubBase = scrubMs ?? model.positionMs
+        scrubMs = scrubBase
+        showControls()
+    }
+
+    /// The finger has moved `dx` points since the swipe began. A swipe right across the whole
+    /// surface moves about a quarter of the title (at least 2.5 minutes), as tvOS's players.
+    private func scrub(_ dx: CGFloat) {
+        guard let model, scrubMs != nil else { return }
+        swipedAt = Date()
+        let span = Double(max(model.durationMs, 600_000)) / 4
+        let moved = Int64(Double(dx) / 1920 * span)
+        scrubMs = min(max(0, scrubBase + moved), max(0, model.durationMs - 1_000))
+    }
+
+    /// Left and Right clicks while scrubbing move the marker 10 seconds.
+    private func nudgeScrub(_ deltaMs: Int64) {
+        guard let model, let at = scrubMs else { return }
+        scrubMs = min(max(0, at + deltaMs), max(0, model.durationMs - 1_000))
+        showControls()
+    }
+
+    /// Select or Play plays from the marker; Back puts it back. Either way the video plays on if
+    /// it was playing before the swipe (Play/Pause always plays).
+    private func endScrub(commit: Bool, play: Bool = false) {
+        guard let model, let at = scrubMs else { return }
+        scrubMs = nil
+        if commit {
+            model.seek(toMs: at)
+            sendSeek()
+        }
+        if (scrubResume || play) && !model.playing { togglePlay() }
+        scrubResume = false
     }
 
     private func openMenu(_ m: OSDMenu) {
