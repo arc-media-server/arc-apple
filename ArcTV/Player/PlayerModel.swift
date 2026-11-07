@@ -38,6 +38,17 @@ final class PlayerModel {
     var versions: [Version] { plan?.versions ?? [] }
     var fileId: Int64 { plan?.fileId ?? 0 }
     var chapters: [Chapter] { plan?.chapters ?? [] }
+    /// How the stream arrives, for the Info card: as it is, repackaged, or converted.
+    var methodName: String? {
+        switch plan?.method {
+        case "direct": return L("player.method_direct")
+        case "remux": return L("player.method_remux")
+        case "transcode": return L("player.method_transcode")
+        default: return nil
+        }
+    }
+    /// Which engine plays it (mpv or Apple's player), for the Info card.
+    var engineName: String { engine is MPVEngine ? L("player.engine_mpv") : L("player.engine_apple") }
     /// The quality limit chosen (nil: the original), and the limits worth offering for this file.
     private(set) var maxKbps: Int?
     var qualities: [Int] {

@@ -68,29 +68,42 @@ final class WalkThrough: XCTestCase {
         remote.press(.playPause)
         pause(2)
         shot("10-player-paused")
-        // Skip Intro has the focus (the stand-in marks the clip's start as an intro); then
-        // down opens Subtitles and Audio, and the stand-in's track turns on.
+        // Skip Intro has the focus (the stand-in marks the clip's start as an intro).
         remote.press(.select)
         pause(2)
         // Right moves 10 seconds on, with the timeline thumbnail (the stand-in has a sheet).
         press(.right)
         pause(1)
         shot("10a-player-thumbnail")
+        // Down opens the Info card under the tab row; Back returns to the picture.
         press(.down)
         pause(2)
-        shot("10b-player-options")
+        shot("10b-player-info")
+        remote.press(.menu)
+        pause(1)
+        // Up goes to the track buttons; Select opens Subtitles above its button, and the
+        // stand-in's track turns on.
+        press(.up)
+        pause(1)
+        remote.press(.select)
+        pause(1)
         press(.down)
         remote.press(.select)
         pause(3)
         shot("10c-player-subtitles")
-        // Further down the panel: Quality, Version and Chapters.
-        press(.down, 4)
-        pause(1)
-        shot("10d-player-quality")
+        // Back to the button, along to Playback: Quality and Version.
         remote.press(.menu)
         pause(1)
-        // Back closes the player, Back again leaves the title page for Home. (A third would
-        // leave the app: Back on Home goes to the Apple TV's home screen, as tvOS apps do.)
+        press(.right, 2)
+        remote.press(.select)
+        pause(1)
+        shot("10d-player-quality")
+        // Back closes the menu, Back again leaves the controls, Back closes the (paused) player,
+        // and Back leaves the title page for Home. (One more would leave the app.)
+        remote.press(.menu)
+        pause(1)
+        remote.press(.menu)
+        pause(1)
         remote.press(.menu)
         pause(1)
         remote.press(.menu)
