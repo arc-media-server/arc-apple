@@ -26,6 +26,12 @@ The server already works out and keeps these four colours for apps. Using them m
 - the TV doesn't decode images to find colours;
 - the Roku, Android and LG/Samsung apps can show the same colours later from the same answer.
 
+## Walk-through
+
+The stand-in server answers the palette request. It shrinks the picture it serves to 2x2 with
+macOS's `sips` and reads one colour for each quarter, so the screenshots show real artwork
+colours. If it can't, it answers "unavailable", as Arc does.
+
 ## Limits
 
 - An older server without the palette endpoint, or a title without artwork, shows the grey

@@ -5,7 +5,7 @@ fixtures/sample.mp4 for every title. Any token is accepted.
 
     python3 UITests/StandIn/serve.py 8080
 """
-import hashlib, http.server, json, os, struct, sys, urllib.parse, urllib.request, zlib
+import hashlib, http.server, json, os, struct, subprocess, sys, tempfile, urllib.parse, urllib.request, zlib
 
 here = os.path.dirname(os.path.abspath(__file__))
 answers = json.load(open(os.path.join(here, "fixtures", "answers.json")))
@@ -130,6 +130,40 @@ def png(seed, w, h):
     pngs[k] = out
     return out
 
+palettes = {}
+
+def palette(item_id):
+    """The four quarter colours of a title's backdrop, shrunk to 2 x 2 with macOS's sips."""
+    if item_id in palettes: return palettes[item_id]
+    out = {"available": False, "algorithm": "standin", "color_space": "srgb", "artwork_type": "backdrop", "reason": "image_unavailable"}
+    item = (answers.get(f"GET items/{item_id}") or {}).get("body") or {}
+    images = item.get("images") or {}
+    path = images.get("backdrop") or images.get("series_backdrop")
+    got = real_picture(path.split("/api/", 1)[-1].split("?")[0]) if path else None
+    if got:
+        try:
+            with tempfile.TemporaryDirectory() as d:
+                src, dst = os.path.join(d, "in"), os.path.join(d, "out.bmp")
+                open(src, "wb").write(got[0])
+                subprocess.run(["sips", "-z", "2", "2", "-s", "format", "bmp", src, "--out", dst], check=True, capture_output=True, timeout=20)
+                bmp = open(dst, "rb").read()
+            start, = struct.unpack_from("<I", bmp, 10)
+            w, h = struct.unpack_from("<ii", bmp, 18)
+            bpp, = struct.unpack_from("<H", bmp, 28)
+            step = bpp // 8
+            stride = (w * step + 3) // 4 * 4
+            def at(x, y):
+                row = (abs(h) - 1 - y) if h > 0 else y  # rows run bottom up unless the height is negative
+                o = start + row * stride + x * step
+                b, g, r = bmp[o], bmp[o + 1], bmp[o + 2]
+                return f"#{r:02x}{g:02x}{b:02x}"
+            out = {"available": True, "algorithm": "standin", "color_space": "srgb", "artwork_type": "backdrop",
+                   "colors": {"top_left": at(0, 0), "top_right": at(1, 0), "bottom_left": at(0, 1), "bottom_right": at(1, 1)}}
+        except Exception as e:
+            sys.stderr.write(f"standin: no palette for {item_id}: {type(e).__name__}\n")
+    palettes[item_id] = out
+    return out
+
 def key(method, path, query):
     q = "&".join(f"{k}={v}" for k, v in sorted(query.items()) if k != "v")
     return f"{method} {path}" + (f"?{q}" if q else "")
@@ -177,6 +211,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             wide = "backdrop" in path or "thumb" in path or (parts[0] == "items" and path.endswith("primary") and query.get("ep") == "1")
             w, h = (320, 180) if wide else (200, 300)
             return self.send(200, png(path.split("/images/")[0], w, h), "image/png", {"Cache-Control": "max-age=3600"})
+        # A title's four artwork colours, from the picture the stand-in serves (as Arc works
+        # them out from its cached artwork: one colour for each quarter of the backdrop).
+        if method == "GET" and len(parts) == 4 and parts[0] == "items" and parts[2:] == ["artwork", "palette"]:
+            return self.json(200, palette(parts[1]))
         if path.startswith("watch-together"):
             return self.watch_together(method, parts, query, body)
         # Sign-in with a code: the code is "approved" on the third check, so its screen can be seen.
