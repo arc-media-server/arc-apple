@@ -89,6 +89,8 @@ public struct MediaFile: Codable, Sendable, Hashable, Identifiable {
     public var container: String?
     public var size: Int64?
     public var bitrate: Int64?
+    /// Where the file is on the server (the title page's Playback card shows its name).
+    public var path: String?
     /// The file's video, audio and subtitle tracks as ffprobe read them (a title's page).
     @Default<Defaults.List<MediaStream>> public var streams: [MediaStream]
 }

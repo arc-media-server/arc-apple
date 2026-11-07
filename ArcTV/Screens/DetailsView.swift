@@ -198,42 +198,51 @@ struct DetailsView: View {
         }
     }
 
-    /// About, Details, Crew and Playback as glass cards at the foot of the page.
+    /// About, Details, Crew and Playback as glass cards at the foot of the page, under an "About"
+    /// heading: About across the top, the other three side by side beneath it.
     /// (Arc's ratings are paused, so there's no Ratings card.)
     private var infoCards: some View {
         let file = Quality.file(of: shown)
         let details: [(String, String)] = [
             (L("details.released"), shown.releaseDate.flatMap(releaseDate) ?? shown.year.map(String.init) ?? ""),
-            (L("details.studio"), shown.studio ?? ""),
+            (L("details.runtime"), shown.isSeries ? "" : shown.runtimeMin.map { formatMinutes($0) } ?? ""),
+            (L("details.content_rating"), shown.contentRating ?? ""),
+            (L("details.genres"), ListFormatter.localizedString(byJoining: shown.genres)),
             (L("details.original_title"), shown.originalTitle.flatMap { $0 == shown.title ? nil : $0 } ?? ""),
         ].filter { !$0.1.isEmpty }
         let crewLines: [(String, String)] = [
             (L("details.directed_by"), ListFormatter.localizedString(byJoining: crew("director"))),
             (L("details.written_by"), ListFormatter.localizedString(byJoining: crew("writer"))),
+            (L("details.studio"), shown.studio ?? ""),
         ].filter { !$0.1.isEmpty }
         let playback = playbackLines(file)
-        return ScrollView(.horizontal) {
-            HStack(alignment: .top, spacing: 30) {
-                if let overview = shown.overview, !overview.isEmpty {
-                    InfoCard(title: L("details.about"), width: 620) {
-                        if let tagline = shown.tagline, !tagline.isEmpty { Text(tagline).font(.callout.weight(.semibold)) }
-                        Text(overview).font(.caption).foregroundStyle(.white.opacity(0.85)).lineLimit(9)
-                    }
+        let about = (shown.tagline?.isEmpty == false ? shown.tagline : nil) ?? (shown.isEpisode ? shown.title : nil)
+        return VStack(alignment: .leading, spacing: 24) {
+            Text(L("details.about")).font(.title3.weight(.semibold))
+            if let overview = shown.overview, !overview.isEmpty {
+                InfoCard(title: nil, width: 1100) {
+                    if let about { Text(about).font(.headline) }
+                    Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(10)
                 }
-                if !details.isEmpty { InfoCard(title: L("details.details")) { lines(details) } }
-                if !crewLines.isEmpty { InfoCard(title: L("details.crew")) { lines(crewLines) } }
-                if !playback.isEmpty { InfoCard(title: L("details.playback")) { lines(playback) } }
             }
-            .padding(.vertical, 24)
+            HStack(alignment: .top, spacing: 30) {
+                if !details.isEmpty { InfoCard(title: L("details.details"), width: 530) { lines(details) } }
+                if !crewLines.isEmpty { InfoCard(title: L("details.crew"), width: 530) { lines(crewLines) } }
+                if !playback.isEmpty { InfoCard(title: L("details.playback"), width: 530) { lines(playback) } }
+            }
         }
-        .scrollClipDisabled()
+        .padding(.vertical, 24)
+    }
+
+    private func formatMinutes(_ m: Int) -> String {
+        m >= 60 ? (m % 60 == 0 ? L("details.hours", m / 60) : L("details.hours_minutes", m / 60, m % 60)) : L("card.minutes_short", m)
     }
 
     private func lines(_ pairs: [(String, String)]) -> some View {
         ForEach(pairs, id: \.0) { pair in
             VStack(alignment: .leading, spacing: 2) {
                 Text(pair.0).font(.caption2).foregroundStyle(ArcColor.muted)
-                Text(pair.1).font(.caption.weight(.semibold)).lineLimit(2)
+                Text(pair.1).font(.callout.weight(.semibold)).lineLimit(3)
             }
         }
     }
@@ -251,10 +260,20 @@ struct DetailsView: View {
             let parts = [Quality.audioCodec(a), Quality.channels(a.channels), Quality.objectAudio(a)].compactMap { $0 }
             if !parts.isEmpty { out.append((L("details.audio"), parts.joined(separator: " "))) }
         }
+        if let bitrate = file.bitrate, bitrate > 0 {
+            out.append((L("details.bitrate"), L("details.mbps", Double(bitrate) / 1000)))
+        }
         if let size = file.size, size > 0 {
             out.append((L("details.size"), ByteCountFormatter.string(fromByteCount: size, countStyle: .file)))
         }
         if let edition = file.edition, !edition.isEmpty { out.append((L("details.edition"), edition)) }
+        if let path = file.path, !path.isEmpty {
+            // Only the file's name: Windows and Unix paths both end in it.
+            let name = path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last.map(String.init) ?? path
+            out.append((L("details.file"), name))
+        }
+        if let server = app.serverName, !server.isEmpty { out.insert((L("details.server"), server), at: 0) }
+        if let profile = app.profile?.name { out.insert((L("details.profile"), profile), at: min(1, out.count)) }
         return out
     }
 
@@ -373,14 +392,14 @@ struct EpisodeCard: View {
 /// A glass card at the foot of a title's page (About, Details, Crew, Playback). It takes the focus
 /// so the page can scroll down to it with the remote.
 struct InfoCard<Content: View>: View {
-    let title: String
+    let title: String?
     var width: CGFloat = 340
     @ViewBuilder let content: () -> Content
     @FocusState private var focused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(title).font(.headline)
+            if let title { Text(title).font(.title3.weight(.semibold)) }
             content()
         }
         .padding(26)

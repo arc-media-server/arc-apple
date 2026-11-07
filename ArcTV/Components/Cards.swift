@@ -4,9 +4,10 @@ import SwiftUI
 extension CardStyle {
     var size: CGSize {
         switch self {
-        case .poster: return CGSize(width: 200, height: 300)
-        case .thumb: return CGSize(width: 384, height: 216)
-        case .backdrop: return CGSize(width: 384, height: 288)
+        // Sized for a sofa: about four wide cards or six posters across the screen.
+        case .poster: return CGSize(width: 250, height: 375)
+        case .thumb: return CGSize(width: 512, height: 288)
+        case .backdrop: return CGSize(width: 512, height: 384)
         }
     }
 }
@@ -76,8 +77,8 @@ struct MediaCardView: View {
             // Names centred under the art.
             VStack(alignment: .center, spacing: 2) {
                 Text(card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title)
-                    .font(.caption.weight(.semibold)).lineLimit(1)
-                if let sub = subtitle { Text(sub).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
+                    .font(.callout.weight(.semibold)).lineLimit(1)
+                if let sub = subtitle { Text(sub).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
             .frame(width: style.size.width, alignment: .center)
         }
