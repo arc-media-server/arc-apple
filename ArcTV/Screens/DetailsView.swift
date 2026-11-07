@@ -51,9 +51,12 @@ struct DetailsView: View {
             // a colour on top, so the blend shows through).
             ArtworkImage(path: backdropPath)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black.opacity(0.15), location: 0.6),
-                                             .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom))
-                .mask(LinearGradient(colors: [.black.opacity(0.12), .black], startPoint: .leading, endPoint: .trailing))
+                // Gentle, as the reference: the picture stays bright to near the bottom and only
+                // softens behind the words on the left.
+                .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.6),
+                                             .init(color: .black.opacity(0.45), location: 1)], startPoint: .top, endPoint: .bottom))
+                .mask(LinearGradient(stops: [.init(color: .black.opacity(0.5), location: 0), .init(color: .black, location: 0.55)],
+                                     startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
                 // The episode browser: the artwork slides up and away, on the page's own clock.
                 .offset(y: receded ? -1200 : 0)
@@ -66,19 +69,29 @@ struct DetailsView: View {
                             // Hidden while browsing a show's episodes, as the reference does: a
                             // mask rather than opacity, so Up from the season tabs still reaches
                             // its buttons (tvOS won't focus a fully transparent view).
-                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1))
+                            // Larger than the hero, so a focused button's lift and shadow aren't cut off.
+                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1).padding(-80))
                             .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
                             .id(Self.heroAnchor)
-                        if !seasons.isEmpty { episodes }
+                        if !seasons.isEmpty {
+                            episodes
+                        } else {
+                            // A film's hero has nothing peeking under it, as the reference: the
+                            // next row starts just below the screen, and Down scrolls to it.
+                            Color.clear.frame(height: 1).id(Self.restAnchor)
+                            Color.clear.frame(height: 150).accessibilityHidden(true)
+                        }
+                        // The cast first, above every other row (owner, 7 November).
+                        if !actors.isEmpty { cast }
                         if !shown.extras.isEmpty { extras }
                         if !similar.isEmpty { related }
-                        if !actors.isEmpty { cast }
                         if !shown.collections.isEmpty { collections }
                         infoCards
                     }
                     .padding(.horizontal, 80)
                     .padding(.bottom, 60)
                 }
+                .defaultFocus($focused, Self.playKey)
                 .onChange(of: focused) { old, new in
                     if let new, new.hasPrefix("season|"), let index = Int(new.dropFirst(7)), index != season {
                         if old?.hasPrefix("season|") == true {
@@ -93,10 +106,20 @@ struct DetailsView: View {
                     }
                     // Into the episodes from the hero: on to the one to watch next. (After tvOS's
                     // own move has settled: it ignores a change made while it's moving the focus.)
-                    if old == nil, let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
+                    if Self.isHero(old), let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
                         Task { @MainActor in
                             try? await Task.sleep(for: .milliseconds(80))
                             focused = "ep|" + next.id
+                        }
+                    }
+                    // A film: Down from the hero brings the first row up under the hero's buttons,
+                    // which stay at the top, as the reference does; Up goes back to the whole hero.
+                    // (The first row's cards carry focus keys, so the hero is Play's key or nil.)
+                    if seasons.isEmpty {
+                        if Self.isFirstRow(new), Self.isHero(old) {
+                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.restAnchor, anchor: Self.restPoint) }
+                        } else if Self.isFirstRow(old), Self.isHero(new) {
+                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
                         }
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
@@ -105,7 +128,7 @@ struct DetailsView: View {
                             receded = true
                             proxy.scrollTo(Self.browserAnchor, anchor: Self.tabsAnchor)
                         }
-                    } else if !nowBrowsing && old?.hasPrefix("season|") == true && new == nil {
+                    } else if !nowBrowsing && old?.hasPrefix("season|") == true && Self.isHero(new) {
                         // Up from the season tabs is the hero's buttons: back to the top.
                         withAnimation(Self.recede) {
                             receded = false
@@ -157,6 +180,7 @@ struct DetailsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
                     }
                     .buttonStyle(.card)
+                    .focused($focused, equals: "extra|" + e.id)
                     Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
                     Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
                 }
@@ -244,6 +268,7 @@ struct DetailsView: View {
                     PlayLabel(item: shown, episode: shown.isEpisode)
                 }
                 .arcGlassButton()
+                .focused($focused, equals: Self.playKey)
                 if resume > 0 {
                     Button { play(PlayRequest(item: shown, startMs: 0)) } label: {
                         Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise")
@@ -255,6 +280,7 @@ struct DetailsView: View {
                     PlayLabel(item: next, episode: true)
                 }
                 .arcGlassButton()
+                .focused($focused, equals: Self.playKey)
             }
             // The page's other actions are round glass icons, as the Android app's title page.
             TitleActions(item: shown, onPage: true).roundIconButton()
@@ -267,7 +293,8 @@ struct DetailsView: View {
     private var cast: some View {
         section(L("details.cast")) {
             ForEach(actors.prefix(30)) { credit in
-                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image) {
+                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image,
+                             focus: $focused, focusKey: "cast|\(credit.personId)") {
                     openRoute(.person(id: credit.personId, name: credit.name))
                 }
             }
@@ -405,6 +432,23 @@ struct DetailsView: View {
     /// same point of the screen).
     static let tabsAnchor = UnitPoint(x: 0.5, y: 0.25)
 
+    static let restAnchor = "details|rest"
+    /// Where the line under a film's hero sits once Down has moved on: near the top, so the
+    /// hero's buttons stay in view above the first row.
+    static let restPoint = UnitPoint(x: 0.5, y: 0.14)
+
+    /// A card in the rows straight under a film's hero (the cast, then trailers and extras).
+    static func isFirstRow(_ key: String?) -> Bool {
+        guard let key else { return false }
+        return key.hasPrefix("cast|") || key.hasPrefix("extra|")
+    }
+
+    /// Play's focus key: the page opens on it, as the reference does.
+    static let playKey = "hero|play"
+
+    /// The hero's buttons: Play, or the others (which carry no key).
+    static func isHero(_ key: String?) -> Bool { key == nil || key == playKey }
+
     static func isBrowser(_ key: String?) -> Bool {
         guard let key else { return false }
         return key.hasPrefix("season|") || key.hasPrefix("ep|")
@@ -440,7 +484,13 @@ struct DetailsView: View {
             .focusSection()
             // Out of reach from the hero's buttons, so Down from Play goes straight into the
             // episodes (as the reference does); Up from the episodes reaches them.
-            .disabled(focused == nil)
+            .disabled(Self.isHero(focused))
+            // On the hero the tabs are folded away, so the top of the episode row peeks in at the
+            // bottom of the screen (as the reference does); Down brings them back with the
+            // episodes. A mask rather than opacity, as for the hero.
+            .frame(maxHeight: browsing ? nil : 0, alignment: .top)
+            .mask(Rectangle().opacity(browsing ? 1 : 0).padding(-40))
+            .animation(Self.recede, value: browsing)
             .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
