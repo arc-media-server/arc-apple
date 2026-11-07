@@ -92,3 +92,8 @@ On a film, Down from the hero now brings the first row (the cast) up under the h
 which stay in view at the top, as in the owner's photo. Up goes back to the whole hero. tvOS's own
 scroll had moved the hero off the screen. To tell the hero from the rows, the cast and the
 trailers carry focus keys (`cast|…`, `extra|…`).
+
+A title's page opens with Play focused, as the reference does. tvOS had been picking the nearest
+button, and on a show that was the watched tick. Play carries the focus key `hero|play`. The
+page's logic treats that key, or no key, as "on the hero". The walk-through's 08 is now taken after
+one Down, the view in the owner's photo.

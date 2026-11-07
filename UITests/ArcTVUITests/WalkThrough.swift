@@ -47,11 +47,12 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(4)
         shot("07-title-page")
-        press(.down, 2)
+        // One Down: the cast comes up under the hero's buttons, which stay in view.
+        press(.down)
         pause(2)
         shot("08-title-page-scrolled")
         // The foot of the page: Cast, then the About, Details, Crew and Playback cards.
-        press(.down, 3)
+        press(.down, 4)
         pause(2)
         shot("08b-title-page-cards")
         // Up returns to the button row under the focus, then left to Play (one more left would
