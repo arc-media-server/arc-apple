@@ -112,10 +112,25 @@ struct PersonButton: View {
     let name: String
     var detail: String?
     let image: String?
+    /// The page's focus, when it follows which person has it (the title page's first row).
+    var focus: FocusState<String?>.Binding? = nil
+    var focusKey = ""
     let action: () -> Void
 
     var body: some View {
         VStack(spacing: 10) {
+            if let focus {
+                button.focused(focus, equals: focusKey)
+            } else {
+                button
+            }
+            Text(name).font(.caption).lineLimit(1)
+            if let detail, !detail.isEmpty { Text(detail).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
+        }
+        .frame(width: 200)
+    }
+
+    private var button: some View {
             Button(action: action) {
                 ZStack {
                     ArcColor.surface2
@@ -130,10 +145,6 @@ struct PersonButton: View {
             }
             .buttonStyle(.card)
             .clipShape(Circle())
-            Text(name).font(.caption).lineLimit(1)
-            if let detail, !detail.isEmpty { Text(detail).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
-        }
-        .frame(width: 200)
     }
 
     private var initials: String {

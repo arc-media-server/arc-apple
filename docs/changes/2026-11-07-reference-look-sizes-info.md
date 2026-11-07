@@ -87,3 +87,8 @@ Resurrection** (TMDB 259909). Their pictures come from TMDB as before.
 - The walk-through picks Dexter on Home. On the season tabs it moves Left, from Season 2 (where
   the show opens, on its next episode) to Season 1.
 - Re-recording the fixtures with `record.py` would bring the scratch library's titles back.
+
+On a film, Down from the hero now brings the first row (the cast) up under the hero's buttons,
+which stay in view at the top, as in the owner's photo. Up goes back to the whole hero. tvOS's own
+scroll had moved the hero off the screen. To tell the hero from the rows, the cast and the
+trailers carry focus keys (`cast|…`, `extra|…`).
