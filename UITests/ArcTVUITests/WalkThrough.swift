@@ -113,6 +113,7 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(2)
         shot("13a-episodes")
+        press(.down)
         press(.right)
         pause(1)
         shot("13b-episode-focused")
@@ -208,16 +209,11 @@ final class WalkThrough: XCTestCase {
             remote.press(.menu)
             pause(1.5)
         }
-        // Home keeps its place from earlier steps; choosing it again (Left reopens the sidebar on
-        // it) starts it afresh at the top, on the Watch Together row.
-        press(.left)
-        for _ in 0..<4 where !home.hasFocus { press(.down) }
-        remote.press(.select)
-        pause(5)
-        // Choosing Home again starts it afresh at the top, on the Watch Together row (from the
-        // sidebar's landing stop, Down goes on into the page if the row hasn't the focus yet).
+        // Home keeps its place from earlier steps: up its rows to the first, Watch Together.
         let room = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together'")).firstMatch
-        if !(room.exists && room.hasFocus) { press(.down) }
+        if !(room.exists && room.hasFocus) { press(.right) }
+        for _ in 0..<10 where !(room.exists && room.hasFocus) { press(.up) }
+        pause(2)
         shot("22-home-watch-together")
         remote.press(.select)
         pause(5)
