@@ -71,3 +71,6 @@ as the rest of the move.
 A film's hero has nothing peeking under it, as in the owner's photo of the reference. A spacer below
 the hero starts the next row (Trailers & Extras, Related…) just under the screen, and Down scrolls
 to it as before.
+
+The cast row now comes first under the hero, above Trailers & Extras, Related and the rest. For a
+show it comes straight after the episodes.

@@ -76,9 +76,10 @@ struct DetailsView: View {
                             // next row starts just below the screen, and Down scrolls to it.
                             Color.clear.frame(height: 150).accessibilityHidden(true)
                         }
+                        // The cast first, above every other row (owner, 7 November).
+                        if !actors.isEmpty { cast }
                         if !shown.extras.isEmpty { extras }
                         if !similar.isEmpty { related }
-                        if !actors.isEmpty { cast }
                         if !shown.collections.isEmpty { collections }
                         infoCards
                     }
