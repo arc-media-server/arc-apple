@@ -57,8 +57,8 @@ final class HomeModel {
 
     nonisolated private static func cards(_ source: RowSource, _ api: ArcAPI) async throws -> [MediaCard] {
         switch source {
-        case .continueWatching(let withUpNext): return try await api.continueWatching(withUpNext: withUpNext).map { MediaCard(item: $0) }
-        case .nextUp: return try await api.nextUp().map { MediaCard(item: $0) }
+        case .continueWatching(let withUpNext): return try await api.continueWatching(withUpNext: withUpNext).map { MediaCard(item: $0).withShowArt() }
+        case .nextUp: return try await api.nextUp().map { MediaCard(item: $0).withShowArt() }
         case .watchlist: return try await api.watchlist().map { MediaCard(item: $0) }
         case .recent(let lib, let showsOnly):
             if lib.kind == "shows" && !showsOnly { return try await api.recentShows(libraryId: lib.id).map { MediaCard(recent: $0) } }

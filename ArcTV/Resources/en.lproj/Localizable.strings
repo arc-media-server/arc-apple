@@ -119,6 +119,8 @@
 "library.filter" = "Filter";
 "library.filtered" = "Filtered";
 "library.unwatched" = "Unwatched Only";
+"library.unwatched_short" = "Unwatched";
+"library.all" = "All";
 "library.genre" = "Genre";
 "library.decade" = "Decade";
 "library.decade_value" = "%@s";
@@ -201,7 +203,7 @@
 "details.audio" = "Audio";
 "details.size" = "Size";
 "details.edition" = "Edition";
-"details.runtime" = "Runtime";
+"details.runtime_label" = "Runtime";
 "details.content_rating" = "Content Rating";
 "details.genres" = "Genres";
 "details.hours" = "%dh";

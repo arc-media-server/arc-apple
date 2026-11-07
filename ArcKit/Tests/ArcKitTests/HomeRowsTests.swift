@@ -44,5 +44,10 @@ final class HomeRowsTests: XCTestCase {
         XCTAssertEqual(card.art(.poster, seasonPosters: true), "/s1")
         XCTAssertEqual(card.art(.thumb, seasonPosters: false), "/still")
         XCTAssertEqual(card.art(.backdrop, seasonPosters: false), "/bg")
+        // Continue Watching shows the show's own picture.
+        XCTAssertEqual(card.withShowArt().art(.thumb, seasonPosters: false), "/bg")
+        XCTAssertTrue(card.withShowArt().showArt)
+        let film = MediaCard(item: Item(id: "m1", kind: "movie", title: "Heat", images: Images(primary: "/p", backdrop: "/b")))
+        XCTAssertEqual(film.withShowArt().art(.thumb, seasonPosters: false), "/b")
     }
 }
