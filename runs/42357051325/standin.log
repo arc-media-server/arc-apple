@@ -1,0 +1,172 @@
+stand-in Arc on http://127.0.0.1:8080
+standin: "GET /api/v1/health HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/link HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 202 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 202 -
+standin: "GET /api/v1/auth/link/standin HTTP/1.1" 200 -
+standin: "GET /api/v1/auth/status HTTP/1.1" 200 -
+standin: "POST /api/v1/auth/profile HTTP/1.1" 200 -
+standin: "GET /api/v1/identity HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/items/674e73fcb4996f929d7033816345c934 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/5c9c9e42ea225a66eacd6c8dd1872c98 HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/backdrop?v=0bebaf17c9eb97507bb88eab HTTP/1.1" 200 -
+standin: "GET /api/v1/items/442fbb64595eb6821a71db8958d2f1c4/images/primary?v=0793fa071b65ced6f67fbc7b HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/logo?v=918af4c82d52c4cf1da1a885 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/674e73fcb4996f929d7033816345c934/images/backdrop?v=bc6cd737766ca721c07aef0c HTTP/1.1" 200 -
+standin: "GET /api/v1/items/5c9c9e42ea225a66eacd6c8dd1872c98/images/backdrop?v=3f3a03779650c1a56e97e890 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/primary?v=ce8752dc51425b9379ae8ae7 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/backdrop?v=f349d190ef45effabe9895e0 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/eb73ba691bc161dfeaff15734c3313c1/images/backdrop?local=6a76f54eb49030b3b7ed1915 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/b1876c7f071f4ad110d9ca08ea467427/images/backdrop?local=05cd034280ceaa6bab71972f HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/similar HTTP/1.1" 200 -
+standin: "GET /api/v1/items/95f0e3420d47e97793d7914f0ad90363/images/backdrop?local=b0f393dcfcd81944d22c153e HTTP/1.1" 200 -
+standin: "GET /api/v1/items/b10df778907ff671f83807a28df7a4e1/images/backdrop?local=eb4b2673c07c628f8fa99aca HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/images/logo?v=820c3a8dda95347fa3d140c5 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/71/image?v=aef8d6d61a54123135306cef HTTP/1.1" 200 -
+standin: "GET /api/v1/people/70/image?v=dfab70b1f2f260f308d4ede0 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/55/image?v=42c90c1c2367de9840b2e9cd HTTP/1.1" 200 -
+standin: "GET /api/v1/people/67/image?v=be5f52fd1c362814ccdf73c4 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/69/image?v=5c9e488c95e7f6d60048d2a9 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/66/image?v=47dea7d65290035a67380590 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/68/image?v=52aeabf75fa820880b5fc9d5 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/674e73fcb4996f929d7033816345c934/images/primary?v=7807172f4e82b52bf90c2472 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/5c9c9e42ea225a66eacd6c8dd1872c98/images/primary?v=fe8412ed00e7218f05baedb8 HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "POST /api/v1/items/2450ed492a92534aa351de140edac5e0/playback HTTP/1.1" 200 -
+standin: "POST /api/v1/cast HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/subtitles/x254f392c03c9?file=20 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/trickplay?file=20 HTTP/1.1" 200 -
+standin: "GET /media/sample.mp4 HTTP/1.1" 206 -
+standin: "GET /media/sample.mp4 HTTP/1.1" 206 -
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 50023)
+standin: "PUT /api/v1/items/2450ed492a92534aa351de140edac5e0/progress HTTP/1.1" 204 -
+standin: "GET /media/sample.mp4 HTTP/1.1" 206 -
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 694, in process_request_thread
+    self.finish_request(request, client_address)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 359, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 763, in __init__
+    self.handle()
+    ~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/http/server.py", line 474, in handle
+    self.handle_one_request()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/http/server.py", line 462, in handle_one_request
+    method()
+    ~~~~~~^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 155, in do_GET
+    def do_GET(self): self.route("GET")
+                      ~~~~~~~~~~^^^^^^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 167, in route
+    if path.startswith("/media/"): return self.media()
+                                          ~~~~~~~~~~^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 344, in media
+    return self.send(206, sample[start:end + 1], "video/mp4", {"Content-Range": f"bytes {start}-{end}/{size}", "Accept-Ranges": "bytes"})
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/runner/work/arc-apple/arc-apple/UITests/StandIn/serve.py", line 149, in send
+    if self.command != "HEAD": self.wfile.write(body)
+                               ~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socketserver.py", line 842, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+ConnectionResetError: [Errno 54] Connection reset by peer
+----------------------------------------
+standin: "PUT /api/v1/items/2450ed492a92534aa351de140edac5e0/progress HTTP/1.1" 204 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/trickplay/20/0 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/subtitles/standin?file=20 HTTP/1.1" 200 -
+standin: "PATCH /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "PUT /api/v1/items/2450ed492a92534aa351de140edac5e0/progress HTTP/1.1" 204 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/2450ed492a92534aa351de140edac5e0/similar HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/items/ff2cb877c65b919fa2fe5ac34c38bc6f/images/primary?local=cba3be4b47ad78be1b0d001d HTTP/1.1" 200 -
+standin: "GET /api/v1/items/262025b838249488633548c9e2d12175/images/primary?v=9149e65010703b883611ef22 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/a7890d07447527f1a33811142978dbd7/images/primary?v=b4bcd3b8fe83f45ea9b52080 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/b1876c7f071f4ad110d9ca08ea467427 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/b1876c7f071f4ad110d9ca08ea467427/similar HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/1/recommended HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/1/facets HTTP/1.1" 200 -
+standin: "GET /api/v1/items/262025b838249488633548c9e2d12175/images/logo?v=cf285ee89858bc210250a3b6 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/262025b838249488633548c9e2d12175/images/backdrop?v=ff09fe28bbfd1de7f6b7389b HTTP/1.1" 200 -
+standin: "GET /api/v1/items/674e73fcb4996f929d7033816345c934/images/logo?v=7c33bf6b1a483f156ea3ad14 HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=60&offset=0&sort=title HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/primary?v=e9319620dbdf150f0c067d5c HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/images/primary?v=6fc6d445de9029de763d3a6e HTTP/1.1" 200 -
+standin: "GET /api/v1/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/backdrop?v=bde49bc25ab4cb6593b3fe2f HTTP/1.1" 200 -
+standin: "GET /api/v1/items/c4a0172b988a77e89f0b75b9f6e7e4e1 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/c4a0172b988a77e89f0b75b9f6e7e4e1/similar HTTP/1.1" 200 -
+standin: "GET /api/v1/series/c4a0172b988a77e89f0b75b9f6e7e4e1/seasons HTTP/1.1" 200 -
+standin: "GET /api/v1/items/c4a0172b988a77e89f0b75b9f6e7e4e1/images/logo?v=81295049a53ca96bab661ff3 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/111/image?v=834c3f93e2cb997b363b3cb2 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/106/image?v=9568c2469967a9c92548d673 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6c618d617784544a377f629f07457cd0/images/primary?v=8959de8a4b2c7c4d6518ae00 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/105/image?v=39ca9d7763e9a8d4ed110299 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/968fd9282145286fc34a0af8d7de692d/images/primary?v=09c572986ba562478d93154d HTTP/1.1" 200 -
+standin: "GET /api/v1/people/109/image?v=5ebf76a1bd076f5d325bceae HTTP/1.1" 200 -
+standin: "GET /api/v1/people/108/image?v=3f11fbff587f3c0cd107ed69 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/107/image?v=f3c1def2c86597f1de07ac53 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/213c2ba078592c4c3ce7fc8a2d196d20/images/primary?v=dd1d7e459429cbe555a0f763 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/3854406fdcbe4d24e27a2f435a17d04e/images/primary?v=b34a2b004cd8be835a013156 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/110/image?v=52cffd068883c7599e41287a HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b HTTP/1.1" 200 -
+standin: "GET /api/v1/items/6da97472777382d43e7b4df51229863b/similar HTTP/1.1" 200 -
+standin: "GET /api/v1/series/6da97472777382d43e7b4df51229863b/seasons HTTP/1.1" 200 -
+standin: "GET /api/v1/people/153/image?v=45c0028955de077f185e0e32 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/154/image?v=67774ade8583f8631ca2decb HTTP/1.1" 200 -
+standin: "GET /api/v1/items/40133282a3319d2e612698bdd9e030c1/images/primary?v=4f0bcba7c004f009ec6de3f0 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/3faeb74c89d43e632e5c45eca797649d/images/primary?v=5fb27097e827054887069758 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/155/image?v=ec943f976ee2785f2d6cfe39 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/151/image?v=76538d974a98eec848f875b4 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/0250e2ce34a04457248776120c727955/images/primary?v=238e8aa225c0d37fd0d10d45 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/157/image?v=ef649a3c09120a1d758286d5 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/156/image?v=2b6530d87721d4b23d6bda45 HTTP/1.1" 200 -
+standin: "GET /api/v1/items/84c4b5dac63cf7448c0ebb583f9ef09e/images/primary?v=7e7f00fc87c9be3cca361031 HTTP/1.1" 200 -
+standin: "GET /api/v1/people/152/image?v=2b62e515fdec54a56c7c1e02 HTTP/1.1" 200 -
+standin: "GET /api/v1/watch-together/rooms HTTP/1.1" 200 -
+standin: "GET /api/v1/me/prefs HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries HTTP/1.1" 200 -
+standin: "GET /api/v1/watchlist HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=1&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/items?kind=movie&library_id=3&limit=24&sort=added HTTP/1.1" 200 -
+standin: "GET /api/v1/libraries/2/recent-shows HTTP/1.1" 200 -
+standin: "GET /api/v1/home/continue?with_up_next=1 HTTP/1.1" 200 -
