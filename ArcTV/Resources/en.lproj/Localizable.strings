@@ -189,6 +189,13 @@
 "player.version" = "Version";
 "player.chapters" = "Chapters";
 "player.chapter" = "Chapter %d";
+"player.playback" = "Playback";
+"player.info" = "Info";
+"player.method_direct" = "Direct play";
+"player.method_remux" = "Repackaged";
+"player.method_transcode" = "Converting";
+"player.engine_mpv" = "mpv";
+"player.engine_apple" = "Apple player";
 "details.extras" = "Trailers & Extras";
 "details.related" = "Related";
 "details.starring" = "Starring";
