@@ -1,8 +1,10 @@
 import ArcKit
 import SwiftUI
 
-/// Settings: the profile's playback preferences (the same ones as Arc's Settings on the web, so
-/// they follow the profile to every app), switching profile, the server, and about.
+/// Settings, laid out as tvOS's own: the profile on the left where Settings shows its icon, the
+/// list on the right. The profile's playback preferences (the same ones as Arc's Settings on the
+/// web, so they follow the profile to every app), Watch Together, the profile and server, and
+/// About (versions, the data sources and the open source licences).
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
@@ -11,24 +13,16 @@ struct SettingsView: View {
     @State private var confirmSignOut = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 80) {
-            VStack(alignment: .leading, spacing: 24) {
-                Text(L("tab.settings")).font(.title2.weight(.semibold))
-                if let profile = app.profile {
-                    HStack(spacing: 20) {
-                        Avatar(profile: profile, size: 120)
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(profile.name).font(.headline)
-                            if let name = app.serverName { Text(name).foregroundStyle(ArcColor.muted) }
-                            if let address = app.serverAddress { Text(address).font(.caption).foregroundStyle(ArcColor.subtle) }
-                        }
-                    }
+        SettingsLayout {
+            // Who's watching, where tvOS's Settings shows its icon.
+            if let profile = app.profile {
+                VStack(spacing: 24) {
+                    Avatar(profile: profile, size: 260)
+                    Text(profile.name).font(.title3.weight(.semibold))
+                    if let name = app.serverName { Text(name).foregroundStyle(ArcColor.muted) }
                 }
-                Text(L("settings.attribution")).font(.caption).foregroundStyle(ArcColor.subtle).frame(maxWidth: 560, alignment: .leading)
-                Text(L("settings.version", Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"))
-                    .font(.caption).foregroundStyle(ArcColor.subtle)
             }
-            .frame(width: 600, alignment: .leading)
+        } rows: {
             List {
                 Section(L("settings.playback")) {
                     if let prefs {
@@ -57,11 +51,13 @@ struct SettingsView: View {
                     Button(L("profiles.sign_out")) { confirmSignOut = true }
                     Button(L("signin.change_server")) { app.changeServer() }
                 }
+                Section {
+                    NavigationLink { AboutView() } label: {
+                        LabeledContent(L("settings.about"), value: AboutView.appVersion)
+                    }
+                }
             }
-            .frame(maxWidth: .infinity)
         }
-        .padding(.horizontal, 80)
-        .padding(.vertical, 40)
         .task { await load() }
         .confirmationDialog(L("settings.sign_out_title"), isPresented: $confirmSignOut) {
             Button(L("profiles.sign_out"), role: .destructive) { Task { await app.signOut() } }
@@ -100,5 +96,108 @@ struct SettingsView: View {
         let (answer, failed) = await loadPage(app, "preferences") { try await $0.prefs() }
         prefs = answer ?? prefs
         problem = failed
+    }
+}
+
+/// tvOS Settings' layout: a picture centred in the left half, the list in the right.
+struct SettingsLayout<Side: View, Rows: View>: View {
+    @ViewBuilder let side: () -> Side
+    @ViewBuilder let rows: () -> Rows
+
+    var body: some View {
+        HStack(spacing: 60) {
+            side()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            rows()
+                .frame(width: 860)
+        }
+        .padding(.trailing, 80)
+        .padding(.vertical, 50)
+    }
+}
+
+/// About: this app's and the server's versions, how this Apple TV reaches it, where the
+/// details and pictures come from, and the open source licences.
+struct AboutView: View {
+    @Environment(AppModel.self) private var app
+    @State private var health: Health?
+
+    static var appVersion: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
+    }
+
+    var body: some View {
+        SettingsLayout {
+            VStack(spacing: 18) {
+                ArcWordmark().scaleEffect(1.6).padding(.bottom, 24)
+                Text(L("about.for_apple_tv")).font(.title3.weight(.semibold))
+                Text(L("settings.version", Self.appVersion)).foregroundStyle(ArcColor.muted)
+                // TheTVDB and TMDB ask to be credited where their details and pictures show.
+                Text(L("settings.attribution")).font(.caption).foregroundStyle(ArcColor.subtle)
+                    .multilineTextAlignment(.center).frame(maxWidth: 620).padding(.top, 30)
+            }
+        } rows: {
+            List {
+                Section(L("about.this_app")) {
+                    row(L("about.version"), Self.appVersion)
+                    row(L("about.player"), EngineChoice.prefersApple ? L("player.engine_apple") : L("player.engine_mpv"))
+                }
+                Section(L("about.server")) {
+                    row(L("about.server_name"), app.serverName ?? health?.name ?? "")
+                    row(L("about.server_version"), health.map { $0.version.isEmpty ? "?" : $0.version } ?? "…")
+                    row(L("about.api"), health.map { "v\($0.apiVersion)" } ?? "…")
+                    row(L("about.address"), app.serverAddress ?? "")
+                    if let local = app.onLocalNetwork {
+                        row(L("details.connection"), L(local ? "details.connection_local" : "details.connection_remote"))
+                    }
+                }
+                Section(L("about.licences")) {
+                    NavigationLink { LicencesView() } label: { Text(L("about.open_source")) }
+                }
+            }
+        }
+        .task {
+            health = try? await app.api?.health()
+        }
+    }
+
+    /// A line with its value at the right; focusable, so the list scrolls to it.
+    private func row(_ title: String, _ value: String) -> some View {
+        Button {} label: { LabeledContent(title, value: value) }
+    }
+}
+
+/// The open source code in this app and the licence each is under.
+struct LicencesView: View {
+    private static let parts: [(name: String, licence: String)] = [
+        ("Arc for Apple TV", "AGPL-3.0"),
+        ("mpv", "GPL-3.0 (as built)"),
+        ("FFmpeg", "GPL-3.0 (as built)"),
+        ("mpv-build for Apple TV (edde746)", "GPL-3.0"),
+        ("libass", "ISC"),
+        ("libplacebo", "LGPL-2.1"),
+        ("FreeType", "FreeType License"),
+        ("HarfBuzz", "MIT"),
+        ("FriBidi", "LGPL-2.1"),
+    ]
+
+    var body: some View {
+        SettingsLayout {
+            VStack(spacing: 18) {
+                Image(systemName: "doc.text").font(.system(size: 160, weight: .light)).foregroundStyle(.white.opacity(0.85))
+                Text(L("about.open_source")).font(.title3.weight(.semibold))
+                Text(L("about.licences_note")).font(.caption).foregroundStyle(ArcColor.subtle)
+                    .multilineTextAlignment(.center).frame(maxWidth: 620)
+            }
+        } rows: {
+            List {
+                ForEach(Self.parts, id: \.name) { part in
+                    Button {} label: { LabeledContent(part.name, value: part.licence) }
+                }
+            }
+        }
     }
 }
