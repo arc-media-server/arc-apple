@@ -179,6 +179,19 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
 
     public var watched: Bool { isSeries ? unwatchedCount == 0 : userData?.played == true }
 
+    /// How an upcoming release reads on its card: the weekday within the next six days
+    /// ("Thursday"), else the day and month ("19 Nov"), in the viewer's language.
+    public static func releaseDay(_ day: Date, asOf today: Date = Date(), calendar: Calendar = .current,
+                                  locale: Locale = .current) -> String {
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: today), to: calendar.startOfDay(for: day)).day ?? 99
+        let f = DateFormatter()
+        f.calendar = calendar
+        f.timeZone = calendar.timeZone
+        f.locale = locale
+        f.setLocalizedDateFormatFromTemplate(days >= 1 && days <= 6 ? "EEEE" : "d MMM")
+        return f.string(from: day)
+    }
+
     /// The day an episode not yet on the server airs, when that's after `today` ("Releases
     /// 8 Nov" on its card); nil once it's out or when Arc has its file.
     public func upcomingRelease(asOf today: Date = Date(), calendar: Calendar = .current) -> Date? {

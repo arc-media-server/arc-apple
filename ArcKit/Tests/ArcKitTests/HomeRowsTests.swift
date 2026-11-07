@@ -64,5 +64,11 @@ final class HomeRowsTests: XCTestCase {
         ep.releaseDate = "2026-11-08"
         ep.available = true // already on the server
         XCTAssertNil(ep.upcomingRelease(asOf: today, calendar: cal))
+        // Within the week, the weekday; further out, the date.
+        let en = Locale(identifier: "en_GB")
+        let thursday = try XCTUnwrap(cal.date(from: DateComponents(year: 2026, month: 11, day: 12)))
+        XCTAssertEqual(Item.releaseDay(thursday, asOf: today, calendar: cal, locale: en), "Thursday")
+        let later = try XCTUnwrap(cal.date(from: DateComponents(year: 2026, month: 11, day: 19)))
+        XCTAssertEqual(Item.releaseDay(later, asOf: today, calendar: cal, locale: en), "19 Nov")
     }
 }
