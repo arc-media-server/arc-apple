@@ -24,8 +24,9 @@ struct DetailsView: View {
     @FocusState private var focused: String?
     @State private var seasons: [Season] = []
     @State private var season = 0
-    /// The backdrop's own colour, for the wash behind a show's episodes.
-    @State private var tone: Color?
+    /// The artwork's four colours from the server, blended behind the whole page: what's left
+    /// when the artwork slides away for a show's episodes.
+    @State private var wash: [Color]?
     /// The artwork has slid away for a show's episodes. It stays away below them (Related, Cast)
     /// and comes back only with the hero.
     @State private var receded = false
@@ -37,18 +38,22 @@ struct DetailsView: View {
 
     private var shown: Item { item ?? initial }
     private var backdropPath: String? { shown.images?.backdrop ?? shown.images?.seriesBackdrop }
+    /// Whose backdrop is showing: the title's own, or for an episode without one, its show's.
+    private var paletteSource: String? {
+        shown.images?.backdrop != nil ? shown.id : (shown.images?.seriesBackdrop != nil ? shown.parentId : shown.id)
+    }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            // Behind the artwork, a wash in its own colour: what's left when the artwork slides
-            // away for a show's episodes.
-            LinearGradient(colors: [(tone ?? ArcColor.background).opacity(0.85), ArcColor.background],
-                           startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            // Behind everything, the artwork's own colours blended corner to corner.
+            PageWash(colors: wash)
+            // The artwork fades into that blend at the bottom and the left (masks rather than
+            // a colour on top, so the blend shows through).
             ArtworkImage(path: backdropPath)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .overlay(LinearGradient(colors: [.clear, ArcColor.background.opacity(0.85), ArcColor.background], startPoint: .top, endPoint: .bottom))
-                .overlay(LinearGradient(colors: [ArcColor.background.opacity(0.9), .clear], startPoint: .leading, endPoint: .trailing))
+                .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black.opacity(0.15), location: 0.6),
+                                             .init(color: .clear, location: 1)], startPoint: .top, endPoint: .bottom))
+                .mask(LinearGradient(colors: [.black.opacity(0.12), .black], startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
                 // The episode browser: the artwork slides up and away, on the page's own clock.
                 .offset(y: receded ? -1200 : 0)
@@ -128,9 +133,12 @@ struct DetailsView: View {
             withAnimation(.easeOut(duration: 0.4).delay(0.35)) { entered = true }
         }
         .task(id: browse.changes) { await load() }
-        .task(id: backdropPath) {
-            guard let path = backdropPath, let api = app.api, let url = api.absolute(path) else { return }
-            if let color = await ArtworkLoader.shared.tone(url, headers: api.authorization) { tone = Color(color) }
+        .task(id: paletteSource) {
+            // The server keeps each backdrop's colours; an older server without them, or a title
+            // without artwork, keeps Arc's grey blend.
+            guard let id = paletteSource, let api = app.api,
+                  let colors = try? await api.palette(id).background else { return }
+            wash = colors.map(Color.init)
         }
         .fullScreenCover(item: $extra) { ExtraPlayerScreen(extra: $0) }
     }

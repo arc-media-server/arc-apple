@@ -1,5 +1,4 @@
 import ArcKit
-import CoreImage
 import SwiftUI
 import UIKit
 
@@ -10,25 +9,6 @@ actor ArtworkLoader {
 
     private let cache = NSCache<NSURL, UIImage>()
     private var running: [URL: Task<UIImage?, Never>] = [:]
-    private var tones: [URL: UIColor] = [:]
-    private let context = CIContext(options: [.useSoftwareRenderer: false])
-
-    /// A picture's average colour (the wash behind a show's episodes, once its artwork has slid
-    /// away), worked out once per picture.
-    func tone(_ url: URL, headers: [String: String]) async -> UIColor? {
-        if let known = tones[url] { return known }
-        guard let image = await image(url, headers: headers), let cg = image.cgImage else { return nil }
-        let input = CIImage(cgImage: cg)
-        guard let filter = CIFilter(name: "CIAreaAverage",
-                                    parameters: [kCIInputImageKey: input, kCIInputExtentKey: CIVector(cgRect: input.extent)]),
-              let output = filter.outputImage else { return nil }
-        var pixel = [UInt8](repeating: 0, count: 4)
-        context.render(output, toBitmap: &pixel, rowBytes: 4, bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
-                       format: .RGBA8, colorSpace: CGColorSpaceCreateDeviceRGB())
-        let color = UIColor(red: CGFloat(pixel[0]) / 255, green: CGFloat(pixel[1]) / 255, blue: CGFloat(pixel[2]) / 255, alpha: 1)
-        tones[url] = color
-        return color
-    }
 
     init() { cache.totalCostLimit = 200 * 1024 * 1024 }
 
