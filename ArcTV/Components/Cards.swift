@@ -146,6 +146,37 @@ struct ResumeStrip: View {
     }
 }
 
+/// The Play button's label. Not started: "Play" for a film, "Start watching · S1, E1" for a
+/// season's first episode, "Play S21 E8" for any other. Part watched: a bar of how far through
+/// with what's left, after the episode's number ("S5 E12 · 43m") or alone for a film ("1h 2m").
+struct PlayLabel: View {
+    let item: Item
+    let episode: Bool
+
+    var body: some View {
+        let resume = item.resumeMs
+        let duration = item.durationMs
+        let season = item.seasonNumber ?? 0, number = item.episodeNumber ?? 0
+        HStack(spacing: 14) {
+            Image(systemName: "play.fill")
+            if resume > 0, duration > resume {
+                let left = Int((duration - resume + 59_999) / 60_000)
+                // The bar follows the label's colour, so it shows on the white of focus too.
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.secondary).frame(width: 70, height: 6)
+                    Capsule().fill(.primary).frame(width: 70 * CGFloat(Double(resume) / Double(duration)), height: 6)
+                }
+                Text(episode ? L("details.resume_episode_left", season, number, runtimeText(left)) : runtimeText(left))
+            } else if episode {
+                Text(number == 1 ? L("details.start_watching", season, number) : L("details.play_episode", season, number))
+            } else {
+                Text(L("details.play"))
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
 /// A content rating (PG-13, TV-14) in an outlined box, as the title pages and the hero show it.
 struct OutlinedBadge: View {
     let text: String
@@ -219,7 +250,7 @@ struct TitleActions: View {
         if item.playable || item.isSeries {
             Button { act("watched") { try await $0.setPlayed(item.id, !item.watched) } } label: {
                 Label(item.watched ? L("actions.mark_unwatched") : L("actions.mark_watched"),
-                      systemImage: item.watched ? "eye.slash" : "checkmark.circle")
+                      systemImage: item.watched ? (onPage ? "checkmark.circle.fill" : "eye.slash") : "checkmark.circle")
             }
         }
         if item.kind == "movie" || item.isSeries {

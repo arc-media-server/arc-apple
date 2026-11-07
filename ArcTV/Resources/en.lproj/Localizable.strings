@@ -62,6 +62,8 @@
 "details.from_beginning" = "Play from Beginning";
 "details.play_episode" = "Play S%1$d E%2$d";
 "details.resume_episode" = "Resume S%1$d E%2$d";
+"details.resume_episode_left" = "S%1$d E%2$d · %3$@";
+"details.start_watching" = "Start watching · S%1$d, E%2$d";
 "details.season" = "Season %d";
 "details.runtime" = "%1$dh %2$dm";
 "details.cast" = "Cast";
@@ -196,6 +198,11 @@
 "details.playback" = "Playback";
 "details.released" = "Released";
 "details.studio" = "Studio";
+"details.studios" = "Studios";
+"details.quality" = "Quality";
+"details.connection" = "Connection";
+"details.connection_local" = "Local network";
+"details.connection_remote" = "Remote";
 "details.original_title" = "Original title";
 "details.directed_by" = "Directed by";
 "details.written_by" = "Written by";

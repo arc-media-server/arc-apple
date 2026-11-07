@@ -101,9 +101,6 @@ struct LibraryView: View {
             showTabs
             Spacer()
             if show == .titles {
-                if !loading && problem == nil {
-                    Text(L(query.filtered ? "library.count_filtered" : "library.count", total)).font(.callout).foregroundStyle(ArcColor.muted)
-                }
                 sortMenu.arcGlassButton().buttonBorderShape(.capsule)
                 filterMenu.arcGlassButton().buttonBorderShape(.capsule)
             }

@@ -229,12 +229,13 @@ struct DetailsView: View {
 
     @ViewBuilder private var buttons: some View {
         HStack(spacing: 20) {
+            // Play is a glass button like the rest: it turns white only with focus.
             if shown.playable {
                 let resume = shown.resumeMs
                 Button { play(PlayRequest(item: shown, startMs: resume)) } label: {
-                    Label(resume > 0 ? L("details.resume") : L("details.play"), systemImage: "play.fill")
+                    PlayLabel(item: shown, episode: shown.isEpisode)
                 }
-                .arcGlassButton(prominent: true)
+                .arcGlassButton()
                 if resume > 0 {
                     Button { play(PlayRequest(item: shown, startMs: 0)) } label: {
                         Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise")
@@ -243,10 +244,9 @@ struct DetailsView: View {
                 }
             } else if let next = nextEpisode {
                 Button { play(PlayRequest(item: next, startMs: next.resumeMs)) } label: {
-                    Label(next.resumeMs > 0 ? L("details.resume_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0)
-                          : L("details.play_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0), systemImage: "play.fill")
+                    PlayLabel(item: next, episode: true)
                 }
-                .arcGlassButton(prominent: true)
+                .arcGlassButton()
             }
             // The page's other actions are round glass icons, as the Android app's title page.
             TitleActions(item: shown, onPage: true).roundIconButton()
@@ -297,15 +297,14 @@ struct DetailsView: View {
         let crewLines: [(String, String)] = [
             (L("details.directed_by"), ListFormatter.localizedString(byJoining: crew("director"))),
             (L("details.written_by"), ListFormatter.localizedString(byJoining: crew("writer"))),
-            (L("details.studio"), shown.studio ?? ""),
+            (L("details.studios"), shown.studio ?? ""),
         ].filter { !$0.1.isEmpty }
         let playback = playbackLines(file)
-        let about = (shown.tagline?.isEmpty == false ? shown.tagline : nil) ?? (shown.isEpisode ? shown.title : nil)
         return VStack(alignment: .leading, spacing: 24) {
             Text(L("details.about")).font(.title3.weight(.semibold))
             if let overview = shown.overview, !overview.isEmpty {
                 InfoCard(title: nil, width: 1100) {
-                    if let about { Text(about).font(.headline) }
+                    Text(shown.title).font(.headline)
                     Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(10)
                 }
             }
@@ -327,19 +326,17 @@ struct DetailsView: View {
         }
     }
 
-    /// What the file is: its video, its main audio and its size.
+    /// Where and what it plays: the server, how it's reached, the profile, then the file's
+    /// quality in words, its bitrate, size, edition and name.
     private func playbackLines(_ file: MediaFile?) -> [(String, String)] {
-        guard let file else { return [] }
         var out: [(String, String)] = []
-        if let v = file.streams.first(where: { $0.kind == "video" }) {
-            let parts = [Quality.resolution(v), Quality.hdr(v), v.codec.isEmpty ? nil : v.codec.uppercased()].compactMap { $0 }
-            if !parts.isEmpty { out.append((L("details.video"), parts.joined(separator: " · "))) }
+        if let server = app.serverName, !server.isEmpty { out.append((L("details.server"), server)) }
+        if let local = app.onLocalNetwork {
+            out.append((L("details.connection"), L(local ? "details.connection_local" : "details.connection_remote")))
         }
-        let audios = file.streams.filter { $0.kind == "audio" }
-        if let a = audios.first(where: \.isDefault) ?? audios.first {
-            let parts = [Quality.audioCodec(a), Quality.channels(a.channels), Quality.objectAudio(a)].compactMap { $0 }
-            if !parts.isEmpty { out.append((L("details.audio"), parts.joined(separator: " "))) }
-        }
+        if let profile = app.profile?.name { out.append((L("details.profile"), profile)) }
+        guard let file else { return out }
+        if let quality = Quality.summary(file) { out.append((L("details.quality"), quality)) }
         // ffprobe's overall bitrate, in bits a second.
         if let bitrate = file.bitrate, bitrate > 0 {
             out.append((L("details.bitrate"), L("details.mbps", Double(bitrate) / 1_000_000)))
@@ -353,8 +350,6 @@ struct DetailsView: View {
             let name = path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last.map(String.init) ?? path
             out.append((L("details.file"), name))
         }
-        if let server = app.serverName, !server.isEmpty { out.insert((L("details.server"), server), at: 0) }
-        if let profile = app.profile?.name { out.insert((L("details.profile"), profile), at: min(1, out.count)) }
         return out
     }
 
