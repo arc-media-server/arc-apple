@@ -55,6 +55,9 @@ struct PlayerOSD: View {
     let tab: OSDTab?
     /// Whether the buttons and tabs take the focus (after Up or Down from the picture).
     let active: Bool
+    /// While swiping on the remote's touch surface: where the marker has been moved to (not
+    /// yet played from).
+    let scrubMs: Int64?
     var focus: FocusState<PlayerScreen.PlayerFocus?>.Binding
     let openMenu: (OSDMenu) -> Void
     let jump: (Chapter) -> Void
@@ -131,6 +134,9 @@ struct PlayerOSD: View {
         }
     }
 
+    /// Where the marker is: the scrubbed-to point while swiping, else where it's playing.
+    private var shownMs: Int64 { scrubMs ?? model.positionMs }
+
     /// The timeline's pieces, one per chapter (the whole film when there are none).
     private var segments: [(start: Int64, end: Int64)] {
         let d = model.durationMs
@@ -151,7 +157,7 @@ struct PlayerOSD: View {
             ZStack(alignment: .topLeading) {
                 HStack(spacing: gap) {
                     ForEach(Array(pieces.enumerated()), id: \.offset) { i, piece in
-                        let done = min(1, max(0, Double(model.positionMs - piece.start) / Double(max(1, piece.end - piece.start))))
+                        let done = min(1, max(0, Double(shownMs - piece.start) / Double(max(1, piece.end - piece.start))))
                         ZStack(alignment: .leading) {
                             Capsule().fill(.white.opacity(0.3))
                             Capsule().fill(.white).frame(width: widths[i] * done)
@@ -166,20 +172,21 @@ struct PlayerOSD: View {
                     .position(x: x, y: 11)
                 // The time played, under the marker, and the time left at the end.
                 HStack(spacing: 10) {
-                    Text(PlayerOSD.time(model.positionMs)).monospacedDigit()
+                    Text(PlayerOSD.time(shownMs)).monospacedDigit()
                     Image(systemName: model.playing ? "pause.circle.fill" : "play.circle.fill")
                 }
                 .font(.callout.weight(.semibold))
                 .fixedSize()
                 .position(x: min(max(x, 60), width - 260), y: 48)
-                Text("-" + PlayerOSD.time(max(0, model.durationMs - model.positionMs)))
+                Text("-" + PlayerOSD.time(max(0, model.durationMs - shownMs)))
                     .font(.callout.weight(.semibold)).monospacedDigit()
                     .frame(width: width, alignment: .trailing)
                     .position(x: width / 2, y: 48)
-                // The picture at this point, for a moment after moving through the timeline.
-                if let trick = model.trickplay, let at = model.seekedAt, Date().timeIntervalSince(at) < 3,
-                   let spot = trick.thumbnail(at: model.positionMs) {
-                    TrickplayThumb(sheet: spot.sheet, x: spot.x, y: spot.y, info: trick.info, chapter: model.chapter?.title)
+                // The picture at this point: while scrubbing, and for a moment after a skip.
+                if let trick = model.trickplay, scrubMs != nil || model.seekedAt.map({ Date().timeIntervalSince($0) < 3 }) == true,
+                   let spot = trick.thumbnail(at: shownMs) {
+                    TrickplayThumb(sheet: spot.sheet, x: spot.x, y: spot.y, info: trick.info,
+                                   chapter: model.chapters.last(where: { $0.startMs <= shownMs })?.title)
                         .fixedSize()
                         .position(x: min(max(x, 180), width - 180), y: -120)
                 }
@@ -194,8 +201,8 @@ struct PlayerOSD: View {
     private func markerX(widths: [CGFloat], gap: CGFloat, pieces: [(start: Int64, end: Int64)]) -> CGFloat {
         var x: CGFloat = 0
         for (i, piece) in pieces.enumerated() {
-            if model.positionMs < piece.end || i == pieces.count - 1 {
-                let done = min(1, max(0, Double(model.positionMs - piece.start) / Double(max(1, piece.end - piece.start))))
+            if shownMs < piece.end || i == pieces.count - 1 {
+                let done = min(1, max(0, Double(shownMs - piece.start) / Double(max(1, piece.end - piece.start))))
                 return x + widths[i] * done
             }
             x += widths[i] + gap
