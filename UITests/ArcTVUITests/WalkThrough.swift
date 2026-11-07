@@ -184,6 +184,12 @@ final class WalkThrough: XCTestCase {
         let home = app.buttons["Home"]
         for _ in 0..<4 where !home.hasFocus { press(.down) }
         remote.press(.select)
+        pause(2)
+        // Home keeps its place from earlier steps; choosing it again (Left reopens the sidebar on
+        // it) starts it afresh at the top, on the Watch Together row.
+        press(.left)
+        for _ in 0..<4 where !home.hasFocus { press(.down) }
+        remote.press(.select)
         pause(5)
         // Choosing Home again starts it afresh at the top, on the Watch Together row (from the
         // sidebar's landing stop, Down goes on into the page if the row hasn't the focus yet).
