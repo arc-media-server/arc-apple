@@ -8,8 +8,8 @@
   the sidebar comes back with it. Each place's page stack reports how deep it is (`ReportDepth`);
   only the place showing counts.
 - **Search has the whole screen.** Search is tvOS's own screen (the keyboard and results across
-  the top), so while its page has the focus the sidebar and its margin step aside there too. Back
-  brings the sidebar back, as on any place's first page.
+  the top), so while its page has the focus the sidebar's icons and margin step aside there too. They're
+  only out of sight: Back, or Left from the keyboard, opens the sidebar as anywhere else.
 - **No dimming when the sidebar opens.** The glass panel behind the names is enough to read them;
   the dark wash across the left of the page is gone.
 
