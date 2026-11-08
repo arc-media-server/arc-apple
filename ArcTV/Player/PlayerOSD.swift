@@ -70,11 +70,15 @@ struct PlayerOSD: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            LinearGradient(colors: [.clear, .black.opacity(tab == nil ? 0.6 : 0.7)], startPoint: .top, endPoint: .bottom)
-                .frame(height: tab == nil ? 440 : 600)
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
+            // The whole picture dims a little while the controls show, and the lower half shades
+            // to near-black behind them, as the reference player.
+            ZStack {
+                Color.black.opacity(0.25)
+                LinearGradient(stops: [.init(color: .clear, location: 0.35), .init(color: .black.opacity(0.55), location: 0.7),
+                                       .init(color: .black.opacity(0.8), location: 1)], startPoint: .top, endPoint: .bottom)
+            }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
             VStack(alignment: .leading, spacing: 18) {
                 Spacer(minLength: 0)
                 // The title and the timeline step aside while a card is up; the tabs stay.
@@ -149,7 +153,7 @@ struct PlayerOSD: View {
         GeometryReader { geo in
             let width = geo.size.width
             let pieces = segments
-            let gap: CGFloat = pieces.count > 1 ? 6 : 0
+            let gap: CGFloat = pieces.count > 1 ? 8 : 0
             let usable = width - gap * CGFloat(pieces.count - 1)
             let total = Double(max(1, pieces.last?.end ?? 1))
             let widths = pieces.map { max(2, usable * CGFloat(Double($0.end - $0.start) / total)) }
@@ -159,15 +163,15 @@ struct PlayerOSD: View {
                     ForEach(Array(pieces.enumerated()), id: \.offset) { i, piece in
                         let done = min(1, max(0, Double(shownMs - piece.start) / Double(max(1, piece.end - piece.start))))
                         ZStack(alignment: .leading) {
-                            Capsule().fill(.white.opacity(0.3))
+                            Capsule().fill(.white.opacity(0.35))
                             Capsule().fill(.white).frame(width: widths[i] * done)
                         }
-                        .frame(width: widths[i], height: 6)
+                        .frame(width: widths[i], height: 12)
                     }
                 }
                 .position(x: width / 2, y: 11)
-                RoundedRectangle(cornerRadius: 2.5).fill(.white)
-                    .frame(width: 5, height: 22)
+                RoundedRectangle(cornerRadius: 3).fill(.white)
+                    .frame(width: 6, height: 30)
                     .shadow(color: .black.opacity(0.35), radius: 3)
                     .position(x: x, y: 11)
                 // The time played, under the marker, and the time left at the end.
