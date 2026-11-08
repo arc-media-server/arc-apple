@@ -585,7 +585,7 @@ struct OSDIconStyle: ButtonStyle {
                 if focused {
                     Circle().fill(.white)
                 } else {
-                    Circle().fill(.ultraThinMaterial).overlay(Circle().stroke(.white.opacity(0.25), lineWidth: 1))
+                    GlassFill(shape: Circle())
                 }
             }
             .scaleEffect(focused ? 1.12 : 1)
@@ -602,9 +602,9 @@ struct OSDCardStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(.white)
             .background {
-                RoundedRectangle(cornerRadius: 26, style: .continuous).fill(.ultraThinMaterial)
+                GlassFill(shape: RoundedRectangle(cornerRadius: 26, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(.white.opacity(focused ? 0.22 : 0)))
-                    .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(.white.opacity(focused ? 0.6 : 0.2), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(.white.opacity(focused ? 0.6 : 0), lineWidth: 1))
             }
             .scaleEffect(focused ? 1.08 : 1)
             .shadow(color: .black.opacity(focused ? 0.4 : 0.15), radius: focused ? 16 : 6, y: focused ? 8 : 3)
@@ -628,7 +628,7 @@ struct OSDTabStyle: ButtonStyle {
                 if focused {
                     Capsule().fill(.white)
                 } else {
-                    Capsule().fill(.ultraThinMaterial).overlay(Capsule().stroke(.white.opacity(chosen ? 0.45 : 0.15), lineWidth: 1))
+                    GlassFill(shape: Capsule()).overlay(Capsule().stroke(.white.opacity(chosen ? 0.45 : 0), lineWidth: 1))
                 }
             }
             .scaleEffect(focused ? 1.06 : 1)
