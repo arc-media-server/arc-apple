@@ -23,6 +23,8 @@ struct PlayerScreen: View {
     /// screen's reach.
     private var menuOpen: Bool { osdActive && focus == nil }
     @State private var hideTask: Task<Void, Never>?
+    /// Control Center, the Now Playing screen and the system's media commands.
+    @State private var nowPlaying = NowPlaying()
     /// Scrubbing (a swipe across the remote's touch surface): where the marker is now, where the
     /// swipe started from, and whether it was playing (it plays on from the new point).
     @State private var scrubMs: Int64?
@@ -125,6 +127,15 @@ struct PlayerScreen: View {
             let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: EngineChoice.make()) { app.tokenRefused() }
             model = m
             m.start()
+            nowPlaying.start(m.item, durationMs: m.durationMs, api: api, actions: .init(
+                toggle: { togglePlay(); showControls() },
+                play: { if model?.playing == false { togglePlay() } },
+                pause: { if model?.playing == true { togglePlay() } },
+                skip: { seek(by: $0); showControls() },
+                seek: { ms in
+                    model?.seek(toMs: ms)
+                    sendSeek()
+                }))
             focus = .surface
             showControls()
             if request.together { startFollowing(m) }
@@ -133,8 +144,14 @@ struct PlayerScreen: View {
             hideTask?.cancel()
             follow?.cancel()
             if together.reporterOwner == owner { together.reporter = nil }
+            nowPlaying.stop()
             model?.close()
         }
+        // tvOS runs Now Playing's clock itself; it's told again when playing starts or stops, on
+        // a jump, and when the length is known.
+        .onChange(of: model?.playing ?? false) { _, _ in tellNowPlaying() }
+        .onChange(of: model?.seekedAt) { _, _ in tellNowPlaying() }
+        .onChange(of: model?.durationMs ?? 0) { _, _ in tellNowPlaying() }
         .onChange(of: model?.ended ?? false) { _, ended in
             guard ended else { return }
             if let room {
@@ -251,6 +268,11 @@ struct PlayerScreen: View {
     }
 
     /// Back to the picture: menus and cards close, and the remote skips and pauses again.
+    private func tellNowPlaying() {
+        guard let model else { return }
+        nowPlaying.update(positionMs: model.positionMs, durationMs: model.durationMs, playing: model.playing)
+    }
+
     private func leaveOSD() {
         tab = nil
         osdActive = false
