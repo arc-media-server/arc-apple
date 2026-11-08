@@ -53,7 +53,7 @@ struct PlayerScreen: View {
                     // A new surface when Apple's player takes over from mpv.
                     .id(ObjectIdentifier(model.engine))
                 if let caption = model.caption, model.subtitle?.image != true {
-                    SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls)
+                    SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls, cardOpen: controls && tab != nil)
                 }
                 if let problem = model.problem {
                     ProblemPane(message: problem, retry: { model.retry() }, close: { close() })
@@ -458,9 +458,11 @@ private struct SubtitleText: View {
     let style: SubtitleStyle?
     /// Lifted above the controls while they show.
     let raised: Bool
+    /// A card is up from the tab row: the line moves to the top of the screen, out of its way.
+    var cardOpen = false
 
     var body: some View {
-        let top = style?.position == "top"
+        let top = style?.position == "top" || cardOpen
         VStack {
             if !top { Spacer() }
             Text(plain)
