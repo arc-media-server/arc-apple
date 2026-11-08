@@ -149,9 +149,8 @@ struct PlayerScreen: View {
         }
         // tvOS runs Now Playing's clock itself; it's told again when playing starts or stops, on
         // a jump, and when the length is known.
-        .onChange(of: model?.playing ?? false) { _, _ in tellNowPlaying() }
-        .onChange(of: model?.seekedAt) { _, _ in tellNowPlaying() }
-        .onChange(of: model?.durationMs ?? 0) { _, _ in tellNowPlaying() }
+        .modifier(PlaybackChanges(playing: model?.playing ?? false, seekedAt: model?.seekedAt,
+                                  durationMs: model?.durationMs ?? 0) { tellNowPlaying() })
         .onChange(of: model?.ended ?? false) { _, ended in
             guard ended else { return }
             if let room {
@@ -567,5 +566,21 @@ private struct ProblemPane: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black.opacity(0.85))
+    }
+}
+
+/// Calls `changed` when playing starts or stops, after a jump, and when the length changes (its
+/// own modifier, so the player's body stays small enough for the compiler).
+private struct PlaybackChanges: ViewModifier {
+    let playing: Bool
+    let seekedAt: Date?
+    let durationMs: Int64
+    let changed: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: playing) { _, _ in changed() }
+            .onChange(of: seekedAt) { _, _ in changed() }
+            .onChange(of: durationMs) { _, _ in changed() }
     }
 }
