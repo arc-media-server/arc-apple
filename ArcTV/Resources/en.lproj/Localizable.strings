@@ -142,6 +142,7 @@
 "browse.videos_count" = "%d videos";
 "browse.collection_empty" = "This collection has nothing you can watch yet.";
 "browse.playlist_empty" = "This playlist is empty. Add titles to it in Arc in a browser.";
+"person.titles_one" = "1 title in your libraries";
 "person.titles_count" = "%d titles in your libraries";
 "person.as" = "as %@";
 "person.movies" = "Movies";

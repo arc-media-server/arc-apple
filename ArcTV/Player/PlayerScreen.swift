@@ -300,7 +300,7 @@ struct PlayerScreen: View {
             }
         }
         .padding(.horizontal, 90)
-        .padding(.bottom, controls ? 220 : 80)
+        .padding(.bottom, controls ? 330 : 80)
         .animation(.easeInOut(duration: 0.25), value: controls)
     }
 
@@ -474,7 +474,7 @@ private struct SubtitleText: View {
             if top { Spacer() }
         }
         .padding(.horizontal, 120)
-        .padding(top ? .top : .bottom, top ? 70 : (raised ? 260 : 80))
+        .padding(top ? .top : .bottom, top ? 70 : (raised ? 340 : 80))
         .animation(.easeInOut(duration: 0.25), value: raised)
         .allowsHitTesting(false)
     }
