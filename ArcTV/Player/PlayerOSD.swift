@@ -236,8 +236,8 @@ struct PlayerOSD: View {
     @ViewBuilder private func card(_ tab: OSDTab) -> some View {
         switch tab {
         case .info: panel { infoCard }
-        case .chapters: chaptersCard
-        case .cast: castCard
+        case .chapters: chaptersCard.frame(height: 240)
+        case .cast: castCard.frame(height: 260)
         case .episodes: panel { episodesCard }
         case .together: panel { togetherCard }
         }
@@ -278,6 +278,7 @@ struct PlayerOSD: View {
                 }
                 if let overview = item.overview, !overview.isEmpty {
                     Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 0)
                 HStack(spacing: 10) {
@@ -429,58 +430,63 @@ struct PlayerOSD: View {
     private func menuPanel(_ menu: OSDMenu) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(menu.title).font(.headline).padding(.horizontal, 20)
-            ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 4) {
-                    switch menu {
-                    case .playback:
-                        row(L("player.zoom_mode"), value: L(model.zoomed ? "player.zoom_fill" : "player.zoom_normal"), key: "p:zoom") {
-                            model.chooseZoom(!model.zoomed)
-                        }
-                        // In a room the room sets the pace.
-                        if room == nil {
-                            row(L("player.speed"), value: L("player.speed_value", PlayerOSD.speedName(model.speed)), key: "p:speed") {
-                                let speeds = PlayerOSD.speeds
-                                let i = speeds.firstIndex(of: model.speed) ?? 2
-                                model.chooseSpeed(speeds[(i + 1) % speeds.count])
-                            }
-                        }
-                        heading(L("player.quality"))
-                        option(L("player.original"), selected: model.maxKbps == nil, key: "q:original") { model.chooseQuality(nil) }
-                        ForEach(model.qualities, id: \.self) { kbps in
-                            option(qualityName(kbps), selected: model.maxKbps == kbps, key: "q:\(kbps)") { model.chooseQuality(kbps) }
-                        }
-                        if model.versions.count > 1 {
-                            heading(L("player.version"))
-                            ForEach(model.versions) { v in
-                                option(v.label, selected: model.fileId == v.fileId, key: "v:\(v.fileId)") { model.chooseVersion(v.fileId) }
-                            }
-                        }
-                    case .audio:
-                        ForEach(model.audioTracks) { a in
-                            option(PlayerOSD.audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
-                        }
-                    case .subtitles:
-                        option(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
-                        ForEach(model.subtitleTracks) { t in
-                            option(PlayerOSD.trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
-                        }
-                    }
-                }
-                .padding(.horizontal, 6)
+            // As tall as its rows, up to the room above the buttons; then it scrolls.
+            ViewThatFits(in: .vertical) {
+                menuRows(menu)
+                ScrollView(.vertical) { menuRows(menu) }
             }
-            .scrollClipDisabled()
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 8)
         .frame(width: 520)
-        .frame(maxHeight: 520)
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(maxHeight: 560)
         .arcGlassPanel(cornerRadius: 28)
         .focusSection()
         // Just above the round buttons, at the right; the timeline and tabs stay in view.
         .padding(.trailing, 90)
         .padding(.bottom, 300)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+    }
+
+    /// A menu's rows: its settings and choices.
+    @ViewBuilder private func menuRows(_ menu: OSDMenu) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            switch menu {
+            case .playback:
+                row(L("player.zoom_mode"), value: L(model.zoomed ? "player.zoom_fill" : "player.zoom_normal"), key: "p:zoom") {
+                    model.chooseZoom(!model.zoomed)
+                }
+                // In a room the room sets the pace.
+                if room == nil {
+                    row(L("player.speed"), value: L("player.speed_value", PlayerOSD.speedName(model.speed)), key: "p:speed") {
+                        let speeds = PlayerOSD.speeds
+                        let i = speeds.firstIndex(of: model.speed) ?? 2
+                        model.chooseSpeed(speeds[(i + 1) % speeds.count])
+                    }
+                }
+                heading(L("player.quality"))
+                option(L("player.original"), selected: model.maxKbps == nil, key: "q:original") { model.chooseQuality(nil) }
+                ForEach(model.qualities, id: \.self) { kbps in
+                    option(qualityName(kbps), selected: model.maxKbps == kbps, key: "q:\(kbps)") { model.chooseQuality(kbps) }
+                }
+                if model.versions.count > 1 {
+                    heading(L("player.version"))
+                    ForEach(model.versions) { v in
+                        option(v.label, selected: model.fileId == v.fileId, key: "v:\(v.fileId)") { model.chooseVersion(v.fileId) }
+                    }
+                }
+            case .audio:
+                ForEach(model.audioTracks) { a in
+                    option(PlayerOSD.audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
+                }
+            case .subtitles:
+                option(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
+                ForEach(model.subtitleTracks) { t in
+                    option(PlayerOSD.trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
+                }
+            }
+        }
+        .padding(.horizontal, 6)
     }
 
     private func heading(_ text: String) -> some View {

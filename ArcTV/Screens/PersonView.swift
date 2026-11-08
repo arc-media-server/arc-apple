@@ -103,7 +103,7 @@ struct PersonView: View {
         var parts: [String] = []
         if let known = page?.person.knownFor, !known.isEmpty { parts.append(known) }
         let count = Set(page?.credits.map(\.item.id) ?? []).count
-        parts.append(L("person.titles_count", count))
+        parts.append(count == 1 ? L("person.titles_one") : L("person.titles_count", count))
         return parts.joined(separator: " · ")
     }
 

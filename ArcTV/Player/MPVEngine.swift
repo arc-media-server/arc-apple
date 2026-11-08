@@ -140,7 +140,10 @@ final class MPVEngine: PlaybackEngine {
         if let handle = mpv {
             mpv_set_wakeup_callback(handle, nil, nil)
             mpv = nil
-            mpv_terminate_destroy(handle)
+            // Off the main thread: shutting down waits for mpv's own threads, and its video
+            // output hands frames over on the main thread, so waiting here would never end.
+            let core = UnsafeSendable(handle)
+            DispatchQueue.global(qos: .userInitiated).async { mpv_terminate_destroy(core.value) }
         }
         started = false
         waiting = false
@@ -239,4 +242,10 @@ private final class WakeBox: @unchecked Sendable {
 final class SampleBufferView: UIView {
     override static var layerClass: AnyClass { AVSampleBufferDisplayLayer.self }
     var displayLayer: AVSampleBufferDisplayLayer { layer as! AVSampleBufferDisplayLayer }
+}
+
+/// Hands mpv's handle to the queue that shuts it down (nothing else uses it by then).
+private struct UnsafeSendable<T>: @unchecked Sendable {
+    let value: T
+    init(_ value: T) { self.value = value }
 }
