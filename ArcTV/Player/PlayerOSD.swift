@@ -45,12 +45,10 @@ enum OSDTab: Hashable {
 ///   left at the right;
 /// - the tab row under it (Info, Chapters, Cast, Episodes, and Watch Together in a room). Down
 ///   from the picture opens Info; a tab's card slides up while the title and timeline step aside.
-/// The screen keeps the state (which menu, which tab, the focus); this view only draws it.
+/// The screen keeps the state (which tab, the focus); this view only draws it.
 struct PlayerOSD: View {
     let model: PlayerModel
     let room: WatchRoom?
-    /// The menu open above its button, if any.
-    let menu: OSDMenu?
     /// The card open from the tab row, if any.
     let tab: OSDTab?
     /// Whether the buttons and tabs take the focus (after Up or Down from the picture).
@@ -59,7 +57,6 @@ struct PlayerOSD: View {
     /// yet played from).
     let scrubMs: Int64?
     var focus: FocusState<PlayerScreen.PlayerFocus?>.Binding
-    let openMenu: (OSDMenu) -> Void
     let jump: (Chapter) -> Void
     /// Plays another episode (the Episodes card, the Info card's Previous).
     let play: (Item) -> Void
@@ -70,13 +67,10 @@ struct PlayerOSD: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // The whole picture dims a little while the controls show, and the lower half shades
-            // to near-black behind them, as the reference player.
-            ZStack {
-                Color.black.opacity(0.25)
-                LinearGradient(stops: [.init(color: .clear, location: 0.35), .init(color: .black.opacity(0.55), location: 0.7),
-                                       .init(color: .black.opacity(0.8), location: 1)], startPoint: .top, endPoint: .bottom)
-            }
+            // The lower part of the picture shades to near-black behind the controls, as the
+            // system player's; the rest of the picture is left as it is.
+            LinearGradient(stops: [.init(color: .clear, location: 0.4), .init(color: .black.opacity(0.5), location: 0.7),
+                                   .init(color: .black.opacity(0.8), location: 1)], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
             .allowsHitTesting(false)
             VStack(alignment: .leading, spacing: 18) {
@@ -102,12 +96,7 @@ struct PlayerOSD: View {
             .padding(.horizontal, 90)
             .padding(.bottom, 60)
             .animation(.timingCurve(0.4, 0, 0.2, 1, duration: 0.45), value: tab)
-            if let menu {
-                menuPanel(menu)
-                    .transition(.opacity.combined(with: .scale(scale: 0.96, anchor: .bottomTrailing)))
-            }
         }
-        .animation(.easeInOut(duration: 0.2), value: menu)
     }
 
     // MARK: Title, buttons, timeline
@@ -127,13 +116,18 @@ struct PlayerOSD: View {
 
     private var trackButtons: some View {
         HStack(spacing: 16) {
+            // tvOS's own menus, as the system player's buttons open: they pop up above the
+            // button with the choices ticked, and Back closes them.
             ForEach(OSDMenu.allCases, id: \.self) { m in
-                Button { openMenu(m) } label: {
+                Menu {
+                    menuContent(m)
+                } label: {
                     Image(systemName: m.icon).accessibilityLabel(m.title)
                 }
+                .menuStyle(.button)
                 .buttonStyle(OSDIconStyle())
                 .focused(focus, equals: .control(m))
-                .disabled(!active || tab != nil || menu != nil)
+                .disabled(!active || tab != nil)
             }
         }
     }
@@ -231,7 +225,7 @@ struct PlayerOSD: View {
                 Button(t.title) {}
                     .buttonStyle(OSDTabStyle(chosen: tab == t))
                     .focused(focus, equals: .tab(t))
-                    .disabled(!active || menu != nil)
+                    .disabled(!active)
             }
         }
         .focusSection()
@@ -431,100 +425,47 @@ struct PlayerOSD: View {
 
     static let speeds: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
-    private func menuPanel(_ menu: OSDMenu) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(menu.title).font(.headline).padding(.horizontal, 20)
-            // As tall as its rows, up to the room above the buttons; then it scrolls.
-            ViewThatFits(in: .vertical) {
-                menuRows(menu)
-                ScrollView(.vertical) { menuRows(menu) }
+    /// A menu's choices, as tvOS's own menu draws them (ticks, sections, submenus).
+    @ViewBuilder private func menuContent(_ menu: OSDMenu) -> some View {
+        switch menu {
+        case .playback:
+            Picker(L("player.zoom_mode"), selection: Binding(get: { model.zoomed }, set: { model.chooseZoom($0) })) {
+                Text(L("player.zoom_normal")).tag(false)
+                Text(L("player.zoom_fill")).tag(true)
             }
-        }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 8)
-        .frame(width: 520)
-        .frame(maxHeight: 560)
-        .arcGlassPanel(cornerRadius: 28)
-        .focusSection()
-        // Just above the round buttons, at the right; the timeline and tabs stay in view.
-        .padding(.trailing, 90)
-        .padding(.bottom, 300)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-    }
-
-    /// A menu's rows: its settings and choices.
-    @ViewBuilder private func menuRows(_ menu: OSDMenu) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            switch menu {
-            case .playback:
-                row(L("player.zoom_mode"), value: L(model.zoomed ? "player.zoom_fill" : "player.zoom_normal"), key: "p:zoom") {
-                    model.chooseZoom(!model.zoomed)
+            .pickerStyle(.menu)
+            // In a room the room sets the pace.
+            if room == nil {
+                Picker(L("player.speed"), selection: Binding(get: { model.speed }, set: { model.chooseSpeed($0) })) {
+                    ForEach(PlayerOSD.speeds, id: \.self) { Text(L("player.speed_value", PlayerOSD.speedName($0))).tag($0) }
                 }
-                // In a room the room sets the pace.
-                if room == nil {
-                    row(L("player.speed"), value: L("player.speed_value", PlayerOSD.speedName(model.speed)), key: "p:speed") {
-                        let speeds = PlayerOSD.speeds
-                        let i = speeds.firstIndex(of: model.speed) ?? 2
-                        model.chooseSpeed(speeds[(i + 1) % speeds.count])
-                    }
-                }
-                heading(L("player.quality"))
-                option(L("player.original"), selected: model.maxKbps == nil, key: "q:original") { model.chooseQuality(nil) }
-                ForEach(model.qualities, id: \.self) { kbps in
-                    option(qualityName(kbps), selected: model.maxKbps == kbps, key: "q:\(kbps)") { model.chooseQuality(kbps) }
-                }
-                if model.versions.count > 1 {
-                    heading(L("player.version"))
-                    ForEach(model.versions) { v in
-                        option(v.label, selected: model.fileId == v.fileId, key: "v:\(v.fileId)") { model.chooseVersion(v.fileId) }
-                    }
-                }
-            case .audio:
-                ForEach(model.audioTracks) { a in
-                    option(PlayerOSD.audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
-                }
-            case .subtitles:
-                option(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
-                ForEach(model.subtitleTracks) { t in
-                    option(PlayerOSD.trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
-                }
+                .pickerStyle(.menu)
             }
-        }
-        .padding(.horizontal, 6)
-    }
-
-    private func heading(_ text: String) -> some View {
-        Text(text).font(.caption.weight(.semibold)).foregroundStyle(.white.opacity(0.6))
-            .padding(.horizontal, 20).padding(.top, 10)
-    }
-
-    /// A choice: its name, ticked at the right when chosen.
-    private func option(_ title: String, selected: Bool, key: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                Text(title).lineLimit(1)
-                Spacer(minLength: 0)
-                Image(systemName: "checkmark").font(.callout.weight(.semibold)).opacity(selected ? 1 : 0)
+            Picker(L("player.quality"), selection: Binding(get: { model.maxKbps ?? 0 }, set: { model.chooseQuality($0 == 0 ? nil : $0) })) {
+                Text(L("player.original")).tag(0)
+                ForEach(model.qualities, id: \.self) { Text(qualityName($0)).tag($0) }
             }
-            .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(OSDRowStyle())
-        .focused(focus, equals: .option(key))
-    }
-
-    /// A setting: its name, and its value at the right; Select moves to the next value.
-    private func row(_ title: String, value: String, key: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                Text(title).lineLimit(1)
-                Spacer(minLength: 0)
-                Text(value).opacity(0.7)
-                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).opacity(0.7)
+            .pickerStyle(.menu)
+            if model.versions.count > 1 {
+                Picker(L("player.version"), selection: Binding(get: { model.fileId }, set: { model.chooseVersion($0) })) {
+                    ForEach(model.versions) { Text($0.label).tag($0.fileId) }
+                }
+                .pickerStyle(.menu)
             }
-            .frame(maxWidth: .infinity)
+        case .audio:
+            Picker(L("player.audio"), selection: Binding(get: { model.audioStream }, set: { model.chooseAudio($0) })) {
+                ForEach(model.audioTracks) { Text(PlayerOSD.audioName($0)).tag($0.index) }
+            }
+            .pickerStyle(.inline)
+        case .subtitles:
+            Picker(L("player.subtitles"), selection: Binding(get: { model.subtitle?.id ?? "" }, set: { id in
+                model.chooseSubtitle(model.subtitleTracks.first { $0.id == id })
+            })) {
+                Text(L("player.off")).tag("")
+                ForEach(model.subtitleTracks) { Text(PlayerOSD.trackName($0)).tag($0.id) }
+            }
+            .pickerStyle(.inline)
         }
-        .buttonStyle(OSDRowStyle())
-        .focused(focus, equals: .option(key))
     }
 
     // MARK: Words
@@ -637,21 +578,5 @@ struct OSDTabStyle: ButtonStyle {
             }
             .scaleEffect(focused ? 1.06 : 1)
             .animation(.easeOut(duration: 0.15), value: focused)
-    }
-}
-
-/// A row in a player menu: full width, white with black text when focused.
-struct OSDRowStyle: ButtonStyle {
-    @Environment(\.isFocused) private var focused
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.callout)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            .foregroundStyle(focused ? .black : .white)
-            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(focused ? .white : .clear))
-            .scaleEffect(focused ? 1.02 : 1)
-            .animation(.easeOut(duration: 0.12), value: focused)
     }
 }
