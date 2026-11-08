@@ -67,16 +67,12 @@ struct PlayerOSD: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // A dark veil over the whole picture while the controls show (darker with a card up),
-            // deepening towards the bottom behind the title, timeline and tabs.
-            ZStack {
-                Color.black.opacity(tab == nil ? 0.35 : 0.5)
-                LinearGradient(stops: [.init(color: .clear, location: 0.45), .init(color: .black.opacity(0.45), location: 0.75),
-                                       .init(color: .black.opacity(0.7), location: 1)], startPoint: .top, endPoint: .bottom)
-            }
+            // The lower part of the picture shades to near-black behind the controls, as the
+            // system player's; the rest of the picture is left as it is.
+            LinearGradient(stops: [.init(color: .clear, location: 0.4), .init(color: .black.opacity(0.5), location: 0.7),
+                                   .init(color: .black.opacity(0.8), location: 1)], startPoint: .top, endPoint: .bottom)
             .ignoresSafeArea()
             .allowsHitTesting(false)
-            .animation(.easeInOut(duration: 0.3), value: tab)
             VStack(alignment: .leading, spacing: 18) {
                 Spacer(minLength: 0)
                 // The title and the timeline step aside while a card is up; the tabs stay.
@@ -97,8 +93,11 @@ struct PlayerOSD: View {
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
-            .padding(.horizontal, 90)
-            .padding(.bottom, 60)
+            // Measured from the screen's edges, not tvOS's safe area (which would add its own 80
+            // points at the sides): the controls reach across the screen, as the reference's.
+            .padding(.horizontal, 100)
+            .padding(.bottom, 64)
+            .ignoresSafeArea()
             .animation(.timingCurve(0.4, 0, 0.2, 1, duration: 0.45), value: tab)
         }
     }

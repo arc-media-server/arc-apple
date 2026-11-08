@@ -301,8 +301,10 @@ struct PlayerScreen: View {
                 }
             }
         }
-        .padding(.horizontal, 90)
-        .padding(.bottom, controls ? 330 : 80)
+        // From the screen's edges, lined up with the controls' right edge.
+        .padding(.horizontal, 100)
+        .padding(.bottom, controls ? 334 : 140)
+        .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.25), value: controls)
     }
 
