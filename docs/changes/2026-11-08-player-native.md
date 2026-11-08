@@ -16,3 +16,17 @@ which the screen can't see, so "the controls are active but nothing on this scre
 focus" stands for "a menu is open".
 
 Not built yet. The next build's walk-through also takes a screenshot of the Subtitles menu open.
+
+## Now Playing and the system's media commands
+
+`NowPlaying` (ArcTV/Player) tells tvOS what's playing: the title, the show and the episode number,
+the card's wide picture (loaded with the sign-in), the length, the position and whether it's
+playing. tvOS shows it in Control Center and on the Now Playing screen. The system's play, pause,
+play/pause, skip 10 seconds and seek commands go to the player, so Control Center, the iPhone
+remote, Siri and AirPods controls work. In a Watch Together room they go to the room, as the
+remote's do. tvOS keeps the clock running itself, so it is only told again when playback starts
+or stops, after a jump, and when the length becomes known. Apple's `MPNowPlayingSession` needs
+Apple's own player, so the default centres are used for both engines.
+
+None of this can be checked in the simulator walk-through. It needs a real Apple TV with Control
+Center or the iPhone remote.
