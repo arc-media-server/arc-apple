@@ -15,11 +15,13 @@ struct PlayerScreen: View {
 
     @State private var model: PlayerModel?
     @State private var controls = true
-    /// The menu open above the track buttons, the card open from the tab row, and whether the
+    /// The card open from the tab row, and whether the
     /// buttons and tabs have the focus (after Up or Down from the picture).
-    @State private var menu: OSDMenu?
     @State private var tab: OSDTab?
     @State private var osdActive = false
+    /// One of the round buttons' menus (tvOS's own) is open: the focus is in it, out of this
+    /// screen's reach.
+    private var menuOpen: Bool { osdActive && focus == nil }
     @State private var hideTask: Task<Void, Never>?
     /// Scrubbing (a swipe across the remote's touch surface): where the marker is now, where the
     /// swipe started from, and whether it was playing (it plays on from the new point).
@@ -61,14 +63,14 @@ struct PlayerScreen: View {
                     // The surface takes the remote while nothing else has the focus.
                     Color.clear
                         .contentShape(Rectangle())
-                        .focusable(!osdActive && menu == nil && !lobby && together.inviting == nil)
+                        .focusable(!osdActive && !menuOpen && !lobby && together.inviting == nil)
                         .focused($focus, equals: .surface)
                         .onMoveCommand { move($0) }
                         .onTapGesture {
                             if scrubMs != nil { endScrub(commit: true) } else { togglePlay() }
                             showControls()
                         }
-                    SwipeCatcher(enabled: !osdActive && menu == nil && !lobby && !model.loading && model.problem == nil
+                    SwipeCatcher(enabled: !osdActive && !menuOpen && !lobby && !model.loading && model.problem == nil
                                     && together.inviting == nil && model.durationMs > 0,
                                  began: { beginScrub() },
                                  changed: { scrub($0) },
@@ -76,8 +78,7 @@ struct PlayerScreen: View {
                         .frame(width: 0, height: 0)
                         .allowsHitTesting(false)
                     if model.loading || model.waiting { ProgressView().scaleEffect(1.6) }
-                    PlayerOSD(model: model, room: room, menu: menu, tab: tab, active: osdActive, scrubMs: scrubMs, focus: $focus,
-                              openMenu: { openMenu($0) },
+                    PlayerOSD(model: model, room: room, tab: tab, active: osdActive, scrubMs: scrubMs, focus: $focus,
                               jump: { c in model.jump(to: c); sendSeek(); leaveOSD() },
                               play: { playNext($0) },
                               restart: { model.restart(); sendSeek(); leaveOSD() },
@@ -111,11 +112,6 @@ struct PlayerScreen: View {
                 endScrub(commit: false)
             } else if request.together && together.inviting != nil {
                 together.inviting = nil
-            } else if let open = menu {
-                // A menu closes back to its button.
-                menu = nil
-                focus = .control(open)
-                showControls()
             } else if osdActive {
                 leaveOSD()
             } else if controls && model?.playing == true && !lobby {
@@ -174,11 +170,11 @@ struct PlayerScreen: View {
         }
         // Skip Intro takes the focus when it appears, so Select skips (as Plex).
         .onChange(of: model?.marker?.startMs) { _, now in
-            if now != nil, menu == nil, !osdActive { focus = model?.marker?.kind == "credits" && model?.next != nil ? .upNext : .skip }
+            if now != nil, !menuOpen, !osdActive { focus = model?.marker?.kind == "credits" && model?.next != nil ? .upNext : .skip }
             else if focus == .skip { focus = .surface }
         }
         .onChange(of: model?.upNextDue ?? false) { _, due in
-            guard due, !upNextDismissed, menu == nil, room?.isHost ?? true else { return }
+            guard due, !upNextDismissed, !menuOpen, room?.isHost ?? true else { return }
             focus = .upNext
             if model?.prefs?.autoPlay != false { startCountdown() }
         }
@@ -254,23 +250,8 @@ struct PlayerScreen: View {
         scrubResume = false
     }
 
-    private func openMenu(_ m: OSDMenu) {
-        menu = m
-        tab = nil
-        guard let model else { return }
-        let key: String
-        switch m {
-        case .subtitles: key = model.subtitle.map { "s:" + $0.id } ?? "s:off"
-        case .audio: key = "a:\(model.audioStream)"
-        case .playback: key = "p:zoom"
-        }
-        Task { @MainActor in focus = .option(key) }
-        showControls()
-    }
-
     /// Back to the picture: menus and cards close, and the remote skips and pauses again.
     private func leaveOSD() {
-        menu = nil
         tab = nil
         osdActive = false
         focus = .surface
@@ -345,7 +326,6 @@ struct PlayerScreen: View {
 
     private func inviteMore(_ room: WatchRoom) {
         guard let id = room.itemId else { return }
-        menu = nil
         tab = nil
         together.inviting = .init(itemId: id, title: room.item?.title ?? model?.item.title ?? "", roomId: room.id)
     }
@@ -410,7 +390,7 @@ struct PlayerScreen: View {
         let quiet: Duration = tab != nil ? .seconds(9) : .seconds(4)
         hideTask = Task {
             try? await Task.sleep(for: quiet)
-            guard !Task.isCancelled, model?.playing == true, menu == nil, !lobby else { return }
+            guard !Task.isCancelled, model?.playing == true, !menuOpen, !lobby else { return }
             if osdActive {
                 osdActive = false
                 tab = nil

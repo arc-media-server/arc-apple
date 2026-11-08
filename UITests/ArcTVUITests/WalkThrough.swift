@@ -90,19 +90,18 @@ final class WalkThrough: XCTestCase {
         shot("10b-player-info")
         remote.press(.menu)
         pause(1)
-        // Up goes to the track buttons; Select opens Subtitles above its button, and the
-        // stand-in's track turns on.
+        // Up goes to the round buttons; Select opens Subtitles (tvOS's own menu), Down and Select
+        // turn the stand-in's track on, and the menu closes back to its button.
         press(.up)
         pause(1)
         remote.press(.select)
-        pause(1)
+        pause(2)
+        shot("10c-player-subtitles-menu")
         press(.down)
         remote.press(.select)
         pause(3)
         shot("10c-player-subtitles")
-        // Back to the button, along to Playback (the first): Zoom Mode, Speed, Quality.
-        remote.press(.menu)
-        pause(1)
+        // Along to Playback (the first): Zoom Mode, Playback Speed, Quality, Version.
         press(.left, 2)
         remote.press(.select)
         pause(1)
