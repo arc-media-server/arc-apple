@@ -327,6 +327,22 @@ final class PlayerModel {
         }
     }
 
+    /// Plays or pauses as the Watch Together room says (not the viewer's own toggle).
+    func setPlaying(_ on: Bool) {
+        guard !loading, on != engine.isPlaying else { return }
+        if on { engine.play() } else { engine.pause() }
+        playing = on
+    }
+
+    /// Plays at `rate` while catching up with the room (1 is normal).
+    func setRate(_ rate: Float) { engine.setRate(rate) }
+
+    /// Moves to `ms` in the file (the room's position).
+    func seek(toMs ms: Int64) { seek(by: ms - positionMs) }
+
+    /// Loading or buffering, for the room's ready check.
+    var busy: Bool { loading || waiting }
+
     /// Moves by `deltaMs` in the file: within the stream when it can, else a new stream from there.
     func seek(by deltaMs: Int64) {
         guard let p = plan, !loading else { return }

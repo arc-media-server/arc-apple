@@ -5,6 +5,7 @@ import SwiftUI
 /// they follow the profile to every app), switching profile, the server, and about.
 struct SettingsView: View {
     @Environment(AppModel.self) private var app
+    @Environment(Browse.self) private var browse
     @State private var prefs: Prefs?
     @State private var problem: String?
     @State private var confirmSignOut = false
@@ -47,6 +48,9 @@ struct SettingsView: View {
                     } else {
                         ProgressView()
                     }
+                }
+                Section(L("together.title")) {
+                    Button(L("together.join_with_code")) { browse.together.enteringCode = true }
                 }
                 Section(L("settings.account")) {
                     Button(L("settings.switch_profile")) { app.switchProfile() }

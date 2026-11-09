@@ -17,6 +17,8 @@ enum Route: Hashable {
 final class Browse {
     var playing: PlayRequest?
     private(set) var changes = 0
+    /// Watch Together: Home's rooms and the room this Apple TV is in.
+    let together = WatchTogetherModel()
 
     func play(_ request: PlayRequest) { playing = request }
     func changed() { changes += 1 }
@@ -106,6 +108,9 @@ struct MainView: View {
     /// While true, an invisible stop at the top left of the page can take the focus: choosing a
     /// place moves the focus there, out of the sidebar, and the next press goes on into the page.
     @State private var landingArmed = false
+    /// Choosing the place that's showing starts its first page afresh (back at the top, as
+    /// tvOS apps' tabs do): each place's page is rebuilt when its count goes up.
+    @State private var fresh: [String: Int] = [:]
 
     /// A place in the sidebar.
     private struct Place: Hashable, Identifiable {
@@ -136,6 +141,7 @@ struct MainView: View {
                 ForEach(places.filter { opened.contains($0.id) }) { place in
                     let showing = place.id == tab
                     page(for: place)
+                        .id(place.id + "#" + String(fresh[place.id] ?? 0))
                         .opacity(showing ? 1 : 0)
                         .disabled(!showing)
                         .accessibilityHidden(!showing)
@@ -184,7 +190,27 @@ struct MainView: View {
                          onDismiss: { browse.changed() }) { request in
             PlayerScreen(request: request).environment(browse)
         }
-        .task { await loadTabs() }
+        // Watch Together's invite panel and code entry, over the pages. (Inside the player the
+        // player shows the invite panel itself: one full-screen cover at a time.)
+        .fullScreenCover(item: Binding(get: { browse.playing == nil ? browse.together.inviting : nil },
+                                       set: { browse.together.inviting = $0 })) { target in
+            InvitePanel(target: target).environment(browse).presentationBackground(.clear)
+        }
+        .fullScreenCover(isPresented: Binding(get: { browse.playing == nil && browse.together.enteringCode },
+                                              set: { browse.together.enteringCode = $0 })) {
+            JoinCodeView().environment(browse)
+        }
+        .overlay {
+            if browse.playing == nil, let notice = browse.together.notice { NoticeCapsule(text: notice) }
+        }
+        .animation(.easeInOut(duration: 0.25), value: browse.together.notice)
+        .task {
+            // Joining a room, or the room moving to another title, opens the player on it.
+            browse.together.openPlayer = { [browse] item, startMs in
+                browse.playing = PlayRequest(item: item, startMs: startMs, together: true)
+            }
+            await loadTabs()
+        }
     }
 
     @ViewBuilder private func page(for place: Place) -> some View {
@@ -215,6 +241,7 @@ struct MainView: View {
             }
             ForEach(places) { place in
                 Button {
+                    if tab == place.id { fresh[place.id, default: 0] += 1 }
                     tab = place.id
                     opened.insert(place.id)
                     handOver()

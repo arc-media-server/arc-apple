@@ -69,7 +69,7 @@ final class AVPlayerEngine: PlaybackEngine {
             // A converted stream is a growing (EVENT) playlist: start where asked, not at its live edge.
             player.seek(to: CMTime(seconds: startSeconds, preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero) { @Sendable [weak self] _ in
                 Task { @MainActor in
-                    self?.player.play()
+                    self?.play()
                     self?.onEvent?(.ready)
                 }
             }
@@ -88,8 +88,21 @@ final class AVPlayerEngine: PlaybackEngine {
         onEvent?(.waiting(now))
     }
 
-    func play() { player.play() }
+    private var rate: Float = 1
+
+    func play() {
+        player.play()
+        if rate != 1 { player.rate = rate }
+    }
+
     func pause() { player.pause() }
+
+    func setRate(_ rate: Float) {
+        guard rate != self.rate else { return }
+        self.rate = rate
+        // While paused the rate is kept for the next play (setting it would start playing).
+        if player.timeControlStatus != .paused { player.rate = rate }
+    }
 
     func seek(to seconds: Double) {
         player.seek(to: CMTime(seconds: max(0, seconds), preferredTimescale: 600), toleranceBefore: .zero, toleranceAfter: .zero)
