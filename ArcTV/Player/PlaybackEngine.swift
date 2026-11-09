@@ -24,6 +24,8 @@ protocol PlaybackEngine: AnyObject {
     func play()
     func pause()
     func seek(to seconds: Double)
+    /// Plays a little faster or slower (Watch Together catching up with the room); 1 is normal.
+    func setRate(_ rate: Float)
     /// Where it is in the stream.
     var currentSeconds: Double { get }
     /// How far into the stream can be reached (for a converted stream, what's converted so far).

@@ -31,6 +31,11 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(6)
         shot("04-home")
+        // With rooms on the stand-in, Home opens on its Watch Together row: down to the titles.
+        if app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together:'")).firstMatch.hasFocus {
+            press(.down)
+            pause(2)
+        }
         press(.right)
         pause(3)
         shot("05-home-focus-moved")
@@ -169,6 +174,54 @@ final class WalkThrough: XCTestCase {
         }
         pause(4)
         shot("21-search-results")
+
+        // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
+        // back to Home, up to the Watch Together row, the host's lobby, then the guest's.
+        // Back once from Search's first page opens the sidebar on Search (a second Back would
+        // leave the app); Home is the next place down.
+        remote.press(.menu)
+        pause(1)
+        let home = app.buttons["Home"]
+        for _ in 0..<4 where !home.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(2)
+        // Home keeps its place from earlier steps; choosing it again (Left reopens the sidebar on
+        // it) starts it afresh at the top, on the Watch Together row.
+        press(.left)
+        for _ in 0..<4 where !home.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(5)
+        // Choosing Home again starts it afresh at the top, on the Watch Together row (from the
+        // sidebar's landing stop, Down goes on into the page if the row hasn't the focus yet).
+        let room = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together'")).firstMatch
+        if !(room.exists && room.hasFocus) { press(.down) }
+        shot("22-home-watch-together")
+        remote.press(.select)
+        pause(5)
+        shot("23-lobby-host")
+        // Back closes the player, which leaves the room; then the next room, as a guest.
+        remote.press(.menu)
+        pause(3)
+        press(.right)
+        remote.press(.select)
+        pause(5)
+        shot("24-lobby-guest")
+        remote.press(.menu)
+        pause(3)
+
+        // Inviting: hold Select on a title, Watch Together…, and choose someone.
+        press(.down)
+        pause(2)
+        remote.press(.select, forDuration: 1.6)
+        pause(2)
+        let together = app.descendants(matching: .any)["Watch Together…"].firstMatch
+        for _ in 0..<6 where !together.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(3)
+        shot("25-invite-panel")
+        remote.press(.select)
+        pause(1)
+        shot("26-invite-chosen")
     }
 
     private func press(_ button: XCUIRemote.Button, _ times: Int = 1) {
