@@ -1,10 +1,12 @@
 import ArcKit
 import SwiftUI
 
-/// The player: the picture, a spinner while it waits, and Arc's own controls (title, timeline,
-/// times). Play/Pause and the touch surface's click toggle playing, left and right skip 10
-/// seconds, down opens Subtitles and Audio, and Back closes those, hides the controls or closes
-/// the player. Skip Intro and Up Next appear as Plex's do, with the focus on them.
+/// The player: the picture, a spinner while it waits, and Arc's own controls (PlayerOSD).
+/// Play/Pause and the touch surface's click toggle playing; Left and Right clicks skip 10
+/// seconds; a sideways swipe on the touch surface scrubs (paused, with the timeline picture),
+/// and a click or Play plays from there while Back puts it back. Up goes to the round buttons,
+/// Down to the cards, and Back closes those, hides the controls or closes the player. Skip Intro
+/// and Up Next appear as Plex's do, with the focus on them.
 struct PlayerScreen: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
@@ -13,8 +15,23 @@ struct PlayerScreen: View {
 
     @State private var model: PlayerModel?
     @State private var controls = true
-    @State private var options = false
+    /// The card open from the tab row, and whether the
+    /// buttons and tabs have the focus (after Up or Down from the picture).
+    @State private var tab: OSDTab?
+    @State private var osdActive = false
+    /// One of the round buttons' menus (tvOS's own) is open: the focus is in it, out of this
+    /// screen's reach.
+    private var menuOpen: Bool { osdActive && focus == nil }
     @State private var hideTask: Task<Void, Never>?
+    /// Control Center, the Now Playing screen and the system's media commands.
+    @State private var nowPlaying = NowPlaying()
+    /// Scrubbing (a swipe across the remote's touch surface): where the marker is now, where the
+    /// swipe started from, and whether it was playing (it plays on from the new point).
+    @State private var scrubMs: Int64?
+    @State private var scrubBase: Int64 = 0
+    @State private var scrubResume = false
+    /// When the last swipe moved: the move commands a swipe also sends are ignored for a moment.
+    @State private var swipedAt = Date.distantPast
     /// Seconds left before the next episode starts (Auto-Play); nil when not counting.
     @State private var countdown: Int?
     @State private var upNextDismissed = false
@@ -24,7 +41,7 @@ struct PlayerScreen: View {
     @State private var follow: Task<Void, Never>?
     @State private var owner = UUID()
 
-    enum PlayerFocus: Hashable { case surface, skip, upNext, lobbyStart, option(String) }
+    enum PlayerFocus: Hashable { case surface, skip, upNext, lobbyStart, option(String), control(OSDMenu), tab(OSDTab), chapter(Int) }
 
     private var together: WatchTogetherModel { browse.together }
     /// The room this player follows, while it's in one.
@@ -37,8 +54,10 @@ struct PlayerScreen: View {
             Color.black.ignoresSafeArea()
             if let model {
                 EngineSurface(engine: model.engine).ignoresSafeArea()
+                    // A new surface when Apple's player takes over from mpv.
+                    .id(ObjectIdentifier(model.engine))
                 if let caption = model.caption, model.subtitle?.image != true {
-                    SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls || options)
+                    SubtitleText(text: caption, style: model.prefs?.subtitleStyle, raised: controls, cardOpen: controls && tab != nil)
                 }
                 if let problem = model.problem {
                     ProblemPane(message: problem, retry: { model.retry() }, close: { close() })
@@ -46,14 +65,31 @@ struct PlayerScreen: View {
                     // The surface takes the remote while nothing else has the focus.
                     Color.clear
                         .contentShape(Rectangle())
-                        .focusable(!options && !lobby && together.inviting == nil)
+                        .focusable(!osdActive && !menuOpen && !lobby && together.inviting == nil)
                         .focused($focus, equals: .surface)
                         .onMoveCommand { move($0) }
-                        .onTapGesture { togglePlay(); showControls() }
+                        .onTapGesture {
+                            if scrubMs != nil { endScrub(commit: true) } else { togglePlay() }
+                            showControls()
+                        }
+                    SwipeCatcher(enabled: !osdActive && !menuOpen && !lobby && !model.loading && model.problem == nil
+                                    && together.inviting == nil && model.durationMs > 0,
+                                 began: { beginScrub() },
+                                 changed: { scrub($0) },
+                                 ended: { swipedAt = Date() })
+                        .frame(width: 0, height: 0)
+                        .allowsHitTesting(false)
                     if model.loading || model.waiting { ProgressView().scaleEffect(1.6) }
-                    PlayerControls(model: model).opacity(controls && !options ? 1 : 0).animation(.easeInOut(duration: 0.25), value: controls)
+                    PlayerOSD(model: model, room: room, tab: tab, active: osdActive, scrubMs: scrubMs, focus: $focus,
+                              jump: { c in model.jump(to: c); sendSeek(); leaveOSD() },
+                              play: { playNext($0) },
+                              restart: { model.restart(); sendSeek(); leaveOSD() },
+                              invite: { if let room { inviteMore(room) } },
+                              leave: { close() },
+                              end: { Task { await together.end() } })
+                        .opacity(controls ? 1 : 0)
+                        .animation(.easeInOut(duration: 0.25), value: controls)
                     corner(model)
-                    if options { optionsPanel(model) }
                     if let room, lobby {
                         LobbyPanel(room: room, code: together.lobbyCode, focus: $focus,
                                    start: { Task { await together.play() } },
@@ -68,13 +104,18 @@ struct PlayerScreen: View {
             if request.together, let notice = together.notice { NoticeCapsule(text: notice) }
         }
         .animation(.easeInOut(duration: 0.25), value: together.notice)
-        .onPlayPauseCommand { togglePlay(); showControls() }
+        .onPlayPauseCommand {
+            if scrubMs != nil { endScrub(commit: true, play: true) } else { togglePlay() }
+            showControls()
+        }
         .onExitCommand {
-            if request.together && together.inviting != nil {
+            if scrubMs != nil {
+                // Back puts the marker where it was.
+                endScrub(commit: false)
+            } else if request.together && together.inviting != nil {
                 together.inviting = nil
-            } else if options {
-                options = false
-                focus = .surface
+            } else if osdActive {
+                leaveOSD()
             } else if controls && model?.playing == true && !lobby {
                 controls = false
             } else {
@@ -83,9 +124,18 @@ struct PlayerScreen: View {
         }
         .onAppear {
             guard model == nil, let api = app.api else { return }
-            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: AVPlayerEngine()) { app.tokenRefused() }
+            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: EngineChoice.make()) { app.tokenRefused() }
             model = m
             m.start()
+            nowPlaying.start(m.item, durationMs: m.durationMs, api: api, actions: .init(
+                toggle: { togglePlay(); showControls() },
+                play: { if model?.playing == false { togglePlay() } },
+                pause: { if model?.playing == true { togglePlay() } },
+                skip: { seek(by: $0); showControls() },
+                seek: { ms in
+                    model?.seek(toMs: ms)
+                    sendSeek()
+                }))
             focus = .surface
             showControls()
             if request.together { startFollowing(m) }
@@ -94,8 +144,13 @@ struct PlayerScreen: View {
             hideTask?.cancel()
             follow?.cancel()
             if together.reporterOwner == owner { together.reporter = nil }
+            nowPlaying.stop()
             model?.close()
         }
+        // tvOS runs Now Playing's clock itself; it's told again when playing starts or stops, on
+        // a jump, and when the length is known.
+        .modifier(PlaybackChanges(playing: model?.playing ?? false, seekedAt: model?.seekedAt,
+                                  durationMs: model?.durationMs ?? 0) { tellNowPlaying() })
         .onChange(of: model?.ended ?? false) { _, ended in
             guard ended else { return }
             if let room {
@@ -113,33 +168,114 @@ struct PlayerScreen: View {
                 showControls()
             }
         }
+        .onChange(of: focus) { _, now in
+            switch now {
+            case .tab(let t):
+                if tab != t { tab = t }
+            case .control:
+                tab = nil
+            case .surface:
+                if osdActive { osdActive = false; tab = nil }
+            default:
+                break
+            }
+            if osdActive { showControls() }
+        }
         .onChange(of: lobby) { _, showing in
             if showing { Task { @MainActor in focus = .lobbyStart } }
         }
         // Skip Intro takes the focus when it appears, so Select skips (as Plex).
         .onChange(of: model?.marker?.startMs) { _, now in
-            if now != nil, !options { focus = model?.marker?.kind == "credits" && model?.next != nil ? .upNext : .skip }
+            if now != nil, !menuOpen, !osdActive { focus = model?.marker?.kind == "credits" && model?.next != nil ? .upNext : .skip }
             else if focus == .skip { focus = .surface }
         }
         .onChange(of: model?.upNextDue ?? false) { _, due in
-            guard due, !upNextDismissed, !options, room?.isHost ?? true else { return }
+            guard due, !upNextDismissed, !menuOpen, room?.isHost ?? true else { return }
             focus = .upNext
             if model?.prefs?.autoPlay != false { startCountdown() }
         }
     }
 
+    /// On the picture: Left and Right skip 10 s, Up goes to the round buttons (Subtitles), Down opens the
+    /// Info card (its tab focused), as the reference player.
     private func move(_ direction: MoveCommandDirection) {
+        // A swipe sends move commands too; it scrubs instead.
+        if direction == .left || direction == .right, Date().timeIntervalSince(swipedAt) < 0.5 { return }
+        // Up or Down leaves scrubbing for the buttons or the cards, the marker back where it was.
+        if direction == .up || direction == .down, scrubMs != nil { endScrub(commit: false) }
         switch direction {
+        case .left where scrubMs != nil: nudgeScrub(-10_000)
+        case .right where scrubMs != nil: nudgeScrub(10_000)
         case .left: seek(by: -10_000)
         case .right: seek(by: 10_000)
+        case .up:
+            osdActive = true
+            Task { @MainActor in focus = .control(.subtitles) }
         case .down:
-            if let model {
-                options = true
-                focus = .option(model.subtitleTracks.isEmpty ? "q:" + (model.maxKbps.map(String.init) ?? "original")
-                                : model.subtitle.map { "s:" + $0.id } ?? "s:off")
-            }
+            osdActive = true
+            tab = .info
+            Task { @MainActor in focus = .tab(.info) }
         default: break
         }
+        showControls()
+    }
+
+    // MARK: - Scrubbing
+
+    /// A sideways swipe began: the video pauses and the marker moves with the finger, from where
+    /// the last swipe left it.
+    private func beginScrub() {
+        guard let model else { return }
+        swipedAt = Date()
+        if scrubMs == nil {
+            scrubResume = model.playing
+            if model.playing { togglePlay() }
+        }
+        scrubBase = scrubMs ?? model.positionMs
+        scrubMs = scrubBase
+        showControls()
+    }
+
+    /// The finger has moved `dx` points since the swipe began. A swipe right across the whole
+    /// surface moves about a quarter of the title (at least 2.5 minutes), as tvOS's players.
+    private func scrub(_ dx: CGFloat) {
+        guard let model, scrubMs != nil else { return }
+        swipedAt = Date()
+        let span = Double(max(model.durationMs, 600_000)) / 4
+        let moved = Int64(Double(dx) / 1920 * span)
+        scrubMs = min(max(0, scrubBase + moved), max(0, model.durationMs - 1_000))
+    }
+
+    /// Left and Right clicks while scrubbing move the marker 10 seconds.
+    private func nudgeScrub(_ deltaMs: Int64) {
+        guard let model, let at = scrubMs else { return }
+        scrubMs = min(max(0, at + deltaMs), max(0, model.durationMs - 1_000))
+        showControls()
+    }
+
+    /// Select or Play plays from the marker; Back puts it back. Either way the video plays on if
+    /// it was playing before the swipe (Play/Pause always plays).
+    private func endScrub(commit: Bool, play: Bool = false) {
+        guard let model, let at = scrubMs else { return }
+        scrubMs = nil
+        if commit {
+            model.seek(toMs: at)
+            sendSeek()
+        }
+        if (scrubResume || play) && !model.playing { togglePlay() }
+        scrubResume = false
+    }
+
+    /// Back to the picture: menus and cards close, and the remote skips and pauses again.
+    private func tellNowPlaying() {
+        guard let model else { return }
+        nowPlaying.update(positionMs: model.positionMs, durationMs: model.durationMs, playing: model.playing)
+    }
+
+    private func leaveOSD() {
+        tab = nil
+        osdActive = false
+        focus = .surface
         showControls()
     }
 
@@ -165,101 +301,11 @@ struct PlayerScreen: View {
                 }
             }
         }
-        .padding(.horizontal, 90)
-        .padding(.bottom, controls ? 220 : 80)
+        // From the screen's edges, lined up with the controls' right edge.
+        .padding(.horizontal, 100)
+        .padding(.bottom, controls ? 334 : 140)
+        .ignoresSafeArea()
         .animation(.easeInOut(duration: 0.25), value: controls)
-    }
-
-    /// Subtitles and Audio, from swiping down, as the web player's settings: a glass panel down
-    /// the right-hand side, so the picture stays in view.
-    private func optionsPanel(_ model: PlayerModel) -> some View {
-        ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 32) {
-                if let room {
-                    optionSection(L("together.title")) {
-                        PeopleList(room: room)
-                        if room.isHost {
-                            optionButton(L("together.invite"), selected: false, key: "t:invite") { inviteMore(room) }
-                        }
-                        optionButton(L("together.leave"), selected: false, key: "t:leave") { close() }
-                        if room.isHost {
-                            optionButton(L("together.end"), selected: false, key: "t:end") { Task { await together.end() } }
-                        }
-                    }
-                }
-                if !model.subtitleTracks.isEmpty {
-                    optionSection(L("player.subtitles")) {
-                        optionButton(L("player.off"), selected: model.subtitle == nil, key: "s:off") { model.chooseSubtitle(nil) }
-                        ForEach(model.subtitleTracks) { t in
-                            optionButton(trackName(t), selected: model.subtitle?.id == t.id, key: "s:" + t.id) { model.chooseSubtitle(t) }
-                        }
-                    }
-                }
-                if model.audioTracks.count > 1 {
-                    optionSection(L("player.audio")) {
-                        ForEach(model.audioTracks) { a in
-                            optionButton(audioName(a), selected: model.audioStream == a.index, key: "a:\(a.index)") { model.chooseAudio(a.index) }
-                        }
-                    }
-                }
-                optionSection(L("player.quality")) {
-                    optionButton(L("player.original"), selected: model.maxKbps == nil, key: "q:original") { model.chooseQuality(nil) }
-                    ForEach(model.qualities, id: \.self) { kbps in
-                        optionButton(qualityName(kbps), selected: model.maxKbps == kbps, key: "q:\(kbps)") { model.chooseQuality(kbps) }
-                    }
-                }
-                if model.versions.count > 1 {
-                    optionSection(L("player.version")) {
-                        ForEach(model.versions) { v in
-                            optionButton(v.label, selected: model.fileId == v.fileId, key: "v:\(v.fileId)") { model.chooseVersion(v.fileId) }
-                        }
-                    }
-                }
-                if !model.chapters.isEmpty {
-                    optionSection(L("player.chapters")) {
-                        ForEach(Array(model.chapters.enumerated()), id: \.offset) { i, c in
-                            optionButton(chapterName(c, i), selected: model.chapter == c, key: "c:\(i)") {
-                                model.jump(to: c)
-                                sendSeek()
-                                options = false
-                                focus = .surface
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(36)
-        }
-        .frame(width: 640)
-        .frame(maxHeight: .infinity)
-        .arcGlassPanel(cornerRadius: 40)
-        .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
-        .padding(.vertical, 60)
-        .padding(.trailing, 60)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-        .transition(.move(edge: .trailing).combined(with: .opacity))
-    }
-
-    private func optionSection<Content: View>(_ title: String, @ViewBuilder _ content: () -> Content) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text(title).font(.headline).foregroundStyle(ArcColor.muted)
-            content()
-        }
-        .focusSection()
-    }
-
-    private func optionButton(_ title: String, selected: Bool, key: String, _ action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                Text(title).lineLimit(1)
-                Spacer(minLength: 0)
-                Image(systemName: "checkmark").opacity(selected ? 1 : 0)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .arcGlassButton(prominent: selected)
-        .buttonBorderShape(.capsule)
-        .focused($focus, equals: .option(key))
     }
 
     private func playNext(_ next: Item) {
@@ -303,7 +349,7 @@ struct PlayerScreen: View {
 
     private func inviteMore(_ room: WatchRoom) {
         guard let id = room.itemId else { return }
-        options = false
+        tab = nil
         together.inviting = .init(itemId: id, title: room.item?.title ?? model?.item.title ?? "", roomId: room.id)
     }
 
@@ -358,46 +404,25 @@ struct PlayerScreen: View {
         }
     }
 
+    /// Shows the controls, and hides them again after a quiet spell: 4 s, or 9 s with a card up,
+    /// as the reference player. Never while a menu is open or the video is paused. If the
+    /// buttons had the focus, it goes back to the picture first.
     private func showControls() {
         controls = true
         hideTask?.cancel()
+        let quiet: Duration = tab != nil ? .seconds(9) : .seconds(4)
         hideTask = Task {
-            try? await Task.sleep(for: .seconds(5))
-            if !Task.isCancelled && model?.playing == true { controls = false }
+            try? await Task.sleep(for: quiet)
+            guard !Task.isCancelled, model?.playing == true, !menuOpen, !lobby else { return }
+            if osdActive {
+                osdActive = false
+                tab = nil
+                focus = .surface
+            }
+            controls = false
         }
     }
 
-    private func chapterName(_ c: Chapter, _ index: Int) -> String {
-        let s = Int(c.startMs / 1000)
-        let time = s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)
-        let name = (c.title?.isEmpty == false ? c.title : nil) ?? L("player.chapter", index + 1)
-        return name + " · " + time
-    }
-
-    private func trackName(_ t: SubtitleTrack) -> String {
-        var parts = [languageName(t.language) ?? t.title ?? L("player.unknown_language")]
-        if let title = t.title, !title.isEmpty, parts.first != title { parts.append(title) }
-        if t.forced { parts.append(L("player.forced")) }
-        if t.hearingImpaired { parts.append(L("player.sdh")) }
-        return parts.joined(separator: " · ")
-    }
-
-    private func audioName(_ a: AudioTrack) -> String {
-        var parts = [languageName(a.language) ?? a.title ?? L("player.unknown_language")]
-        if !a.codec.isEmpty { parts.append(a.codec.uppercased()) }
-        switch a.channels {
-        case 0: break
-        case 1: parts.append(L("player.mono"))
-        case 2: parts.append(L("player.stereo"))
-        default: parts.append("\(a.channels - 1).1")
-        }
-        return parts.joined(separator: " · ")
-    }
-
-    private func languageName(_ code: String?) -> String? {
-        guard let code, !code.isEmpty, code != "und" else { return nil }
-        return Locale.current.localizedString(forLanguageCode: code) ?? code
-    }
 }
 
 /// The next episode near the end: its picture and name, Play Now and the countdown.
@@ -436,9 +461,11 @@ private struct SubtitleText: View {
     let style: SubtitleStyle?
     /// Lifted above the controls while they show.
     let raised: Bool
+    /// A card is up from the tab row: the line moves to the top of the screen, out of its way.
+    var cardOpen = false
 
     var body: some View {
-        let top = style?.position == "top"
+        let top = style?.position == "top" || cardOpen
         VStack {
             if !top { Spacer() }
             Text(plain)
@@ -452,7 +479,7 @@ private struct SubtitleText: View {
             if top { Spacer() }
         }
         .padding(.horizontal, 120)
-        .padding(top ? .top : .bottom, top ? 70 : (raised ? 260 : 80))
+        .padding(top ? .top : .bottom, top ? 70 : (raised ? 340 : 80))
         .animation(.easeInOut(duration: 0.25), value: raised)
         .allowsHitTesting(false)
     }
@@ -487,81 +514,8 @@ private struct EngineSurface: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {}
 }
 
-/// The title large at the bottom left, a thin timeline and the times, over a soft shade, as
-/// the Android player; Down shows the subtitle and audio panel (the hint at the right says so).
-private struct PlayerControls: View {
-    let model: PlayerModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            Spacer()
-            HStack(alignment: .bottom) {
-                VStack(alignment: .leading, spacing: 6) {
-                    if model.item.isEpisode {
-                        Text(L("card.episode_code", model.item.seasonNumber ?? 0, model.item.episodeNumber ?? 0) + " · " + (model.item.seriesTitle ?? ""))
-                            .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.8))
-                        Text(model.item.title).font(.system(size: 52, weight: .bold)).lineLimit(1)
-                    } else {
-                        Text(model.item.title).font(.system(size: 52, weight: .bold)).lineLimit(1)
-                    }
-                }
-                Spacer()
-                HStack(spacing: 14) {
-                    if !model.subtitleTracks.isEmpty { glassIcon("captions.bubble") }
-                    if model.audioTracks.count > 1 { glassIcon("speaker.wave.2") }
-                    glassIcon("slider.horizontal.3")
-                    Image(systemName: "chevron.down").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.7))
-                }
-                .accessibilityHidden(true)
-            }
-            GeometryReader { geo in
-                let fraction = model.durationMs > 0 ? min(1, Double(model.positionMs) / Double(model.durationMs)) : 0
-                ZStack(alignment: .leading) {
-                    // The picture at this point, for a moment after moving through the timeline.
-                    if let trick = model.trickplay, let at = model.seekedAt, Date().timeIntervalSince(at) < 3,
-                       let spot = trick.thumbnail(at: model.positionMs) {
-                        TrickplayThumb(sheet: spot.sheet, x: spot.x, y: spot.y, info: trick.info, chapter: model.chapter?.title)
-                            .offset(x: min(max(0, geo.size.width * fraction - 180), geo.size.width - 360), y: -150)
-                    }
-                    Capsule().fill(.white.opacity(0.25)).frame(height: 6)
-                    Capsule().fill(.white).frame(width: geo.size.width * fraction, height: 6)
-                    Circle().fill(.white).frame(width: 18, height: 18)
-                        .offset(x: geo.size.width * fraction - 9)
-                }
-                .frame(maxHeight: .infinity)
-            }
-            .frame(height: 18)
-            HStack(spacing: 14) {
-                Image(systemName: model.playing ? "pause.fill" : "play.fill")
-                Text(time(model.positionMs)).monospacedDigit()
-                Spacer()
-                Text("-" + time(max(0, model.durationMs - model.positionMs))).monospacedDigit()
-            }
-            .font(.callout)
-            .foregroundStyle(.white.opacity(0.8))
-        }
-        .padding(.horizontal, 90)
-        .padding(.bottom, 60)
-        .background(alignment: .bottom) {
-            LinearGradient(colors: [.clear, .black.opacity(0.6)], startPoint: .top, endPoint: .bottom)
-                .frame(height: 360)
-                .ignoresSafeArea()
-        }
-    }
-
-    /// A small glass circle with an icon, showing what Down opens.
-    private func glassIcon(_ name: String) -> some View {
-        Image(systemName: name).font(.callout).frame(width: 64, height: 64).arcGlassPanel(cornerRadius: 32)
-    }
-
-    private func time(_ ms: Int64) -> String {
-        let s = Int(ms / 1000)
-        return s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)
-    }
-}
-
 /// One timeline thumbnail, cut from its sheet, at 360 points wide.
-private struct TrickplayThumb: View {
+struct TrickplayThumb: View {
     @Environment(AppModel.self) private var app
     let sheet: String
     let x: Int
@@ -614,5 +568,21 @@ private struct ProblemPane: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.black.opacity(0.85))
+    }
+}
+
+/// Calls `changed` when playing starts or stops, after a jump, and when the length changes (its
+/// own modifier, so the player's body stays small enough for the compiler).
+private struct PlaybackChanges: ViewModifier {
+    let playing: Bool
+    let seekedAt: Date?
+    let durationMs: Int64
+    let changed: () -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: playing) { _, _ in changed() }
+            .onChange(of: seekedAt) { _, _ in changed() }
+            .onChange(of: durationMs) { _, _ in changed() }
     }
 }

@@ -38,8 +38,31 @@ final class PlayerModel {
     var versions: [Version] { plan?.versions ?? [] }
     var fileId: Int64 { plan?.fileId ?? 0 }
     var chapters: [Chapter] { plan?.chapters ?? [] }
+    /// How the stream arrives, for the Info card: as it is, repackaged, or converted.
+    var methodName: String? {
+        switch plan?.method {
+        case "direct": return L("player.method_direct")
+        case "remux": return L("player.method_remux")
+        case "transcode": return L("player.method_transcode")
+        default: return nil
+        }
+    }
+    /// Which engine plays it (mpv or Apple's player), for the Info card.
+    var engineName: String { engine is MPVEngine ? L("player.engine_mpv") : L("player.engine_apple") }
     /// The quality limit chosen (nil: the original), and the limits worth offering for this file.
     private(set) var maxKbps: Int?
+    /// The controls' Cast and Episodes cards: the title's cast (an episode's, else its show's),
+    /// and the episodes of its season.
+    private(set) var cast: [Credit] = []
+    private(set) var seasonEpisodes: [Item] = []
+    /// The episode before this one in its season, for the Info card's Previous button.
+    var previous: Item? {
+        guard let i = seasonEpisodes.firstIndex(where: { $0.id == item.id }), i > 0 else { return nil }
+        return seasonEpisodes[i - 1]
+    }
+    /// Playback Speed and Zoom Mode (the Playback menu), kept when the stream or engine changes.
+    private(set) var speed: Float = 1
+    private(set) var zoomed = false
     var qualities: [Int] {
         let offered = offeredQualities(sourceKbps: plan?.sourceKbps ?? 0)
         guard let limit = plan?.serverLimitKbps, limit > 0 else { return offered }
@@ -50,7 +73,9 @@ final class PlayerModel {
     /// When the viewer last moved through the timeline (the thumbnail shows for a moment after).
     private(set) var seekedAt: Date?
 
-    let engine: PlaybackEngine
+    /// mpv by default; Apple's player when this Apple TV is set to it, or after mpv couldn't play
+    /// a file (the screen shows whichever is current).
+    private(set) var engine: PlaybackEngine
     private let api: ArcAPI
     /// The version the viewer chose (nil: Arc's choice).
     private var fileChoice: Int64?
@@ -74,7 +99,7 @@ final class PlayerModel {
         self.item = item
         self.engine = engine
         self.onRefused = onRefused
-        caps = DeviceCaps.current()
+        caps = Self.caps(for: engine)
         positionMs = startMs
         engine.onEvent = { [weak self] in self?.handle($0) }
     }
@@ -128,6 +153,7 @@ final class PlayerModel {
                     throw UnexpectedAnswer()
                 }
                 guard !Task.isCancelled else { return }
+                engine.prepareDisplay(displayHint(for: p))
                 engine.load(url, headers: headers, startSeconds: Double(PlaybackClock.playerStart(p, fileMs: fileMs)) / 1000)
             } catch is CancellationError {
             } catch let error as APIError where error.status == 401 {
@@ -153,7 +179,44 @@ final class PlayerModel {
         if item.isEpisode {
             do { next = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
         }
+        await loadCastAndEpisodes()
     }
+
+    private func loadCastAndEpisodes() async {
+        func actors(_ credits: [Credit]) -> [Credit] { credits.filter { $0.role == "actor" || $0.role.isEmpty } }
+        do {
+            cast = actors(try await api.item(item.id).credits)
+            if cast.isEmpty, item.isEpisode, let show = item.parentId {
+                cast = actors(try await api.item(show).credits)
+            }
+        } catch {
+            log.debug("cast unavailable in the player: \(type(of: error))")
+        }
+        guard item.isEpisode, let show = item.parentId else { return }
+        do {
+            let seasons = try await api.seasons(seriesId: show).seasons
+            let id = item.id
+            let season = seasons.first { season in season.episodes.contains { $0.id == id } }
+            seasonEpisodes = (season?.episodes ?? []).filter(\.available)
+        } catch {
+            log.debug("episodes unavailable in the player: \(type(of: error))")
+        }
+    }
+
+    /// Playback Speed: the viewer's own choice (Watch Together sets the rate itself instead).
+    func chooseSpeed(_ speed: Float) {
+        self.speed = speed
+        engine.setRate(speed)
+    }
+
+    /// Zoom Mode: the whole picture (Normal), or the screen filled and the edges cut (Zoom).
+    func chooseZoom(_ on: Bool) {
+        zoomed = on
+        engine.setZoom(on)
+    }
+
+    /// Back to the start (the Info card's Restart).
+    func restart() { seek(toMs: 0) }
 
     /// Turns on the subtitles the profile's preferences ask for, once both are known.
     private func settleSubtitles() {
@@ -289,6 +352,13 @@ final class PlayerModel {
     private func onStreamError(_ reason: String) {
         guard let p = plan else { return }
         log.warn("the stream didn't play (\(p.method), \(reason))")
+        // mpv couldn't play it: the same position with Apple's player (and what it plays), once.
+        if engine is MPVEngine {
+            log.warn("mpv couldn't play this file; Apple's player instead")
+            switchToApple()
+            load(at: positionMs)
+            return
+        }
         if !retried && p.method != "transcode" {
             retried = true
             caps = caps.fallback(after: p.method)
@@ -359,8 +429,34 @@ final class PlayerModel {
 
     func retry() {
         retried = false
-        caps = DeviceCaps.current()
+        caps = Self.caps(for: engine)
         load(at: positionMs)
+    }
+
+    /// What the server should send for this engine.
+    private static func caps(for engine: PlaybackEngine) -> PlayerCaps {
+        engine is MPVEngine ? DeviceCaps.mpv() : DeviceCaps.apple()
+    }
+
+    private func switchToApple() {
+        engine.onEvent = nil
+        engine.stop()
+        let apple = AVPlayerEngine()
+        apple.onEvent = { [weak self] in self?.handle($0) }
+        engine = apple
+        caps = DeviceCaps.apple()
+        if speed != 1 { apple.setRate(speed) }
+        if zoomed { apple.setZoom(true) }
+        retried = false
+    }
+
+    /// What the TV should switch to for the stream being played: the file's own picture when it's
+    /// sent as it is or repackaged, plain SDR when Arc converts the video (to H.264, tone-mapped).
+    private func displayHint(for p: PlaybackPlan) -> DisplayHint? {
+        guard p.method != "transcode" else { return .sdr }
+        let file = item.files.first { $0.id == p.fileId } ?? Quality.file(of: item)
+        guard let video = file?.streams.first(where: { $0.kind == "video" }) else { return nil }
+        return DisplayHint(video)
     }
 
     func close() {

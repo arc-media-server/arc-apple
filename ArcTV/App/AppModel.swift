@@ -27,6 +27,8 @@ final class AppModel {
     /// Whether the server sees this device on its local network (the title page's Connection
     /// line), from the last sign-in status; nil until known.
     private(set) var onLocalNetwork: Bool?
+    /// A Top Shelf link waiting for Home (after the profile is chosen, on a cold start).
+    var pendingLink: Shared.Link?
 
     private let token = TokenBox()
     private let log = ArcLog.shared
@@ -47,6 +49,9 @@ final class AppModel {
         }
         api = makeAPI(url)
         token.set(Keychain.read())
+        // The Top Shelf reads both from the app group (installs from before it, too).
+        Shared.setServer(url)
+        Keychain.share()
         stage = token.get() == nil ? .signIn : .profiles
     }
 
@@ -62,6 +67,7 @@ final class AppModel {
         }
         api = candidate
         UserDefaults.standard.set(url.absoluteString, forKey: Self.serverKey)
+        Shared.setServer(url)
         log.info("connected to Arc \(health.version), API v\(health.apiVersion)")
         stage = token.get() == nil ? .signIn : .profiles
         return health
@@ -109,6 +115,7 @@ final class AppModel {
         api = nil
         forgetServerName()
         UserDefaults.standard.removeObject(forKey: Self.serverKey)
+        Shared.setServer(nil)
         stage = .server
     }
 

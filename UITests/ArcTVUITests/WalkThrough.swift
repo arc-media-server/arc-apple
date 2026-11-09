@@ -51,6 +51,15 @@ final class WalkThrough: XCTestCase {
         press(.down)
         pause(2)
         shot("08-title-page-scrolled")
+        // The first person in the cast: their page, then back.
+        remote.press(.select)
+        pause(4)
+        shot("08a-person")
+        press(.right)
+        pause(2)
+        shot("08a-person-focus-moved")
+        remote.press(.menu)
+        pause(2)
         // The foot of the page: Cast, then the About, Details, Crew and Playback cards.
         press(.down, 4)
         pause(2)
@@ -68,29 +77,51 @@ final class WalkThrough: XCTestCase {
         remote.press(.playPause)
         pause(2)
         shot("10-player-paused")
-        // Skip Intro has the focus (the stand-in marks the clip's start as an intro); then
-        // down opens Subtitles and Audio, and the stand-in's track turns on.
+        // Skip Intro has the focus (the stand-in marks the clip's start as an intro).
         remote.press(.select)
         pause(2)
         // Right moves 10 seconds on, with the timeline thumbnail (the stand-in has a sheet).
         press(.right)
         pause(1)
         shot("10a-player-thumbnail")
+        // Down opens the Info card under the tab row; Back returns to the picture.
         press(.down)
         pause(2)
-        shot("10b-player-options")
+        shot("10b-player-info")
+        remote.press(.menu)
+        pause(1)
+        // Up goes to the round buttons; Select opens Subtitles (tvOS's own menu), Down and Select
+        // turn the stand-in's track on, and the menu closes back to its button.
+        press(.up)
+        pause(1)
+        remote.press(.select)
+        pause(2)
+        shot("10c-player-subtitles-menu")
         press(.down)
         remote.press(.select)
         pause(3)
         shot("10c-player-subtitles")
-        // Further down the panel: Quality, Version and Chapters.
-        press(.down, 4)
+        // Along to Playback (the first): Zoom Mode, Playback Speed, Quality, Version.
+        press(.left, 2)
+        remote.press(.select)
         pause(1)
-        shot("10d-player-quality")
+        shot("10d-player-playback")
+        // Then the Cast card: Back closes the menu, Back leaves the controls, Down opens Info, and
+        // along the tabs to Cast.
         remote.press(.menu)
         pause(1)
-        // Back closes the player, Back again leaves the title page for Home. (A third would
-        // leave the app: Back on Home goes to the Apple TV's home screen, as tvOS apps do.)
+        remote.press(.menu)
+        pause(1)
+        press(.down)
+        pause(1)
+        let castTab = app.buttons["Cast"]
+        for _ in 0..<4 where !castTab.hasFocus { press(.right) }
+        pause(2)
+        shot("10e-player-cast")
+        // Back leaves the controls, Back closes the (paused) player, and Back leaves the title
+        // page for Home. (One more would open the sidebar.)
+        remote.press(.menu)
+        pause(1)
         remote.press(.menu)
         pause(1)
         remote.press(.menu)
@@ -147,6 +178,20 @@ final class WalkThrough: XCTestCase {
             shot(String(format: "16-tab-%02d", i))
         }
 
+        // Settings (the last place), then About inside it; Back twice returns to the sidebar.
+        remote.press(.select)
+        pause(3)
+        press(.right)
+        let about = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'About'")).firstMatch
+        for _ in 0..<12 where !about.hasFocus { press(.down) }
+        remote.press(.select)
+        pause(3)
+        shot("16b-about")
+        remote.press(.menu)
+        pause(1)
+        remote.press(.menu)
+        pause(2)
+
         // A library opens on Recommended: a hero and rows, the pill bar above. Then up to the pill
         // bar and Browse: sort and filters, the grid, and holding Select on a title.
         // (The sidebar only highlights as the focus moves; Select opens the place and shuts it.)
@@ -181,6 +226,19 @@ final class WalkThrough: XCTestCase {
         shot("19-title-actions")
         remote.press(.menu)
         pause(1)
+        // The library's Collections, laid out as its grid, and inside one: then back.
+        let collectionsPill = app.buttons["Collections"]
+        for _ in 0..<6 where !collectionsPill.hasFocus && !browse.hasFocus { press(.up) }
+        for _ in 0..<3 where !collectionsPill.hasFocus { press(.right) }
+        remote.press(.select)
+        pause(3)
+        shot("19a-library-collections")
+        press(.down)
+        remote.press(.select)
+        pause(4)
+        shot("19b-collection")
+        remote.press(.menu)
+        pause(2)
 
         // Search, at the top of the sidebar (Back from the library opens it): type a few letters;
         // results follow the typing.

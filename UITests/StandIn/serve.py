@@ -264,6 +264,23 @@ class Handler(http.server.BaseHTTPRequestHandler):
             a = next((v for kk, v in answers.items() if kk.startswith("GET items?")), None)
         if a is None and method == "GET" and path == "search":
             a = {"status": 200, "body": {"movies": [], "shows": [], "episodes": [], "collections": [], "people": []}}
+        # Someone with no page in the fixtures (the made-up cast): the titles that list them,
+        # else a handful of the library's, so the person page has rows to show.
+        if a is None and method == "GET" and parts[0] == "people" and len(parts) == 2:
+            pid = parts[1]
+            mine = []
+            for kk, v in answers.items():
+                if kk.startswith("GET items/") and kk.count("/") == 1 and v["status"] == 200:
+                    for c in v["body"].get("credits") or []:
+                        if str(c.get("person_id")) == pid:
+                            mine.append({"item": v["body"], "character": c.get("character"), "roles": [c.get("role") or "actor"]})
+                            break
+            if not mine:
+                listing = next((v["body"].get("items", []) for kk, v in answers.items() if kk.startswith("GET items?") and "parent_id=" not in kk), [])
+                mine = [{"item": it, "character": "Role", "roles": ["actor"]} for it in listing[:8]]
+            name = globals()["people"].get(pid) or "Ada Stone"
+            a = {"status": 200, "body": {"person": {"id": int(pid) if pid.isdigit() else 0, "name": name, "known_for": "Acting",
+                                                    "count": len(mine), "image": f"/api/people/{pid}/image"}, "credits": mine}}
         if a is None and method == "GET" and parts[-1] == "next":
             return self.send(204, b"")
         if a is None:

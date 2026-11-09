@@ -55,12 +55,19 @@ struct PageScaffold<Content: View>: View {
     var loading = false
     var problem: String?
     var empty: String?
+    /// Controls at the right of the title (the Watchlist's filter and sort).
+    var accessory: AnyView?
     @ViewBuilder let content: () -> Content
 
     var body: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 40) {
-                Text(title).font(.title2.weight(.semibold))
+                HStack(alignment: .center, spacing: 24) {
+                    Text(title).font(.title2.weight(.semibold))
+                    Spacer(minLength: 0)
+                    if let accessory { accessory }
+                }
+                .focusSection()
                 if loading {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 400)
                 } else if let problem {
