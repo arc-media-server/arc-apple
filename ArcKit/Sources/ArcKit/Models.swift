@@ -109,6 +109,9 @@ public struct MediaStream: Codable, Sendable, Hashable {
     public var language: String?
     public var colorTransfer: String?
     @Default<Defaults.False> public var dolbyVision: Bool
+    public var dolbyVisionProfile: Int?
+    /// Frames a second (23.976, 25, 50…), for the TV's frame-rate matching.
+    public var frameRate: Double?
     @Default<Defaults.False> public var hdr10Plus: Bool
     @Default<Defaults.False> public var isDefault: Bool
 
@@ -279,6 +282,9 @@ public struct Prefs: Codable, Sendable {
 public struct CollectionRef: Codable, Sendable, Hashable, Identifiable {
     public let id: String
     public let title: String
+    /// On a collection's own page (collections/{id}).
+    public var overview: String?
+    public var images: Images?
 }
 
 public struct CollectionPage: Codable, Sendable {
@@ -308,9 +314,12 @@ public struct PlayerCaps: Codable, Sendable, Hashable {
     public var hdrFormats: [String]?
     /// Dolby Vision profiles the decoder plays; nil when unknown.
     public var dolbyVisionProfiles: [Int]?
+    /// The deepest colour (bits) the decoder plays; nil for the server's default (8-bit H.264).
+    public var maxBitDepth: Int?
 
     public init(containers: [String], video: [String], audio: [String], maxHeight: Int, audioPassthrough: [String] = [],
-                hdrFormats: [String]? = nil, dolbyVisionProfiles: [Int]? = nil) {
+                hdrFormats: [String]? = nil, dolbyVisionProfiles: [Int]? = nil, maxBitDepth: Int? = nil) {
+        self.maxBitDepth = maxBitDepth
         self.containers = containers
         self.video = video
         self.audio = audio

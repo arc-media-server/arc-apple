@@ -9,6 +9,11 @@ options:
 packages:
   ArcKit:
     path: ArcKit
+  # mpv and FFmpeg, patched for Apple TV (Dolby Vision, HDR10+, frame pacing), as XCFrameworks.
+  # GPL-3.0; pinned by commit (docs/plans/arc-engine.md).
+  MPVKit:
+    url: https://github.com/edde746/mpv-build
+    revision: 6dbda06021b128b7adc30161bf7870977e575135
 targets:
   ArcTV:
     type: application
@@ -17,9 +22,26 @@ targets:
       - path: ArcTV
     dependencies:
       - package: ArcKit
+      - package: MPVKit
+        product: MPVKit
+      # The Top Shelf: Continue Watching on the Home Screen.
+      - target: ArcTopShelf
+    # Shared with the Top Shelf: the server's address (app group) and the token (Keychain).
+    entitlements:
+      path: ArcTV/ArcTV.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.org.arcmediaserver.apple
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)org.arcmediaserver.apple.shared
     info:
       path: ArcTV/Info.plist
       properties:
+        # The Top Shelf's links: arcmediaserver://open/<id> and arcmediaserver://play/<id>.
+        CFBundleURLTypes:
+          - CFBundleURLName: org.arcmediaserver.apple
+            CFBundleURLSchemes:
+              - arcmediaserver
         CFBundleDisplayName: Arc
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
@@ -38,6 +60,42 @@ targets:
         SWIFT_VERSION: "5.0"
         TARGETED_DEVICE_FAMILY: "3"
         ENABLE_USER_SCRIPT_SANDBOXING: YES
+  # The Top Shelf extension: the profile's most recent Continue Watching titles.
+  ArcTopShelf:
+    type: tv-app-extension
+    platform: tvOS
+    sources:
+      - path: ArcTopShelf
+      - path: ArcTV/Shared
+    dependencies:
+      - package: ArcKit
+      - sdk: TVServices.framework
+    entitlements:
+      path: ArcTopShelf/ArcTopShelf.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.org.arcmediaserver.apple
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)org.arcmediaserver.apple.shared
+    info:
+      path: ArcTopShelf/Info.plist
+      properties:
+        CFBundleDisplayName: Arc
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.tv-top-shelf
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ContentProvider
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.arcmediaserver.apple.tv.topshelf
+        PRODUCT_NAME: ArcTopShelf
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "3"
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+        APPLICATION_EXTENSION_API_ONLY: YES
   # Walks the app in the simulator against the stand-in Arc and keeps screenshots (UITests/).
   ArcTVUITests:
     type: bundle.ui-testing

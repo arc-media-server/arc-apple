@@ -128,3 +128,21 @@ extension View {
         labelStyle(.iconOnly).arcGlassButton().buttonBorderShape(.circle)
     }
 }
+
+/// Liquid Glass in a shape, for custom button styles' backgrounds (the player's round buttons,
+/// tabs and tiles, the season tabs); the closest material on older tvOS.
+struct GlassFill<S: Shape>: View {
+    let shape: S
+
+    var body: some View {
+        #if compiler(>=6.2)
+        if #available(tvOS 26.0, *) {
+            Color.clear.glassEffect(.regular, in: shape)
+        } else {
+            shape.fill(.ultraThinMaterial)
+        }
+        #else
+        shape.fill(.ultraThinMaterial)
+        #endif
+    }
+}

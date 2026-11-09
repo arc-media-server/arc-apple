@@ -628,7 +628,7 @@ struct SeasonTabStyle: ButtonStyle {
                 if isFocused {
                     Capsule().fill(.white)
                 } else if chosen {
-                    Capsule().fill(.ultraThinMaterial).overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1.5))
+                    GlassFill(shape: Capsule()).overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1.5))
                 }
             }
             .scaleEffect(isFocused ? 1.06 : configuration.isPressed ? 0.97 : 1)

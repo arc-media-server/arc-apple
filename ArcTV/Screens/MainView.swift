@@ -16,6 +16,8 @@ enum Route: Hashable {
 @Observable
 final class Browse {
     var playing: PlayRequest?
+    /// A title's page to open on Home (the Top Shelf's Select); Home's stack takes it.
+    var linkedRoute: Route?
     private(set) var changes = 0
     /// Watch Together: Home's rooms and the room this Apple TV is in.
     let together = WatchTogetherModel()
@@ -81,7 +83,10 @@ extension EnvironmentValues {
 struct BrowseStack<Root: View>: View {
     @Environment(\.openSidebar) private var openSidebar
     @Environment(\.reportDepth) private var reportDepth
+    @Environment(Browse.self) private var browse
     @State private var path = NavigationPath()
+    /// Home's stack opens the pages the Top Shelf asks for.
+    var takesLinks = false
     @ViewBuilder let root: () -> Root
 
     var body: some View {
@@ -94,6 +99,15 @@ struct BrowseStack<Root: View>: View {
         }
         .environment(\.openRoute, OpenRoute { path.append($0) })
         .onChange(of: path.count) { _, depth in reportDepth(depth) }
+        .onAppear { takeLink() }
+        .onChange(of: browse.linkedRoute) { _, _ in takeLink() }
+    }
+
+    private func takeLink() {
+        guard takesLinks, let route = browse.linkedRoute else { return }
+        browse.linkedRoute = nil
+        path = NavigationPath()
+        path.append(route)
     }
 }
 
@@ -242,12 +256,42 @@ struct MainView: View {
             }
             await loadTabs()
         }
+        .task(id: app.pendingLink) { await followLink() }
+    }
+
+    /// A Top Shelf link: Select opens the title's page on Home, Play plays it.
+    private func followLink() async {
+        guard let link = app.pendingLink, let api = app.api else { return }
+        app.pendingLink = nil
+        let id: String
+        switch link {
+        case .open(let i), .play(let i): id = i
+        }
+        let item: Item
+        do {
+            item = try await api.item(id)
+        } catch {
+            ArcLogApp.warn("a Top Shelf title couldn't be opened (\(type(of: error)))")
+            return
+        }
+        switch link {
+        case .open:
+            ArcLogApp.info("opening a title from the Top Shelf")
+            browse.playing = nil
+            if tab == "home" { depths["home"] = 0 }
+            tab = "home"
+            opened.insert("home")
+            browse.linkedRoute = .item(item)
+        case .play:
+            ArcLogApp.info("playing a title from the Top Shelf")
+            browse.play(PlayRequest(item: item, startMs: item.resumeMs))
+        }
     }
 
     @ViewBuilder private func page(for place: Place) -> some View {
         switch place.id {
         case "search": BrowseStack { SearchView() }
-        case "home": BrowseStack { HomeView() }
+        case "home": BrowseStack(takesLinks: true) { HomeView() }
         case "watchlist": BrowseStack { WatchlistView() }
         case "playlists": BrowseStack { PlaylistsView() }
         case "settings": BrowseStack { SettingsView() }
