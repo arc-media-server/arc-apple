@@ -7,7 +7,7 @@ reference screenshots. When it's shut, only the icons show down the left, straig
 the profile's picture at the top and a grey disc behind the place that's showing. Moving left onto
 it (or Back from a place's first page) opens it. The icons stay exactly where they are while a tall
 glass panel comes in behind them and the names fade in beside them, with the profile's name at the
-top. Selecting the profile switches profile. The page behind dims. Moving up and down only highlights a place, and Select opens it and shuts the sidebar.
+top. Selecting the profile switches profile. (Since 7 November the page no longer dims: see 2026-11-07-sidebar-steps-aside.md.) Moving up and down only highlights a place, and Select opens it and shuts the sidebar.
 Coming into the sidebar always starts on the place that's showing. Back in the sidebar leaves the
 app, as on tvOS's own sidebar.
 
