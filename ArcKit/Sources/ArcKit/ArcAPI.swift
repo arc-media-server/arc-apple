@@ -108,6 +108,10 @@ public final class ArcAPI: Sendable {
     }
 
     public func item(_ id: String) async throws -> Item { try await get("items/\(enc(id))", route: "items/{id}") }
+    /// The four colours of a title's backdrop, worked out and kept by the server.
+    public func palette(_ id: String) async throws -> ArtworkPalette {
+        try await get("items/\(enc(id))/artwork/palette", route: "items/{id}/artwork/palette")
+    }
 
     public func seasons(seriesId: String) async throws -> SeasonsResponse {
         try await get("series/\(enc(seriesId))/seasons", route: "series/{id}/seasons")

@@ -32,7 +32,7 @@ struct HeroRows<Header: View>: View {
                     if let top { top($focused) }
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 16) {
-                            Text(row.title).font(.headline).padding(.horizontal, 80)
+                            Text(row.title).font(.title3.weight(.semibold)).padding(.horizontal, 80)
                             ScrollView(.horizontal) {
                                 LazyHStack(alignment: .top, spacing: 36) {
                                     ForEach(row.cards) { card in

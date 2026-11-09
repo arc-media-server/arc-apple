@@ -175,6 +175,19 @@ public struct MediaCard: Sendable, Hashable, Identifiable {
         }
     }
 
+    /// Whether the wide picture is the show's own (with its logo on it) rather than an episode's.
+    public var showArt = false
+
+    /// The same card with the show's own picture in place of the episode's still, so a row of
+    /// shows (Continue Watching) is easy to tell apart; films are unchanged.
+    public func withShowArt() -> MediaCard {
+        guard item.isEpisode, let bg = item.images?.seriesBackdrop else { return self }
+        var card = self
+        card.thumb = bg
+        card.showArt = true
+        return card
+    }
+
     /// The picture a card of `style` shows.
     public func art(_ style: CardStyle, seasonPosters: Bool) -> String? {
         switch style {

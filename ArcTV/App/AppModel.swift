@@ -24,6 +24,9 @@ final class AppModel {
     private(set) var profile: Profile?
     /// The server's name (Arc's Settings → Access & devices), learnt once a profile is chosen.
     private(set) var serverName: String?
+    /// Whether the server sees this device on its local network (the title page's Connection
+    /// line), from the last sign-in status; nil until known.
+    private(set) var onLocalNetwork: Bool?
 
     private let token = TokenBox()
     private let log = ArcLog.shared
@@ -110,6 +113,7 @@ final class AppModel {
     }
 
     private func learnServerName() async {
+        if let local = try? await api?.authStatus().local { onLocalNetwork = local }
         guard let name = try? await api?.identity().name, !name.isEmpty else { return }
         serverName = name
         UserDefaults.standard.set(name, forKey: Self.serverNameKey)

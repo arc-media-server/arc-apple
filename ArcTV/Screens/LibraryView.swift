@@ -101,9 +101,6 @@ struct LibraryView: View {
             showTabs
             Spacer()
             if show == .titles {
-                if !loading && problem == nil {
-                    Text(L(query.filtered ? "library.count_filtered" : "library.count", total)).font(.callout).foregroundStyle(ArcColor.muted)
-                }
                 sortMenu.arcGlassButton().buttonBorderShape(.capsule)
                 filterMenu.arcGlassButton().buttonBorderShape(.capsule)
             }
@@ -150,6 +147,16 @@ struct LibraryView: View {
         }
     }
 
+    private var filterName: String {
+        let chosen = [query.unwatchedOnly ? L("library.unwatched_short") : nil, query.genre,
+                      query.decade.map { L("library.decade_value", $0) }, query.resolution.map { resolutionName($0) }].compactMap { $0 }
+        switch chosen.count {
+        case 0: return L("library.all")
+        case 1: return chosen[0]
+        default: return L("library.filtered")
+        }
+    }
+
     private var filterMenu: some View {
         Menu {
             Toggle(L("library.unwatched"), isOn: $query.unwatchedOnly)
@@ -167,7 +174,8 @@ struct LibraryView: View {
                 }
             }
         } label: {
-            Label(query.filtered ? L("library.filtered") : L("library.filter"), systemImage: query.filtered ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+            // The button names what's shown: All, Unwatched, a genre, or Filtered for several.
+            Label(filterName, systemImage: query.filtered ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
         }
     }
 

@@ -15,7 +15,7 @@ struct WatchTogetherRow: View {
     var body: some View {
         let together = browse.together
         VStack(alignment: .leading, spacing: 16) {
-            Text(L("together.title")).font(.headline).padding(.horizontal, 80)
+            Text(L("together.title")).font(.title3.weight(.semibold)).padding(.horizontal, 80)
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: 36) {
                     ForEach(Array(together.rooms.enumerated()), id: \.element.id) { index, room in
