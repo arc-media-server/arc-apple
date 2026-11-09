@@ -44,5 +44,31 @@ final class HomeRowsTests: XCTestCase {
         XCTAssertEqual(card.art(.poster, seasonPosters: true), "/s1")
         XCTAssertEqual(card.art(.thumb, seasonPosters: false), "/still")
         XCTAssertEqual(card.art(.backdrop, seasonPosters: false), "/bg")
+        // Continue Watching shows the show's own picture.
+        XCTAssertEqual(card.withShowArt().art(.thumb, seasonPosters: false), "/bg")
+        XCTAssertTrue(card.withShowArt().showArt)
+        let film = MediaCard(item: Item(id: "m1", kind: "movie", title: "Heat", images: Images(primary: "/p", backdrop: "/b")))
+        XCTAssertEqual(film.withShowArt().art(.thumb, seasonPosters: false), "/b")
+    }
+
+    func testAnEpisodeNotOutYetSaysWhenItReleases() throws {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        let today = try XCTUnwrap(cal.date(from: DateComponents(year: 2026, month: 11, day: 7)))
+        var ep = Item(id: "e2", kind: "episode", title: "Young Blood")
+        ep.releaseDate = "2026-11-08"
+        ep.available = false
+        XCTAssertEqual(ep.upcomingRelease(asOf: today, calendar: cal), cal.date(from: DateComponents(year: 2026, month: 11, day: 8)))
+        ep.releaseDate = "2026-11-07" // out today
+        XCTAssertNil(ep.upcomingRelease(asOf: today, calendar: cal))
+        ep.releaseDate = "2026-11-08"
+        ep.available = true // already on the server
+        XCTAssertNil(ep.upcomingRelease(asOf: today, calendar: cal))
+        // Within the week, the weekday; further out, the date.
+        let en = Locale(identifier: "en_GB")
+        let thursday = try XCTUnwrap(cal.date(from: DateComponents(year: 2026, month: 11, day: 12)))
+        XCTAssertEqual(Item.releaseDay(thursday, asOf: today, calendar: cal, locale: en), "Thursday")
+        let later = try XCTUnwrap(cal.date(from: DateComponents(year: 2026, month: 11, day: 19)))
+        XCTAssertEqual(Item.releaseDay(later, asOf: today, calendar: cal, locale: en), "19 Nov")
     }
 }

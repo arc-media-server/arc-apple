@@ -37,6 +37,8 @@ public struct Profile: Codable, Sendable, Hashable, Identifiable {
 
 public struct AuthStatus: Codable, Sendable {
     @Default<Defaults.False> public var signedIn: Bool
+    /// Whether the server sees this device on its local network.
+    public var local: Bool?
     public var profile: Profile?
     @Default<Defaults.List<Profile>> public var profiles: [Profile]
 }
@@ -89,6 +91,8 @@ public struct MediaFile: Codable, Sendable, Hashable, Identifiable {
     public var container: String?
     public var size: Int64?
     public var bitrate: Int64?
+    /// Where the file is on the server (the title page's Playback card shows its name).
+    public var path: String?
     /// The file's video, audio and subtitle tracks as ffprobe read them (a title's page).
     @Default<Defaults.List<MediaStream>> public var streams: [MediaStream]
 }
@@ -176,6 +180,29 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     public var resumeMs: Int64 { userData.map { $0.played ? 0 : $0.positionMs } ?? 0 }
 
     public var watched: Bool { isSeries ? unwatchedCount == 0 : userData?.played == true }
+
+    /// How an upcoming release reads on its card: the weekday within the next six days
+    /// ("Thursday"), else the day and month ("19 Nov"), in the viewer's language.
+    public static func releaseDay(_ day: Date, asOf today: Date = Date(), calendar: Calendar = .current,
+                                  locale: Locale = .current) -> String {
+        let days = calendar.dateComponents([.day], from: calendar.startOfDay(for: today), to: calendar.startOfDay(for: day)).day ?? 99
+        let f = DateFormatter()
+        f.calendar = calendar
+        f.timeZone = calendar.timeZone
+        f.locale = locale
+        f.setLocalizedDateFormatFromTemplate(days >= 1 && days <= 6 ? "EEEE" : "d MMM")
+        return f.string(from: day)
+    }
+
+    /// The day an episode not yet on the server airs, when that's after `today` ("Releases
+    /// 8 Nov" on its card); nil once it's out or when Arc has its file.
+    public func upcomingRelease(asOf today: Date = Date(), calendar: Calendar = .current) -> Date? {
+        guard !available, let iso = releaseDate else { return nil }
+        let parts = iso.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3,
+              let day = calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2])) else { return nil }
+        return day > calendar.startOfDay(for: today) ? day : nil
+    }
 }
 
 public struct ItemPage: Codable, Sendable {

@@ -4,10 +4,14 @@ import SwiftUI
 /// Arc's colours: the web app's dark tokens (web/src/index.css), the same as the Android app's
 /// Theme.kt. Arc is dark only. The brand accent is defined here and nowhere else.
 enum ArcColor {
-    static let background = Color(hex: 0x0B0B10)
-    static let surface = Color(hex: 0x15151C)
-    static let surface2 = Color(hex: 0x1F1F28)
-    static let surface3 = Color(hex: 0x2A2A35)
+    /// A soft dark grey, as the reference design's dark look, rather than near-black.
+    static let background = Color(hex: 0x1C1D21)
+    /// The page's own blend when a title has no artwork colours, and on pages without artwork:
+    /// a slightly cooler top left and warmer bottom right around the background grey.
+    static let wash: [Color] = [Color(hex: 0x25282D), Color(hex: 0x222429), Color(hex: 0x1B1B1D), Color(hex: 0x1E1F1E)]
+    static let surface = Color(hex: 0x26272D)
+    static let surface2 = Color(hex: 0x2F3038)
+    static let surface3 = Color(hex: 0x393A43)
     static let foreground = Color(hex: 0xF5F5F7)
     static let muted = Color(hex: 0xA1A1AD)
     static let subtle = Color(hex: 0x6B6B78)
@@ -53,6 +57,28 @@ enum ArcLogApp {
     static func info(_ message: String) { ArcLog.shared.info(message) }
     static func warn(_ message: String) { ArcLog.shared.warn(message) }
     static func debug(_ message: String) { ArcLog.shared.debug(message) }
+}
+
+/// The page's background: four colours blended corner to corner (top left, top right, bottom
+/// left, bottom right). A title's page passes its artwork's colours from the server; without
+/// them, or anywhere else, it's Arc's soft grey blend. New colours fade in.
+struct PageWash: View {
+    var colors: [Color]? = nil
+
+    var body: some View {
+        let c = (colors?.count == 4 ? colors : nil) ?? ArcColor.wash
+        MeshGradient(width: 2, height: 2,
+                     points: [[0, 0], [1, 0], [0, 1], [1, 1]],
+                     colors: c)
+            .ignoresSafeArea()
+            .animation(.easeInOut(duration: 0.8), value: c)
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+}
+
+extension Color {
+    init(_ rgb: RGB) { self.init(red: rgb.r, green: rgb.g, blue: rgb.b) }
 }
 
 // Apple's Liquid Glass (tvOS 26): controls and panels that float over the artwork are glass;

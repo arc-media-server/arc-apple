@@ -47,11 +47,12 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(4)
         shot("07-title-page")
-        press(.down, 2)
+        // One Down: the cast comes up under the hero's buttons, which stay in view.
+        press(.down)
         pause(2)
         shot("08-title-page-scrolled")
         // The foot of the page: Cast, then the About, Details, Crew and Playback cards.
-        press(.down, 3)
+        press(.down, 4)
         pause(2)
         shot("08b-title-page-cards")
         // Up returns to the button row under the focus, then left to Play (one more left would
@@ -96,13 +97,39 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("11-back-from-player")
 
-        // A show: down the rows until a show's page has seasons.
-        press(.down)
-        pause(2)
+        // A show: down the rows until a show's card (Recently Added in TV) has the focus.
+        // Dexter: Resurrection, the show in the owner's photos of the reference, for comparison.
+        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mushoku' OR label BEGINSWITH 'Dexter'"))
+        let dexter = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Dexter'"))
+        for _ in 0..<6 {
+            press(.down)
+            pause(1.5)
+            if shows.allElementsBoundByIndex.contains(where: { $0.hasFocus }) { break }
+        }
+        for _ in 0..<8 where !dexter.allElementsBoundByIndex.contains(where: { $0.hasFocus }) {
+            press(.right)
+            pause(1)
+        }
         shot("12-home-third-row")
         remote.press(.select)
         pause(4)
         shot("13-third-row-title")
+        // Down from Play: the episode browser comes up on the episode to watch next (the logo
+        // small at the top, the season tabs, the episodes); along it, the focused episode shows
+        // its overview; Up is the season tabs, and along them the episodes follow.
+        press(.down)
+        pause(2)
+        shot("13a-episodes")
+        press(.right)
+        pause(1)
+        shot("13b-episode-focused")
+        press(.up)
+        pause(1)
+        shot("13c-season-tabs")
+        // The show opens on Season 2 (its episode to watch next); Left is Season 1.
+        press(.left)
+        pause(2)
+        shot("13d-next-season")
         press(.down, 6)
         pause(3)
         shot("14-title-page-rows")
@@ -177,24 +204,26 @@ final class WalkThrough: XCTestCase {
 
         // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
         // back to Home, up to the Watch Together row, the host's lobby, then the guest's.
-        // Back once from Search's first page opens the sidebar on Search (a second Back would
-        // leave the app); Home is the next place down.
-        remote.press(.menu)
-        pause(1)
+        // Search has the whole screen; Left from the keyboard's first key opens the sidebar on
+        // Search (Back belongs to the keyboard there). Home is the next place down.
         let home = app.buttons["Home"]
+        let searchPlace = app.buttons["Search"]
+        for _ in 0..<30 where !(searchPlace.hasFocus || home.hasFocus) { remote.press(.left) }
+        pause(1)
         for _ in 0..<4 where !home.hasFocus { press(.down) }
         remote.press(.select)
         pause(2)
-        // Home keeps its place from earlier steps; choosing it again (Left reopens the sidebar on
-        // it) starts it afresh at the top, on the Watch Together row.
-        press(.left)
-        for _ in 0..<4 where !home.hasFocus { press(.down) }
-        remote.press(.select)
-        pause(5)
-        // Choosing Home again starts it afresh at the top, on the Watch Together row (from the
-        // sidebar's landing stop, Down goes on into the page if the row hasn't the focus yet).
+        // Home still has the title opened earlier, and the sidebar steps aside on opened pages:
+        // Back closes them until Home's first page (where the sidebar's buttons work again).
+        for _ in 0..<4 where !home.isEnabled {
+            remote.press(.menu)
+            pause(1.5)
+        }
+        // Home keeps its place from earlier steps: up its rows to the first, Watch Together.
         let room = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together'")).firstMatch
-        if !(room.exists && room.hasFocus) { press(.down) }
+        if !(room.exists && room.hasFocus) { press(.right) }
+        for _ in 0..<10 where !(room.exists && room.hasFocus) { press(.up) }
+        pause(2)
         shot("22-home-watch-together")
         remote.press(.select)
         pause(5)

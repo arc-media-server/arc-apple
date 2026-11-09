@@ -4,9 +4,10 @@ import SwiftUI
 extension CardStyle {
     var size: CGSize {
         switch self {
-        case .poster: return CGSize(width: 200, height: 300)
-        case .thumb: return CGSize(width: 384, height: 216)
-        case .backdrop: return CGSize(width: 384, height: 288)
+        // Sized for a sofa: about four wide cards or six posters across the screen.
+        case .poster: return CGSize(width: 236, height: 354)
+        case .thumb: return CGSize(width: 512, height: 288)
+        case .backdrop: return CGSize(width: 512, height: 384)
         }
     }
 }
@@ -20,6 +21,12 @@ extension MediaCard {
         guard progress != nil else { return nil }
         return max(1, Int((item.durationMs - item.resumeMs) / 60_000))
     }
+}
+
+/// A length as the cards and title pages write it: "25m", "1h", "2h 25m".
+func runtimeText(_ minutes: Int) -> String {
+    if minutes < 60 { return L("card.minutes_short", minutes) }
+    return minutes % 60 == 0 ? L("details.hours", minutes / 60) : L("details.hours_minutes", minutes / 60, minutes % 60)
 }
 
 /// A title on a row or grid, in its row's style: rounded artwork that lifts on focus (tvOS's
@@ -45,6 +52,13 @@ struct MediaCardView: View {
                             .frame(width: style.size.width * 0.6, height: style.size.height * 0.3)
                             .padding(20)
                     }
+                    // The show's own picture carries its logo, as Continue Watching's do.
+                    if style == .thumb, card.showArt, card.progress == nil, let logo = card.logo {
+                        ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
+                            .frame(width: style.size.width * 0.55, height: style.size.height * 0.3)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+                            .padding(.horizontal, 20)
+                    }
                     if let progress = card.progress {
                         if style == .poster {
                             ProgressBar(fraction: progress).padding(12)
@@ -59,6 +73,14 @@ struct MediaCardView: View {
                             ResumeStrip(fraction: progress, minutesLeft: card.minutesLeft)
                         }
                     }
+                    // A show's episodes still to watch, in a tab at the poster's top right.
+                    if let left = card.item.unwatchedCount, left > 0, card.item.isSeries, style == .poster {
+                        Text(String(left))
+                            .font(.caption.weight(.bold)).monospacedDigit()
+                            .padding(.horizontal, 12).padding(.vertical, 6)
+                            .background(UnevenRoundedRectangle(bottomLeadingRadius: 12, style: .continuous).fill(.black.opacity(0.8)))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    }
                     if card.item.watched {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title3)
@@ -72,15 +94,21 @@ struct MediaCardView: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
+            // VoiceOver (and the walk-through) know a card by its title.
+            .accessibilityLabel(Text(name))
             .contextMenu { TitleActions(item: card.item) }
             // Names centred under the art.
             VStack(alignment: .center, spacing: 2) {
-                Text(card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title)
-                    .font(.caption.weight(.semibold)).lineLimit(1)
-                if let sub = subtitle { Text(sub).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(1) }
+                Text(name)
+                    .font(.callout.weight(.semibold)).lineLimit(1)
+                if let sub = subtitle { Text(sub).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
             .frame(width: style.size.width, alignment: .center)
         }
+    }
+
+    private var name: String {
+        card.item.isEpisode && style != .poster ? card.item.seriesTitle ?? card.item.title : card.item.title
     }
 
     private var subtitle: String? {
@@ -93,7 +121,8 @@ struct MediaCardView: View {
         } else if let year = item.year {
             parts.append(String(year))
         }
-        if style == .poster, let left = card.minutesLeft { parts.append(L("card.minutes_left", left)) }
+        // Posters say how long: a film's length, or a show's episodes' ("2011 · 25m").
+        if style == .poster, !item.isEpisode, let m = item.runtimeMin, m > 0 { parts.append(runtimeText(m)) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }
@@ -117,8 +146,38 @@ struct ResumeStrip: View {
     }
 }
 
-/// A content rating (PG-13, TV-14) or a file's quality (4K, DV HDR10) in an outlined box, as
-/// the title pages show them.
+/// The Play button's label. Not started: "Play" for a film, "Start watching · S1, E1" for a
+/// season's first episode, "Play S21 E8" for any other. Part watched: a bar of how far through
+/// with what's left, after the episode's number ("S5 E12 · 43m") or alone for a film ("1h 2m").
+struct PlayLabel: View {
+    let item: Item
+    let episode: Bool
+
+    var body: some View {
+        let resume = item.resumeMs
+        let duration = item.durationMs
+        let season = item.seasonNumber ?? 0, number = item.episodeNumber ?? 0
+        HStack(spacing: 14) {
+            Image(systemName: "play.fill")
+            if resume > 0, duration > resume {
+                let left = Int((duration - resume + 59_999) / 60_000)
+                // The bar follows the label's colour, so it shows on the white of focus too.
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.secondary).frame(width: 70, height: 6)
+                    Capsule().fill(.primary).frame(width: 70 * CGFloat(Double(resume) / Double(duration)), height: 6)
+                }
+                Text(episode ? L("details.resume_episode_left", season, number, runtimeText(left)) : runtimeText(left))
+            } else if episode {
+                Text(number == 1 ? L("details.start_watching", season, number) : L("details.play_episode", season, number))
+            } else {
+                Text(L("details.play"))
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// A content rating (PG-13, TV-14) in an outlined box, as the title pages and the hero show it.
 struct OutlinedBadge: View {
     let text: String
 
@@ -127,6 +186,27 @@ struct OutlinedBadge: View {
             .font(.caption2.weight(.bold))
             .padding(.horizontal, 6).padding(.vertical, 1)
             .overlay(RoundedRectangle(cornerRadius: 4).stroke(.white.opacity(0.85), lineWidth: 1.5))
+    }
+}
+
+/// A file's quality as the title page shows it: a capsule, filled white for the resolution
+/// ("4K", "1080p") and outlined for the rest, its parts split by a thin line ("DV | HDR10").
+struct QualityCapsule: View {
+    let capsule: Quality.Capsule
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(Array(capsule.parts.enumerated()), id: \.offset) { index, part in
+                if index > 0 { Rectangle().fill(.white.opacity(0.6)).frame(width: 1.5).padding(.vertical, 3) }
+                Text(part).padding(.horizontal, 8)
+            }
+        }
+        .font(.caption2.weight(.bold))
+        .padding(.horizontal, 2).padding(.vertical, 2)
+        .foregroundStyle(capsule.filled ? Color.black : Color.white)
+        .background(Capsule().fill(.white.opacity(capsule.filled ? 0.9 : 0)))
+        .overlay(Capsule().stroke(.white.opacity(capsule.filled ? 0 : 0.75), lineWidth: 1.5))
+        .fixedSize()
     }
 }
 
@@ -170,7 +250,7 @@ struct TitleActions: View {
         if item.playable || item.isSeries {
             Button { act("watched") { try await $0.setPlayed(item.id, !item.watched) } } label: {
                 Label(item.watched ? L("actions.mark_unwatched") : L("actions.mark_watched"),
-                      systemImage: item.watched ? "eye.slash" : "checkmark.circle")
+                      systemImage: item.watched ? (onPage ? "checkmark.circle.fill" : "eye.slash") : "checkmark.circle")
             }
         }
         if item.kind == "movie" || item.isSeries {

@@ -24,33 +24,145 @@ struct DetailsView: View {
     @FocusState private var focused: String?
     @State private var seasons: [Season] = []
     @State private var season = 0
+    /// The artwork's four colours from the server, blended behind the whole page: what's left
+    /// when the artwork slides away for a show's episodes.
+    @State private var wash: [Color]?
+    /// The artwork has slid away for a show's episodes. It stays away below them (Related, Cast)
+    /// and comes back only with the hero.
+    @State private var receded = false
+    /// The page opens on its artwork alone; the hero's words fade in a moment later, as the
+    /// reference does. (A mask, so Play can take the focus straight away.)
+    @State private var entered = false
     @State private var problem: String?
     @State private var extra: Extra?
 
     private var shown: Item { item ?? initial }
+    private var backdropPath: String? { shown.images?.backdrop ?? shown.images?.seriesBackdrop }
+    /// Whose backdrop is showing: the title's own, or for an episode without one, its show's.
+    private var paletteSource: String? {
+        shown.images?.backdrop != nil ? shown.id : (shown.images?.seriesBackdrop != nil ? shown.parentId : shown.id)
+    }
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            ArtworkImage(path: shown.images?.backdrop ?? shown.images?.seriesBackdrop)
+            // Behind everything, the artwork's own colours blended corner to corner.
+            PageWash(colors: wash)
+            // The artwork fades into that blend at the bottom and the left (masks rather than
+            // a colour on top, so the blend shows through).
+            ArtworkImage(path: backdropPath)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .overlay(LinearGradient(colors: [.clear, ArcColor.background.opacity(0.85), ArcColor.background], startPoint: .top, endPoint: .bottom))
-                .overlay(LinearGradient(colors: [ArcColor.background.opacity(0.9), .clear], startPoint: .leading, endPoint: .trailing))
+                // Gentle, as the reference: the picture stays bright to near the bottom and only
+                // softens behind the words on the left.
+                .mask(LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.6),
+                                             .init(color: .black.opacity(0.45), location: 1)], startPoint: .top, endPoint: .bottom))
+                .mask(LinearGradient(stops: [.init(color: .black.opacity(0.5), location: 0), .init(color: .black, location: 0.55)],
+                                     startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
-            ScrollView(.vertical) {
-                VStack(alignment: .leading, spacing: 28) {
-                    hero
-                    if !seasons.isEmpty { episodes }
-                    if !shown.extras.isEmpty { extras }
-                    if !similar.isEmpty { related }
-                    if !actors.isEmpty { cast }
-                    if !shown.collections.isEmpty { collections }
-                    infoCards
+                // The episode browser: the artwork slides up and away, on the page's own clock.
+                .offset(y: receded ? -1200 : 0)
+                .opacity(receded ? 0 : 1)
+                .animation(Self.recede, value: receded)
+            ScrollViewReader { proxy in
+                ScrollView(.vertical) {
+                    VStack(alignment: .leading, spacing: 28) {
+                        hero
+                            // Hidden while browsing a show's episodes, as the reference does: a
+                            // mask rather than opacity, so Up from the season tabs still reaches
+                            // its buttons (tvOS won't focus a fully transparent view).
+                            // Larger than the hero, so a focused button's lift and shadow aren't cut off.
+                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1).padding(-80))
+                            .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
+                            .id(Self.heroAnchor)
+                        if !seasons.isEmpty {
+                            episodes
+                        } else {
+                            // A film's hero has nothing peeking under it, as the reference: the
+                            // next row starts just below the screen, and Down scrolls to it.
+                            Color.clear.frame(height: 1).id(Self.restAnchor)
+                            Color.clear.frame(height: 150).accessibilityHidden(true)
+                        }
+                        // The cast first, above every other row (owner, 7 November).
+                        if !actors.isEmpty { cast }
+                        if !shown.extras.isEmpty { extras }
+                        if !similar.isEmpty { related }
+                        if !shown.collections.isEmpty { collections }
+                        infoCards
+                    }
+                    .padding(.horizontal, 80)
+                    .padding(.bottom, 60)
                 }
-                .padding(.horizontal, 80)
-                .padding(.bottom, 60)
+                .defaultFocus($focused, Self.playKey)
+                .onChange(of: focused) { old, new in
+                    if let new, new.hasPrefix("season|"), let index = Int(new.dropFirst(7)), index != season {
+                        if old?.hasPrefix("season|") == true {
+                            // Moving along the season tabs shows that season's episodes; no Select.
+                            withAnimation(.easeInOut(duration: 0.2)) { season = index }
+                        } else {
+                            // Coming into the tabs (from the episodes or the hero) lands on the
+                            // season showing, whichever tab is nearest. (A step later: tvOS
+                            // ignores a focus change made while it's moving the focus.)
+                            Task { @MainActor in focused = "season|\(season)" }
+                        }
+                    }
+                    // Into the episodes from the hero: on to the one to watch next. (After tvOS's
+                    // own move has settled: it ignores a change made while it's moving the focus.)
+                    if Self.isHero(old), let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(80))
+                            focused = "ep|" + next.id
+                        }
+                    }
+                    // A film: Down from the hero brings the first row up under the hero's buttons,
+                    // which stay at the top, as the reference does; Up goes back to the whole hero.
+                    // (The first row's cards carry focus keys, so the hero is Play's key or nil.)
+                    if seasons.isEmpty {
+                        if Self.isFirstRow(new), Self.isHero(old) {
+                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.restAnchor, anchor: Self.restPoint) }
+                        } else if Self.isFirstRow(old), Self.isHero(new) {
+                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
+                        }
+                    }
+                    let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
+                    if nowBrowsing && !wasBrowsing {
+                        withAnimation(Self.recede) {
+                            receded = true
+                            proxy.scrollTo(Self.browserAnchor, anchor: Self.tabsAnchor)
+                        }
+                    } else if !nowBrowsing && old?.hasPrefix("season|") == true && Self.isHero(new) {
+                        // Up from the season tabs is the hero's buttons: back to the top.
+                        withAnimation(Self.recede) {
+                            receded = false
+                            proxy.scrollTo(Self.heroAnchor, anchor: .top)
+                        }
+                    }
+                }
+            }
+            if !seasons.isEmpty {
+                TitleLogo(path: shown.images?.logo, title: shown.title)
+                    .frame(maxWidth: 560, maxHeight: 150)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 50)
+                    // It trails in from a little lower, and leaves quicker than it came, so it's
+                    // gone before the hero is back.
+                    .offset(y: browsing ? 0 : 100)
+                    .opacity(browsing ? 1 : 0)
+                    .animation(browsing ? Self.recede : .easeInOut(duration: 0.35), value: browsing)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
             }
         }
+        .onAppear {
+            guard !entered else { return }
+            withAnimation(.easeOut(duration: 0.4).delay(0.35)) { entered = true }
+        }
         .task(id: browse.changes) { await load() }
+        .task(id: paletteSource) {
+            // The server keeps each backdrop's colours; an older server without them, or a title
+            // without artwork, keeps Arc's grey blend.
+            guard let id = paletteSource, let api = app.api,
+                  let colors = try? await api.palette(id).background else { return }
+            wash = colors.map(Color.init)
+        }
         .fullScreenCover(item: $extra) { ExtraPlayerScreen(extra: $0) }
     }
 
@@ -68,6 +180,7 @@ struct DetailsView: View {
                         .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
                     }
                     .buttonStyle(.card)
+                    .focused($focused, equals: "extra|" + e.id)
                     Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
                     Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
                 }
@@ -100,11 +213,14 @@ struct DetailsView: View {
                 }
                 HStack(spacing: 12) {
                     if !facts.isEmpty { Text(facts) }
-                    ForEach(Quality.badges(Quality.file(of: shown)), id: \.self) { OutlinedBadge(text: $0) }
+                    ForEach(Array(Quality.capsules(Quality.file(of: shown)).enumerated()), id: \.offset) { QualityCapsule(capsule: $0.element) }
                 }
                 .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.85))
                 if let problem { Text(problem).foregroundStyle(ArcColor.error) }
                 buttons
+                    // Out of reach while an episode has the focus, so Up from the episodes always
+                    // lands on the season tabs; from the tabs, Up reaches them again.
+                    .disabled(focused?.hasPrefix("ep|") == true)
             }
             Spacer(minLength: 0)
             people
@@ -145,12 +261,14 @@ struct DetailsView: View {
 
     @ViewBuilder private var buttons: some View {
         HStack(spacing: 20) {
+            // Play is a glass button like the rest: it turns white only with focus.
             if shown.playable {
                 let resume = shown.resumeMs
                 Button { play(PlayRequest(item: shown, startMs: resume)) } label: {
-                    Label(resume > 0 ? L("details.resume") : L("details.play"), systemImage: "play.fill")
+                    PlayLabel(item: shown, episode: shown.isEpisode)
                 }
-                .arcGlassButton(prominent: true)
+                .arcGlassButton()
+                .focused($focused, equals: Self.playKey)
                 if resume > 0 {
                     Button { play(PlayRequest(item: shown, startMs: 0)) } label: {
                         Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise")
@@ -159,10 +277,10 @@ struct DetailsView: View {
                 }
             } else if let next = nextEpisode {
                 Button { play(PlayRequest(item: next, startMs: next.resumeMs)) } label: {
-                    Label(next.resumeMs > 0 ? L("details.resume_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0)
-                          : L("details.play_episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0), systemImage: "play.fill")
+                    PlayLabel(item: next, episode: true)
                 }
-                .arcGlassButton(prominent: true)
+                .arcGlassButton()
+                .focused($focused, equals: Self.playKey)
             }
             // The page's other actions are round glass icons, as the Android app's title page.
             TitleActions(item: shown, onPage: true).roundIconButton()
@@ -175,7 +293,8 @@ struct DetailsView: View {
     private var cast: some View {
         section(L("details.cast")) {
             ForEach(actors.prefix(30)) { credit in
-                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image) {
+                PersonButton(name: credit.name, detail: credit.character ?? roleName(credit.role), image: credit.image,
+                             focus: $focused, focusKey: "cast|\(credit.personId)") {
                     openRoute(.person(id: credit.personId, name: credit.name))
                 }
             }
@@ -198,63 +317,74 @@ struct DetailsView: View {
         }
     }
 
-    /// About, Details, Crew and Playback as glass cards at the foot of the page.
+    /// About, Details, Crew and Playback as glass cards at the foot of the page, under an "About"
+    /// heading: About across the top, the other three side by side beneath it.
     /// (Arc's ratings are paused, so there's no Ratings card.)
     private var infoCards: some View {
         let file = Quality.file(of: shown)
         let details: [(String, String)] = [
             (L("details.released"), shown.releaseDate.flatMap(releaseDate) ?? shown.year.map(String.init) ?? ""),
-            (L("details.studio"), shown.studio ?? ""),
+            (L("details.runtime_label"), shown.isSeries ? "" : shown.runtimeMin.map { runtimeText($0) } ?? ""),
+            (L("details.content_rating"), shown.contentRating ?? ""),
+            (L("details.genres"), ListFormatter.localizedString(byJoining: shown.genres)),
             (L("details.original_title"), shown.originalTitle.flatMap { $0 == shown.title ? nil : $0 } ?? ""),
         ].filter { !$0.1.isEmpty }
         let crewLines: [(String, String)] = [
             (L("details.directed_by"), ListFormatter.localizedString(byJoining: crew("director"))),
             (L("details.written_by"), ListFormatter.localizedString(byJoining: crew("writer"))),
+            (L("details.studios"), shown.studio ?? ""),
         ].filter { !$0.1.isEmpty }
         let playback = playbackLines(file)
-        return ScrollView(.horizontal) {
-            HStack(alignment: .top, spacing: 30) {
-                if let overview = shown.overview, !overview.isEmpty {
-                    InfoCard(title: L("details.about"), width: 620) {
-                        if let tagline = shown.tagline, !tagline.isEmpty { Text(tagline).font(.callout.weight(.semibold)) }
-                        Text(overview).font(.caption).foregroundStyle(.white.opacity(0.85)).lineLimit(9)
-                    }
+        return VStack(alignment: .leading, spacing: 24) {
+            Text(L("details.about")).font(.title3.weight(.semibold))
+            if let overview = shown.overview, !overview.isEmpty {
+                InfoCard(title: nil, width: 1100) {
+                    Text(shown.title).font(.headline)
+                    Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(10)
                 }
-                if !details.isEmpty { InfoCard(title: L("details.details")) { lines(details) } }
-                if !crewLines.isEmpty { InfoCard(title: L("details.crew")) { lines(crewLines) } }
-                if !playback.isEmpty { InfoCard(title: L("details.playback")) { lines(playback) } }
             }
-            .padding(.vertical, 24)
+            HStack(alignment: .top, spacing: 30) {
+                if !details.isEmpty { InfoCard(title: L("details.details"), width: 530) { lines(details) } }
+                if !crewLines.isEmpty { InfoCard(title: L("details.crew"), width: 530) { lines(crewLines) } }
+                if !playback.isEmpty { InfoCard(title: L("details.playback"), width: 530) { lines(playback) } }
+            }
         }
-        .scrollClipDisabled()
+        .padding(.vertical, 24)
     }
 
     private func lines(_ pairs: [(String, String)]) -> some View {
         ForEach(pairs, id: \.0) { pair in
             VStack(alignment: .leading, spacing: 2) {
                 Text(pair.0).font(.caption2).foregroundStyle(ArcColor.muted)
-                Text(pair.1).font(.caption.weight(.semibold)).lineLimit(2)
+                Text(pair.1).font(.callout.weight(.semibold)).lineLimit(3)
             }
         }
     }
 
-    /// What the file is: its video, its main audio and its size.
+    /// Where and what it plays: the server, how it's reached, the profile, then the file's
+    /// quality in words, its bitrate, size, edition and name.
     private func playbackLines(_ file: MediaFile?) -> [(String, String)] {
-        guard let file else { return [] }
         var out: [(String, String)] = []
-        if let v = file.streams.first(where: { $0.kind == "video" }) {
-            let parts = [Quality.resolution(v), Quality.hdr(v), v.codec.isEmpty ? nil : v.codec.uppercased()].compactMap { $0 }
-            if !parts.isEmpty { out.append((L("details.video"), parts.joined(separator: " · "))) }
+        if let server = app.serverName, !server.isEmpty { out.append((L("details.server"), server)) }
+        if let local = app.onLocalNetwork {
+            out.append((L("details.connection"), L(local ? "details.connection_local" : "details.connection_remote")))
         }
-        let audios = file.streams.filter { $0.kind == "audio" }
-        if let a = audios.first(where: \.isDefault) ?? audios.first {
-            let parts = [Quality.audioCodec(a), Quality.channels(a.channels), Quality.objectAudio(a)].compactMap { $0 }
-            if !parts.isEmpty { out.append((L("details.audio"), parts.joined(separator: " "))) }
+        if let profile = app.profile?.name { out.append((L("details.profile"), profile)) }
+        guard let file else { return out }
+        if let quality = Quality.summary(file) { out.append((L("details.quality"), quality)) }
+        // ffprobe's overall bitrate, in bits a second.
+        if let bitrate = file.bitrate, bitrate > 0 {
+            out.append((L("details.bitrate"), L("details.mbps", Double(bitrate) / 1_000_000)))
         }
         if let size = file.size, size > 0 {
             out.append((L("details.size"), ByteCountFormatter.string(fromByteCount: size, countStyle: .file)))
         }
         if let edition = file.edition, !edition.isEmpty { out.append((L("details.edition"), edition)) }
+        if let path = file.path, !path.isEmpty {
+            // Only the file's name: Windows and Unix paths both end in it.
+            let name = path.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last.map(String.init) ?? path
+            out.append((L("details.file"), name))
+        }
         return out
     }
 
@@ -292,28 +422,90 @@ struct DetailsView: View {
         return available.first { !$0.watched } ?? available.first
     }
 
+    /// The one clock the move between a show's overview and its episodes runs on: a slow,
+    /// gentle 0.9 s, everything (the page, the artwork, the logo) together.
+    static let recede = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.9)
+    static let heroAnchor = "details|hero"
+    static let browserAnchor = "details|browser"
+    /// Where the season tabs sit while browsing episodes: a quarter of the way down the screen,
+    /// leaving the top for the show's logo (scrollTo lines this point of the tabs up with the
+    /// same point of the screen).
+    static let tabsAnchor = UnitPoint(x: 0.5, y: 0.25)
+
+    static let restAnchor = "details|rest"
+    /// Where the line under a film's hero sits once Down has moved on: near the top, so the
+    /// hero's buttons stay in view above the first row.
+    static let restPoint = UnitPoint(x: 0.5, y: 0.14)
+
+    /// A card in the rows straight under a film's hero (the cast, then trailers and extras).
+    static func isFirstRow(_ key: String?) -> Bool {
+        guard let key else { return false }
+        return key.hasPrefix("cast|") || key.hasPrefix("extra|")
+    }
+
+    /// Play's focus key: the page opens on it, as the reference does.
+    static let playKey = "hero|play"
+
+    /// The hero's buttons: Play, or the others (which carry no key).
+    static func isHero(_ key: String?) -> Bool { key == nil || key == playKey }
+
+    static func isBrowser(_ key: String?) -> Bool {
+        guard let key else { return false }
+        return key.hasPrefix("season|") || key.hasPrefix("ep|")
+    }
+
+    /// Whether the season tabs or an episode has the focus (the episode browser is up).
+    private var browsing: Bool { Self.isBrowser(focused) }
+
+    /// The season tabs over one row of a season's episodes, as the reference design has them:
+    /// moving along the tabs shows that season, coming into them lands on the season showing,
+    /// and the focused episode shows its overview under it.
+    /// The season showing's episode to watch next: one part-way through, else the first not
+    /// watched, else the first. Down from the hero lands on it.
+    private var seasonNextUp: Item? {
+        guard seasons.indices.contains(season) else { return nil }
+        let eps = seasons[season].episodes
+        return eps.first { $0.available && $0.resumeMs > 0 } ?? eps.first { $0.available && !$0.watched } ?? eps.first
+    }
+
     private var episodes: some View {
-        VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 20) {
             ScrollView(.horizontal) {
-                HStack(spacing: 24) {
+                HStack(spacing: 20) {
                     ForEach(Array(seasons.enumerated()), id: \.element.id) { index, s in
                         Button(s.name.isEmpty ? L("details.season", s.seasonNumber) : s.name) { season = index }
-                            .arcGlassButton(prominent: index == season)
+                            .buttonStyle(SeasonTabStyle(chosen: index == season))
+                            .focused($focused, equals: "season|\(index)")
                     }
                 }
                 .padding(.vertical, 12)
             }
             .scrollClipDisabled()
+            .focusSection()
+            // Out of reach from the hero's buttons, so Down from Play goes straight into the
+            // episodes (as the reference does); Up from the episodes reaches them.
+            .disabled(Self.isHero(focused))
+            // On the hero the tabs are folded away, so the top of the episode row peeks in at the
+            // bottom of the screen (as the reference does); Down brings them back with the
+            // episodes. A mask rather than opacity, as for the hero.
+            .frame(maxHeight: browsing ? nil : 0, alignment: .top)
+            .mask(Rectangle().opacity(browsing ? 1 : 0).padding(-40))
+            .animation(Self.recede, value: browsing)
+            .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: 40) {
                         ForEach(seasons[season].episodes) { ep in
-                            EpisodeCard(episode: ep) { play(PlayRequest(item: ep, startMs: ep.resumeMs)) }
+                            EpisodeCard(episode: ep, focus: $focused, focusKey: "ep|" + ep.id,
+                                        showsOverview: focused == "ep|" + ep.id) {
+                                play(PlayRequest(item: ep, startMs: ep.resumeMs))
+                            }
                         }
                     }
                     .padding(.vertical, 24)
                 }
                 .scrollClipDisabled()
+                .id(season) // another season starts at its first episode
             }
         }
     }
@@ -340,32 +532,58 @@ struct DetailsView: View {
     }
 }
 
-/// An episode in a season: its still, number and title, with how far through.
+/// An episode in a season: its still (with its length, or how far through), its number and
+/// name, and its overview while it has the focus. One that hasn't aired yet is dimmed with the day
+/// it releases; it can take the focus but doesn't play.
 struct EpisodeCard: View {
     let episode: Item
+    var focus: FocusState<String?>.Binding
+    let focusKey: String
+    var showsOverview = false
     let action: () -> Void
+
+    private var size: CGSize { CardStyle.thumb.size }
 
     var body: some View {
         let card = MediaCard(item: episode)
+        let releases = episode.upcomingRelease()
         VStack(alignment: .leading, spacing: 10) {
-            Button(action: action) {
+            Button { if episode.available { action() } } label: {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: episode.images?.primary).frame(width: 384, height: 216).clipped()
-                    if let progress = card.progress { ProgressBar(fraction: progress).padding(12) }
+                    ArtworkImage(path: episode.images?.primary ?? episode.images?.seriesBackdrop)
+                        .frame(width: size.width, height: size.height).clipped()
+                        .opacity(episode.available ? 1 : 0.25)
+                    if let releases {
+                        Label(L("details.releases", Item.releaseDay(releases)), systemImage: "clock")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 14).padding(.vertical, 8)
+                            .background(Capsule().fill(.black.opacity(0.6)))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                    if let progress = card.progress {
+                        ResumeStrip(fraction: progress, minutesLeft: card.minutesLeft)
+                    } else if episode.available, let m = episode.runtimeMin, m > 0 {
+                        Text(runtimeText(m)).font(.callout.weight(.semibold))
+                            .shadow(color: .black.opacity(0.7), radius: 4)
+                            .padding(16)
+                    }
                     if episode.watched {
                         Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.black, .white)
                             .padding(10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     }
                 }
-                .frame(width: 384, height: 216)
+                .frame(width: size.width, height: size.height)
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
-            .disabled(!episode.available)
-            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title)).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
-            if let overview = episode.overview {
-                Text(overview).font(.caption2).foregroundStyle(ArcColor.muted).lineLimit(2).frame(width: 384, alignment: .leading)
-            }
+            .focused(focus, equals: focusKey)
+            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
+                .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
+            // Kept in the layout so the row doesn't jump as the focus moves.
+            Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
+                .lineLimit(3, reservesSpace: true).frame(width: size.width, alignment: .leading)
+                .opacity(showsOverview ? 1 : 0)
+                .animation(.easeInOut(duration: 0.2), value: showsOverview)
         }
     }
 }
@@ -373,14 +591,14 @@ struct EpisodeCard: View {
 /// A glass card at the foot of a title's page (About, Details, Crew, Playback). It takes the focus
 /// so the page can scroll down to it with the remote.
 struct InfoCard<Content: View>: View {
-    let title: String
+    let title: String?
     var width: CGFloat = 340
     @ViewBuilder let content: () -> Content
     @FocusState private var focused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text(title).font(.headline)
+            if let title { Text(title).font(.title3.weight(.semibold)) }
             content()
         }
         .padding(26)
@@ -392,5 +610,28 @@ struct InfoCard<Content: View>: View {
         .animation(.easeOut(duration: 0.15), value: focused)
         .focusable()
         .focused($focused)
+    }
+}
+
+/// A season tab, as the reference draws them: plain words, the chosen season in a soft glass
+/// capsule, and the focused one white with black words.
+struct SeasonTabStyle: ButtonStyle {
+    let chosen: Bool
+    @Environment(\.isFocused) private var isFocused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.callout.weight(chosen || isFocused ? .semibold : .medium))
+            .padding(.horizontal, 22).padding(.vertical, 10)
+            .foregroundStyle(isFocused ? Color.black : chosen ? Color.white : Color.white.opacity(0.7))
+            .background {
+                if isFocused {
+                    Capsule().fill(.white)
+                } else if chosen {
+                    Capsule().fill(.ultraThinMaterial).overlay(Capsule().stroke(.white.opacity(0.35), lineWidth: 1.5))
+                }
+            }
+            .scaleEffect(isFocused ? 1.06 : configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.15), value: isFocused)
     }
 }
