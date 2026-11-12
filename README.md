@@ -1,7 +1,8 @@
-# Arc for Apple TV
+# Arc for Apple
 
-The Apple TV (tvOS) client for [Arc Media Server](https://github.com/arc-media-server/arc-media-server),
-written in Swift and SwiftUI. It uses only Arc's stable `/api/v1`, like the Android app
+The Apple client for [Arc Media Server](https://github.com/arc-media-server/arc-media-server),
+written in Swift and SwiftUI: Apple TV (tvOS) first, then iPhone and iPad from the same
+repository and shared code (ArcKit). It uses only Arc's stable `/api/v1`, like the Android app
 ([arc-android](https://github.com/arc-media-server/arc-android)).
 
 Status: just started. Playback uses Apple's own player first, behind a small player interface,
