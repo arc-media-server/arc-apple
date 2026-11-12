@@ -221,6 +221,9 @@ public struct RecentCard: Codable, Sendable {
     public var seasonNumber: Int?
     @Default<Defaults.Zero> public var episodes: Int
     public var seasonPoster: String?
+    /// When the card's newest episode was added (Unix seconds). The same show or season can
+    /// appear more than once, one card per day's batch, so this is part of its identity.
+    @Default<Defaults.Zero64> public var addedAt: Int64
 }
 
 public struct HomeRowPref: Codable, Sendable, Hashable {

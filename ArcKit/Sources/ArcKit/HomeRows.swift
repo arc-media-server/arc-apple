@@ -167,7 +167,7 @@ public struct MediaCard: Sendable, Hashable, Identifiable {
 
     /// A TV library's Recently Added card.
     public init(recent: RecentCard) {
-        self.init(item: recent.item, id: "\(recent.type):\(recent.item.id):\(recent.seasonNumber.map(String.init) ?? "")")
+        self.init(item: recent.item, id: "\(recent.type):\(recent.item.id):\(recent.seasonNumber.map(String.init) ?? ""):\(recent.addedAt)")
         if recent.type == "season" {
             seasonNumber = recent.seasonNumber
             newEpisodes = recent.episodes

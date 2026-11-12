@@ -20,6 +20,14 @@ final class HomeRowsTests: XCTestCase {
         XCTAssertEqual(rows.first { $0.id == "recent:3" }?.style, .thumb)
     }
 
+    func testTheSameSeasonAddedOnTwoDaysIsTwoCardsWithTheirOwnIDs() throws {
+        // A row's cards need distinct ids; two days' batches of one season are separate cards.
+        let json = #"[{"type":"season","item":{"id":"s1","kind":"series","title":"Firefly"},"season_number":2,"episodes":3,"added_at":1700000000},"#
+            + #"{"type":"season","item":{"id":"s1","kind":"series","title":"Firefly"},"season_number":2,"episodes":4,"added_at":1700172800}]"#
+        let cards = try ArcJSON.decoder.decode([RecentCard].self, from: Data(json.utf8)).map { MediaCard(recent: $0) }
+        XCTAssertNotEqual(cards[0].id, cards[1].id)
+    }
+
     func testTheWatchlistCanComeLastAndSeasonsAddTheirRow() {
         let halloween = DateComponents(calendar: Calendar(identifier: .gregorian), year: 2026, month: 10, day: 31).date!
         let rows = resolveHomeRows(prefs: Prefs(watchlistPosition: 9), libraries: [movies], today: halloween)
