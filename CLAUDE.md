@@ -1,6 +1,8 @@
-# Arc for Apple TV: notes for AI agents
+# Arc for Apple: notes for AI agents
 
-The Apple TV (tvOS) client for Arc Media Server, in Swift and SwiftUI. The server is
+The Apple client for Arc Media Server, in Swift and SwiftUI: Apple TV (tvOS) first, then iPhone
+and iPad (iOS/iPadOS) in this same repository, sharing ArcKit (the API client, models and
+playback logic), as the Android app does with TV and phone. The server is
 arc-media-server/arc-media-server (Go, with a web app); the Android TV app is
 arc-media-server/arc-android and is the closest model for this one. The owner (GitHub: JonzaUK)
 drives product vision; agents (Claude, Codex) do most implementation. Read `README.md` and
@@ -20,7 +22,8 @@ wider context; decisions waiting for the owner are on arc-media-server#80.
   body and the Co-Authored-By trailer. Keep working without check-ins; log product decisions on
   arc-media-server#80; stop only for risky or irreversible things.
 - Never mark device, playback, HDR, Dolby Vision or audio checks done without evidence from a
-  real Apple TV. Never point tests at the owner's server, data or keys.
+  real Apple TV (or iPhone/iPad, for the iOS app). Never point tests at the owner's server,
+  data or keys.
 
 ## Rules
 
@@ -30,13 +33,14 @@ wider context; decisions waiting for the owner are on arc-media-server#80.
 - **Playback engine:** the screens talk only to `PlaybackEngine` (ArcTV/Player). Apple's player
   (`AVPlayerEngine`) is behind it for now; another engine (e.g. AetherEngine) may replace it later
   without changing the screens. Don't use AVPlayerViewController or engine types in screens.
-- **Feel:** native tvOS first (focus engine, `.card` buttons, Back always works), Arc identity
-  through the wordmark. No UI colour (owner, 1 November): chosen and main
-  controls are white with black text, as the sidebar's; the teal is the logo's alone. Dark only; artwork-led Home (no banner). The player's
-  controls follow the web and Android players' set and order. Brand colours live only in
-  `ArcTV/App/Theme.swift`.
-- **Plex first:** match how Plex for Apple TV behaves unless there's a clear reason not to; log
-  differences on arc-media-server#80. Settings come from the server (the profile's prefs) rather
+- **Feel:** native to each platform: on Apple TV the focus engine, `.card` buttons and Back
+  always working; on iPhone/iPad, iOS conventions (touch, navigation stacks). Arc identity
+  through the wordmark. No UI colour (owner, 1 November): chosen and main controls are white
+  with black text, as the sidebar's; the teal is the logo's alone. Dark only; artwork-led Home
+  (no banner). The player's controls follow the web and Android players' set and order. Brand
+  colours live only in `ArcTV/App/Theme.swift`.
+- **Plex first:** match how Plex for Apple TV (and Plex for iOS, for the iPhone/iPad app)
+  behaves unless there's a clear reason not to; log differences on arc-media-server#80. Settings come from the server (the profile's prefs) rather
   than app-only options where Arc already has them.
 - **Text:** every user-facing string in `ArcTV/Resources/en.lproj/Localizable.strings`, used via `L()`.
 - **Logging:** `ArcLog` (os.Logger, subsystem org.arcmediaserver.apple, category Arc): outcomes and
@@ -51,5 +55,6 @@ ArcTV/App/       app entry, AppModel (server, sign-in, profile), Keychain, Theme
 ArcTV/Screens/   server, sign-in code, profile picker, Home, title page
 ArcTV/Player/    PlaybackEngine, AVPlayerEngine, DeviceCaps, PlayerModel, PlayerScreen
 ArcTV/Components/ artwork loading (with the sign-in header), cards
+(iOS)           the iPhone/iPad app will be a target beside ArcTV/, sharing ArcKit (not started)
 project.yml      XcodeGen project (Arc.xcodeproj is generated, not kept)
 ```
