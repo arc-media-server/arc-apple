@@ -90,6 +90,52 @@ final class BrowseTests: XCTestCase {
         XCTAssertEqual(prefs.subtitleMode, "always")
     }
 
+    func testASeasonIsMarkedWatchedByItsNumber() async throws {
+        answer(204, "")
+        answer(204, "")
+        try await api.setPlayed(seriesId: "s 1", seasonNumber: 2, true)
+        try await api.setPlayed(seriesId: "s1", seasonNumber: 0, false)
+        XCTAssertEqual(StubArc.requests.map(\.httpMethod), ["PUT", "PUT"])
+        XCTAssertEqual(StubArc.requests[0].url?.path, "/api/v1/items/s 1/played")
+        // A whole number, as Arc reads season_number.
+        XCTAssertEqual(StubArc.bodies, [#"{"played":true,"season_number":2}"#, #"{"played":false,"season_number":0}"#])
+    }
+
+    func testRemovingFromContinueWatchingDeletesItsEntry() async throws {
+        answer(204, "")
+        try await api.removeFromContinue("e/7")
+        XCTAssertEqual(StubArc.requests.map(\.httpMethod), ["DELETE"])
+        XCTAssertEqual(StubArc.requests[0].url?.absoluteString, "http://arc.test:8099/api/v1/home/continue/e%2F7")
+    }
+
+    func testRemovingFromContinueWatchingCanBeRefused() async {
+        answer(404, #"{"error":"item not found"}"#)
+        do {
+            try await api.removeFromContinue("gone")
+            XCTFail("expected a failure")
+        } catch let error as APIError {
+            XCTAssertEqual(error.status, 404)
+        } catch {
+            XCTFail("unexpected \(error)")
+        }
+    }
+
+    func testASeasonIsWatchedWhenEveryEpisodeOutIs() throws {
+        func season(_ episodes: String) throws -> Season {
+            try ArcJSON.decoder.decode(Season.self, from: Data(#"{"season_number":1,"episodes":[\#(episodes)]}"#.utf8))
+        }
+        let seen = #"{"id":"e1","kind":"episode","title":"One","user_data":{"played":true}}"#
+        let unseen = #"{"id":"e2","kind":"episode","title":"Two"}"#
+        let upcoming = #"{"id":"e3","kind":"episode","title":"Three","available":false}"#
+        XCTAssertTrue(try season(seen + "," + upcoming).watched)
+        XCTAssertFalse(try season(seen + "," + unseen).watched)
+        XCTAssertTrue(try season(seen).markable)
+        let notOut = try season(upcoming)
+        XCTAssertFalse(notOut.watched)
+        XCTAssertFalse(notOut.markable)
+        XCTAssertFalse(try season("").markable)
+    }
+
     func testARefusedActionIsAnError() async {
         answer(404, #"{"error":"item not found"}"#)
         do {
