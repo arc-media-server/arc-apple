@@ -581,7 +581,7 @@ struct EpisodeCard: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
-            Text(unplaced ? episode.title : L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
+            Text(unplaced || !episode.hasEpisodeCode ? episode.title : L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
                 .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
             // Kept in the layout so the row doesn't jump as the focus moves.
             Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
