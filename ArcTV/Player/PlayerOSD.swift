@@ -108,7 +108,8 @@ struct PlayerOSD: View {
         let item = model.item
         return VStack(alignment: .leading, spacing: 6) {
             if item.isEpisode {
-                Text(L("player.episode_line", item.seasonNumber ?? 0, item.episodeNumber ?? 0, item.title))
+                // Outside the show's order, an episode has no "S2, E4" in it: just its name.
+                Text(model.outsideOrder ? item.title : L("player.episode_line", item.seasonNumber ?? 0, item.episodeNumber ?? 0, item.title))
                     .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.8)).lineLimit(1)
             }
             Text(item.isEpisode ? (item.seriesTitle ?? item.title) : item.title)
@@ -301,7 +302,7 @@ struct PlayerOSD: View {
     private var meta: String {
         let item = model.item
         var parts: [String] = []
-        if item.isEpisode {
+        if item.isEpisode && !model.outsideOrder {
             parts.append(L("card.episode_code", item.seasonNumber ?? 0, item.episodeNumber ?? 0))
         }
         let minutes = Int(model.durationMs / 60_000)
@@ -387,7 +388,7 @@ struct PlayerOSD: View {
                                 ArtworkImage(path: episode.images?.primary ?? episode.images?.backdrop)
                                     .frame(width: 300, height: 169)
                                     .overlay(alignment: .bottomLeading) {
-                                        Text(L("card.episode_code", episode.seasonNumber ?? 0, episode.episodeNumber ?? 0))
+                                        Text(model.outsideOrder ? "" : L("card.episode_code", episode.seasonNumber ?? 0, episode.episodeNumber ?? 0))
                                             .font(.caption2.weight(.bold))
                                             .shadow(color: .black.opacity(0.8), radius: 3)
                                             .padding(12)

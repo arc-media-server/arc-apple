@@ -41,4 +41,32 @@ final class ModelTests: XCTestCase {
         XCTAssertFalse(PlaybackClock.seekInStream(converted, fileMs: 500_000, availableMs: 300_000))
         XCTAssertTrue(PlaybackClock.seekInStream(direct, fileMs: 5_000_000, availableMs: 0))
     }
+
+    func testEpisodesOutsideTheOrderComeAfterTheSeasons() throws {
+        let json = #"""
+        {"series":{"id":"s1","kind":"series","title":"Firefly"},
+         "seasons":[{"season_number":1,"episodes":[{"id":"e1","kind":"episode","title":"Serenity","season_number":1,"episode_number":1}]}],
+         "unplaced":[{"id":"e9","kind":"episode","title":"Unaired Pilot"},{"id":"e10","kind":"episode","title":"Not Out","available":false}]}
+        """#
+        let answer = try ArcJSON.decoder.decode(SeasonsResponse.self, from: Data(json.utf8))
+        let tabs = answer.tabs(unplacedName: "Not in This Order")
+        XCTAssertEqual(tabs.map(\.name), ["", "Not in This Order"])
+        XCTAssertEqual(tabs.map(\.isUnplaced), [false, true])
+        XCTAssertEqual(tabs[1].episodes.map(\.id), ["e9", "e10"])
+        // The player's Episodes card: the episode's own tab, playable episodes only.
+        let outside = try XCTUnwrap(answer.tab(containing: "e9"))
+        XCTAssertTrue(outside.isUnplaced)
+        XCTAssertEqual(outside.episodes.map(\.id), ["e9"])
+        XCTAssertEqual(answer.tab(containing: "e1")?.seasonNumber, 1)
+        XCTAssertNil(answer.tab(containing: "nope"))
+    }
+
+    func testAShowWithEverythingInItsOrderHasOnlyItsSeasons() throws {
+        for unplaced in [#""unplaced":null,"#, #""unplaced":[],"#, ""] {
+            let json = #"{"# + unplaced + #""series":{"id":"s1","kind":"series","title":"Firefly"},"seasons":[{"season_number":1}]}"#
+            let answer = try ArcJSON.decoder.decode(SeasonsResponse.self, from: Data(json.utf8))
+            XCTAssertTrue(answer.unplaced.isEmpty)
+            XCTAssertEqual(answer.tabs(unplacedName: "Not in This Order").map(\.seasonNumber), [1])
+        }
+    }
 }
