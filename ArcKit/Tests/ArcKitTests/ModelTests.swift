@@ -69,4 +69,15 @@ final class ModelTests: XCTestCase {
             XCTAssertEqual(answer.tabs(unplacedName: "Not in This Order").map(\.seasonNumber), [1])
         }
     }
+
+    func testAnEpisodeOutsideTheOrderHasNoEpisodeCode() throws {
+        func item(_ json: String) throws -> Item { try ArcJSON.decoder.decode(Item.self, from: Data(json.utf8)) }
+        XCTAssertTrue(try item(#"{"id":"e1","kind":"episode","title":"Serenity","season_number":1,"episode_number":1}"#).hasEpisodeCode)
+        // A special keeps its number.
+        XCTAssertTrue(try item(#"{"id":"e2","kind":"episode","title":"Making Of","season_number":0,"episode_number":3}"#).hasEpisodeCode)
+        // Arc sends 0 and 0 for an episode the order doesn't place.
+        XCTAssertFalse(try item(#"{"id":"e9","kind":"episode","title":"Unaired Pilot","season_number":0,"episode_number":0}"#).hasEpisodeCode)
+        XCTAssertFalse(try item(#"{"id":"e10","kind":"episode","title":"Unaired Pilot"}"#).hasEpisodeCode)
+        XCTAssertFalse(try item(#"{"id":"m1","kind":"movie","title":"Serenity","season_number":1,"episode_number":1}"#).hasEpisodeCode)
+    }
 }

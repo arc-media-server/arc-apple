@@ -171,6 +171,10 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     }
 
     public var isEpisode: Bool { kind == "episode" }
+    /// An episode with a place in its show's order, so "S1 · E4" means something. Arc sends season
+    /// 0 and episode 0 for one the order doesn't place ("Not in This Order"); specials keep theirs
+    /// (season 0, episode 1 and on).
+    public var hasEpisodeCode: Bool { isEpisode && ((seasonNumber ?? 0) != 0 || (episodeNumber ?? 0) != 0) }
     public var isSeries: Bool { kind == "series" }
     public var playable: Bool { kind == "movie" || kind == "episode" }
 

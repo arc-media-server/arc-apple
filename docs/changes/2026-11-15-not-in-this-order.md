@@ -28,6 +28,18 @@ silently disappears.
   - `tab(containing:)`, the episode's tab with only its playable episodes, for the player;
   - `Season.isUnplaced`;
   - two tests.
+- **No "S0 · E0" anywhere.** Arc sends season 0 and episode 0 for these episodes. ArcKit's
+  `Item.hasEpisodeCode` is false for them, though specials (season 0, episode 1 and on) keep
+  theirs. Where an episode code was drawn, these episodes now show their name instead, or
+  nothing beside the length:
+  - the title page's episode cards and its Play label;
+  - Continue Watching and other cards, and Home's hero;
+  - the player's title line and Info card, and the Episodes tiles;
+  - Up Next's card;
+  - Now Playing in Control Center;
+  - the Top Shelf ("Firefly · Unaired Pilot").
+
+  One more test.
 
 ## Decisions
 
@@ -39,7 +51,7 @@ silently disappears.
 
 ## Checks
 
-- `swift test --package-path ArcKit` on Linux (Swift 6.2.1): 55 tests, 1 skipped (the live
+- `swift test --package-path ArcKit` on Linux (Swift 6.2.1): 56 tests, 1 skipped (the live
   server test), 0 failures. Before this change: 53 tests, 1 skipped, 0 failures.
 - The edited tvOS files parse (`swiftc -parse`), and `Localizable.strings` passes `plutil -lint`.
 - **Not compiled for tvOS:** the macOS build hasn't been run, and the tab hasn't been seen in the
