@@ -82,6 +82,9 @@
 "actions.watchlist_add" = "Add to Watchlist";
 "actions.watchlist_remove" = "Remove from Watchlist";
 "actions.go_to_show" = "Go to Show";
+"actions.remove_from_continue" = "Remove from Continue Watching";
+"actions.season_watched" = "Mark Season as Watched";
+"actions.season_unwatched" = "Mark Season as Unwatched";
 
 "library.count" = "%d titles";
 "library.count_filtered" = "%d titles match";

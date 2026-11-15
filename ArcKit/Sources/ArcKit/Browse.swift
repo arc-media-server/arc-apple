@@ -155,6 +155,23 @@ extension ArcAPI {
         try await sendJSON("PUT", "items/\(enc(itemId))/played", ["played": .bool(played)], route: "items/{id}/played")
     }
 
+    /// Marks one season of a show watched or unwatched: the season as the profile's episode order
+    /// numbers it, as `series/{id}/seasons` lists it.
+    public func setPlayed(seriesId: String, seasonNumber: Int, _ played: Bool) async throws {
+        let route = "items/{id}/played"
+        let body = try ArcJSON.encoder.encode(SeasonPlayed(played: played, seasonNumber: seasonNumber))
+        let (status, data) = try await raw("PUT", "items/\(enc(seriesId))/played", body: body, route: route)
+        guard (200...299).contains(status) else { throw failure(status, data, route) }
+    }
+
+    /// Takes a movie or episode out of Continue Watching and Up Next without marking it watched.
+    /// For an episode its whole show goes, until something of it plays again. The resume point is kept.
+    public func removeFromContinue(_ itemId: String) async throws {
+        let route = "home/continue/{id}"
+        let (status, data) = try await raw("DELETE", "home/continue/\(enc(itemId))", route: route)
+        guard (200...299).contains(status) else { throw failure(status, data, route) }
+    }
+
     /// Puts a movie or show on the profile's Watchlist, or takes it off.
     public func setWatchlisted(_ itemId: String, _ on: Bool) async throws {
         try await sendJSON("PUT", "items/\(enc(itemId))/watchlist", ["on": .bool(on)], route: "items/{id}/watchlist")
@@ -167,6 +184,12 @@ extension ArcAPI {
         let (status, data) = try await raw("PATCH", route, body: try ArcJSON.encoder.encode(changes), route: route)
         guard (200...299).contains(status) else { throw failure(status, data, route) }
         return try decode(Prefs.self, data, route)
+    }
+
+    /// A season's watched mark: the season number is sent as a whole number, which Arc requires.
+    struct SeasonPlayed: Encodable {
+        let played: Bool
+        let seasonNumber: Int
     }
 
     func sendJSON(_ method: String, _ path: String, _ body: [String: JSONValue], route: String) async throws {

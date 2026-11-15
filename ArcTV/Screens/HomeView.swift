@@ -8,6 +8,8 @@ struct LoadedRow: Identifiable {
     let style: CardStyle
     var seasonPosters = false
     var cards: [MediaCard]
+    /// Continue Watching or Up Next: its cards offer Remove from Continue Watching, as the web's do.
+    var continueRow = false
 }
 
 /// Home's rows for the profile, arranged as on the web (Edit Home, Arrange libraries): the
@@ -40,7 +42,8 @@ final class HomeModel {
             }
             rows = specs.compactMap { spec in
                 guard let cards = loaded[spec.id], !cards.isEmpty else { return nil }
-                return LoadedRow(id: spec.id, title: Self.title(spec.source), style: spec.style, seasonPosters: spec.seasonPosters, cards: cards)
+                return LoadedRow(id: spec.id, title: Self.title(spec.source), style: spec.style, seasonPosters: spec.seasonPosters, cards: cards,
+                                 continueRow: Self.isContinue(spec.source))
             }
             let ms = Int(Date().timeIntervalSince(started) * 1000)
             if problems > 0 { ArcLogApp.warn("Home: \(problems) of \(specs.count) rows failed to load") }
@@ -67,6 +70,13 @@ final class HomeModel {
         case .seasonal(let pick): return try await api.items(pick.query.merging(["limit": "24"]) { a, _ in a }).items.map { MediaCard(item: $0) }
         case .collection(let id, _): return try await api.collection(id).items.map { MediaCard(item: $0) }
         case .playlist(let id, _): return try await api.playlist(id).entries.map { MediaCard(item: $0.item, id: "entry:\($0.entryId)") }
+        }
+    }
+
+    nonisolated private static func isContinue(_ source: RowSource) -> Bool {
+        switch source {
+        case .continueWatching, .nextUp: return true
+        default: return false
         }
     }
 
