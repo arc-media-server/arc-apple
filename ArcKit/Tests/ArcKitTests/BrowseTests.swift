@@ -38,6 +38,47 @@ final class BrowseTests: XCTestCase {
                         "genre": "Drama", "decade": "1990", "resolution": "4k", "offset": "60", "limit": "60"])
     }
 
+    func testTheLetterCountsAreAskedForOnlyWhenSortedByTitle() {
+        let films = Library(id: 3, name: "Films", kind: "movies")
+        var q = LibraryQuery()
+        XCTAssertTrue(q.showsLetters)
+        XCTAssertEqual(q.parameters(library: films, offset: 0, limit: 60, letters: true)["letters"], "1")
+        XCTAssertNil(q.parameters(library: films, offset: 0, limit: 60)["letters"])
+        q.sort = .added
+        XCTAssertFalse(q.showsLetters)
+        XCTAssertNil(q.parameters(library: films, offset: 0, limit: 60, letters: true)["letters"])
+    }
+
+    func testAPageReadsItsLetterCounts() async throws {
+        answer(200, ##"{"total":5,"offset":0,"items":[{"id":"m1","kind":"movie","title":"007"}],"letters":[{"letter":"#","count":2},{"letter":"a","count":3}]}"##)
+        let page = try await api.items(["library_id": "3", "letters": "1"])
+        XCTAssertEqual(page.letters, [LetterCount(letter: "#", count: 2), LetterCount(letter: "a", count: 3)])
+        XCTAssertTrue(StubArc.requests[0].url?.query?.contains("letters=1") == true)
+        // Without letters=1 there are none.
+        let plain = try ArcJSON.decoder.decode(ItemPage.self, from: Data(#"{"total":0,"items":[]}"#.utf8))
+        XCTAssertTrue(plain.letters.isEmpty)
+    }
+
+    func testEachLetterJumpsToItsFirstTitle() {
+        // As the server sends them: digits first, other scripts last, both as "#".
+        let letters = [LetterCount(letter: "#", count: 2), LetterCount(letter: "a", count: 2), LetterCount(letter: "s", count: 1),
+                       LetterCount(letter: "z", count: 1), LetterCount(letter: "#", count: 2), LetterCount(letter: "b", count: 0)]
+        XCTAssertEqual(letterJumps(letters, reversed: false).map { "\($0.letter)\($0.offset)" }, ["#0", "A2", "S4", "Z5"])
+        // Z to A: the list starts with the other scripts.
+        XCTAssertEqual(letterJumps(letters, reversed: true).map { "\($0.letter)\($0.offset)" }, ["#0", "Z2", "S3", "A4"])
+        XCTAssertTrue(letterJumps([], reversed: false).isEmpty)
+    }
+
+    func testAJumpLoadsThroughTheLetterAndAPageMore() {
+        func pages(_ target: Int, have: Int, total: Int) -> [String] {
+            pagesToReach(target, have: have, total: total, page: 60).map { "\($0.offset)+\($0.limit)" }
+        }
+        XCTAssertEqual(pages(1_200, have: 60, total: 3_000), ["60+500", "560+500", "1060+200"])
+        XCTAssertEqual(pages(2_990, have: 60, total: 3_000), ["60+500", "560+500", "1060+500", "1560+500", "2060+500", "2560+440"])
+        // Already loaded: nothing to ask for.
+        XCTAssertEqual(pages(10, have: 120, total: 3_000), [])
+    }
+
     func testSearchReadsEveryKindOfResult() async throws {
         answer(200, #"{"movies":[{"id":"m1","kind":"movie","title":"Alien"}],"shows":[],"collections":[{"id":"c1","title":"Alien Collection","count":4}],"people":[{"id":7,"name":"Sigourney Weaver","known_for":"Alien","image":"/api/people/7/image?v=1"}]}"#)
         let found = try await api.search("ali en")
