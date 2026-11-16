@@ -140,6 +140,8 @@
 "library.empty" = "This library is empty. Add files to its folders and Arc will find them.";
 "library.nothing_matches" = "Nothing matches these filters.";
 "library.no_collections" = "This library has no collections yet.";
+"library.jump_to" = "Jump to %@";
+"library.letter_other" = "Numbers and Symbols";
 
 "browse.titles_count" = "%d titles";
 "browse.videos_count" = "%d videos";

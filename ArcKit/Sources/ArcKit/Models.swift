@@ -211,6 +211,8 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
 public struct ItemPage: Codable, Sendable {
     @Default<Defaults.Zero> public var total: Int
     @Default<Defaults.List<Item>> public var items: [Item]
+    /// With letters=1: the titles counted by their first letter, for the A–Z bar.
+    @Default<Defaults.List<LetterCount>> public var letters: [LetterCount]
 }
 
 /// A TV library's Recently Added card: a new show, new episodes of a season, or one episode.
