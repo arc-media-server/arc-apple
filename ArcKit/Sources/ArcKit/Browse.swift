@@ -106,10 +106,12 @@ public struct LibraryQuery: Sendable, Hashable {
 
     public init() {}
 
-    /// The /items parameters for `library`'s grid, `limit` titles from `offset`.
-    public func parameters(library: Library, offset: Int, limit: Int) -> [String: String] {
+    /// The /items parameters for `library`'s grid, `limit` titles from `offset`. `letters` asks
+    /// for the A–Z bar's counts too (only sorted by title, where letters mean something).
+    public func parameters(library: Library, offset: Int, limit: Int, letters: Bool = false) -> [String: String] {
         var p = ["library_id": String(library.id), "kind": library.kind == "shows" ? "series" : "movie",
                  "sort": sort.rawValue, "offset": String(offset), "limit": String(limit)]
+        if letters && showsLetters { p["letters"] = "1" }
         if reversed { p["reverse"] = "1" }
         if unwatchedOnly { p["unwatched"] = "1" }
         if let genre { p["genre"] = genre }
@@ -119,6 +121,59 @@ public struct LibraryQuery: Sendable, Hashable {
     }
 
     public var filtered: Bool { unwatchedOnly || genre != nil || decade != nil || resolution != nil }
+
+    /// The A–Z bar is offered with the title sort only, as on the web and Android.
+    public var showsLetters: Bool { sort == .title }
+}
+
+/// How many titles in a listing start with one character of their sort title (GET /items with
+/// letters=1): "a" to "z", or "#" for anything else. They come in title order, so "#" can come
+/// twice: before "a" for digits and punctuation, after "z" for other scripts.
+public struct LetterCount: Codable, Sendable, Hashable {
+    public let letter: String
+    @Default<Defaults.Zero> public var count: Int
+
+    public init(letter: String, count: Int) {
+        self.letter = letter
+        self.count = count
+    }
+}
+
+/// A place on the A–Z bar: the letter as shown ("A", or "#") and where its first title is in the list.
+public struct LetterJump: Sendable, Hashable, Identifiable {
+    public let letter: String
+    public let offset: Int
+    public var id: String { letter }
+}
+
+/// Where each letter's first title is in a title-sorted list, in the list's own order (the web's
+/// and Android's letterOffsets): Z to A when the sort is reversed. Letters with no titles are left
+/// out, and a "#" that comes twice keeps its first place.
+public func letterJumps(_ letters: [LetterCount], reversed: Bool) -> [LetterJump] {
+    var out: [LetterJump] = []
+    var seen: Set<String> = []
+    var at = 0
+    for l in reversed ? letters.reversed() : letters {
+        let letter = l.letter.count == 1 && l.letter.lowercased() >= "a" && l.letter.lowercased() <= "z" ? l.letter.uppercased() : "#"
+        if l.count > 0, seen.insert(letter).inserted { out.append(LetterJump(letter: letter, offset: at)) }
+        at += l.count
+    }
+    return out
+}
+
+/// The requests that load a grid from the `have` titles it holds through `target` and a page
+/// past it, so a jump to a letter lands on a full screen of titles: (offset, limit) pairs, at most
+/// `maxLimit` each (/items takes up to 500).
+public func pagesToReach(_ target: Int, have: Int, total: Int, page: Int, maxLimit: Int = 500) -> [(offset: Int, limit: Int)] {
+    let end = min(total, target + page)
+    var out: [(offset: Int, limit: Int)] = []
+    var at = have
+    while at < end {
+        let limit = min(maxLimit, end - at)
+        out.append((at, limit))
+        at += limit
+    }
+    return out
 }
 
 extension ArcAPI {
@@ -155,6 +210,23 @@ extension ArcAPI {
         try await sendJSON("PUT", "items/\(enc(itemId))/played", ["played": .bool(played)], route: "items/{id}/played")
     }
 
+    /// Marks one season of a show watched or unwatched: the season as the profile's episode order
+    /// numbers it, as `series/{id}/seasons` lists it.
+    public func setPlayed(seriesId: String, seasonNumber: Int, _ played: Bool) async throws {
+        let route = "items/{id}/played"
+        let body = try ArcJSON.encoder.encode(SeasonPlayed(played: played, seasonNumber: seasonNumber))
+        let (status, data) = try await raw("PUT", "items/\(enc(seriesId))/played", body: body, route: route)
+        guard (200...299).contains(status) else { throw failure(status, data, route) }
+    }
+
+    /// Takes a movie or episode out of Continue Watching and Up Next without marking it watched.
+    /// For an episode its whole show goes, until something of it plays again. The resume point is kept.
+    public func removeFromContinue(_ itemId: String) async throws {
+        let route = "home/continue/{id}"
+        let (status, data) = try await raw("DELETE", "home/continue/\(enc(itemId))", route: route)
+        guard (200...299).contains(status) else { throw failure(status, data, route) }
+    }
+
     /// Puts a movie or show on the profile's Watchlist, or takes it off.
     public func setWatchlisted(_ itemId: String, _ on: Bool) async throws {
         try await sendJSON("PUT", "items/\(enc(itemId))/watchlist", ["on": .bool(on)], route: "items/{id}/watchlist")
@@ -167,6 +239,12 @@ extension ArcAPI {
         let (status, data) = try await raw("PATCH", route, body: try ArcJSON.encoder.encode(changes), route: route)
         guard (200...299).contains(status) else { throw failure(status, data, route) }
         return try decode(Prefs.self, data, route)
+    }
+
+    /// A season's watched mark: the season number is sent as a whole number, which Arc requires.
+    struct SeasonPlayed: Encodable {
+        let played: Bool
+        let seasonNumber: Int
     }
 
     func sendJSON(_ method: String, _ path: String, _ body: [String: JSONValue], route: String) async throws {

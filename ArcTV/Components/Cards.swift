@@ -35,6 +35,8 @@ struct MediaCardView: View {
     let card: MediaCard
     let style: CardStyle
     var seasonPosters = false
+    /// The card is in Continue Watching or Up Next: its menu offers Remove from Continue Watching.
+    var continueRow = false
     /// Where the row keeps which card has the focus (Home's hero follows it).
     var focus: FocusState<String?>.Binding
     let focusKey: String
@@ -96,7 +98,7 @@ struct MediaCardView: View {
             .focused(focus, equals: focusKey)
             // VoiceOver (and the walk-through) know a card by its title.
             .accessibilityLabel(Text(name))
-            .contextMenu { TitleActions(item: card.item) }
+            .contextMenu { TitleActions(item: card.item, continueRow: continueRow) }
             // Names centred under the art.
             VStack(alignment: .center, spacing: 2) {
                 Text(name)
@@ -231,13 +233,16 @@ struct ProgressBar: View {
 }
 
 /// A title's actions, from holding Select on its card (Plex's context menu) and on its page:
-/// play, watched or not, the Watchlist, and an episode's show.
+/// play, watched or not, the Watchlist, an episode's show, and taking a title out of Continue
+/// Watching.
 struct TitleActions: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     let item: Item
     var onPage = false
+    /// Opened from a card in Continue Watching or Up Next.
+    var continueRow = false
 
     var body: some View {
         if !onPage && item.playable {
@@ -254,6 +259,13 @@ struct TitleActions: View {
             Button { act("watched") { try await $0.setPlayed(item.id, !item.watched) } } label: {
                 Label(item.watched ? L("actions.mark_unwatched") : L("actions.mark_watched"),
                       systemImage: item.watched ? (onPage ? "checkmark.circle.fill" : "eye.slash") : "checkmark.circle")
+            }
+        }
+        // Out of Continue Watching and Up Next without marking it watched (an episode: its whole
+        // show, until something of it plays again), as the web's card menu does.
+        if continueRow && !onPage {
+            Button { act("remove from continue") { try await $0.removeFromContinue(item.id) } } label: {
+                Label(L("actions.remove_from_continue"), systemImage: "xmark.circle")
             }
         }
         if item.kind == "movie" || item.isSeries {

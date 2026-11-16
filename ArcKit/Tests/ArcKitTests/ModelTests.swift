@@ -53,6 +53,9 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(tabs.map(\.name), ["", "Not in This Order"])
         XCTAssertEqual(tabs.map(\.isUnplaced), [false, true])
         XCTAssertEqual(tabs[1].episodes.map(\.id), ["e9", "e10"])
+        // Not in This Order has no season number, so it can't be marked watched as a season.
+        XCTAssertTrue(tabs[0].markable)
+        XCTAssertFalse(tabs[1].markable)
         // The player's Episodes card: the episode's own tab, playable episodes only.
         let outside = try XCTUnwrap(answer.tab(containing: "e9"))
         XCTAssertTrue(outside.isUnplaced)

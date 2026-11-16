@@ -21,6 +21,7 @@ wider context; decisions waiting for the owner are on arc-media-server#80.
 - Record each change in `docs/changes/YYYY-MM-DD-<slug>.md`; commit messages have a summary, a
   body and the Co-Authored-By trailer. Keep working without check-ins; log product decisions on
   arc-media-server#80; stop only for risky or irreversible things.
+- No agent session links in commits or PRs (no `Claude-Session:` or other chat URLs; owner, 13 November): the Co-Authored-By trailer is the only attribution. Earlier links are removed once, before the repository goes public (arc-media-server `docs/ALPHA-CHECKLIST.md`).
 - Never mark device, playback, HDR, Dolby Vision or audio checks done without evidence from a
   real Apple TV (or iPhone/iPad, for the iOS app). Never point tests at the owner's server,
   data or keys.
