@@ -464,6 +464,16 @@ public struct Season: Codable, Sendable, Hashable, Identifiable {
     public var poster: String?
     @Default<Defaults.List<Item>> public var episodes: [Item]
     public var id: Int { seasonNumber }
+
+    /// Every episode that can be played is watched (episodes not out yet don't count). A season
+    /// with nothing to play isn't watched.
+    public var watched: Bool {
+        let playable = episodes.filter(\.available)
+        return !playable.isEmpty && playable.allSatisfy(\.watched)
+    }
+
+    /// Whether the season has anything to mark watched or unwatched.
+    public var markable: Bool { episodes.contains(where: \.available) }
 }
 
 /// GET /series/{id}/seasons: a show's seasons in the profile's ordering, with their episodes.
