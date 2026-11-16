@@ -55,9 +55,12 @@ final class PlayerModel {
     /// and the episodes of its season.
     private(set) var cast: [Credit] = []
     private(set) var seasonEpisodes: [Item] = []
+    /// The episode is outside the show's order ("Not in This Order"): the Episodes card lists the
+    /// others like it, without "S1 · E8" codes, and there's no Previous Episode.
+    private(set) var outsideOrder = false
     /// The episode before this one in its season, for the Info card's Previous button.
     var previous: Item? {
-        guard let i = seasonEpisodes.firstIndex(where: { $0.id == item.id }), i > 0 else { return nil }
+        guard !outsideOrder, let i = seasonEpisodes.firstIndex(where: { $0.id == item.id }), i > 0 else { return nil }
         return seasonEpisodes[i - 1]
     }
     /// Playback Speed and Zoom Mode (the Playback menu), kept when the stream or engine changes.
@@ -194,10 +197,11 @@ final class PlayerModel {
         }
         guard item.isEpisode, let show = item.parentId else { return }
         do {
-            let seasons = try await api.seasons(seriesId: show).seasons
-            let id = item.id
-            let season = seasons.first { season in season.episodes.contains { $0.id == id } }
-            seasonEpisodes = (season?.episodes ?? []).filter(\.available)
+            // The episode's season, or the episodes outside the order when it's one of them.
+            let tab = try await api.seasons(seriesId: show).tab(containing: item.id)
+            seasonEpisodes = tab?.episodes ?? []
+            outsideOrder = tab?.isUnplaced == true
+            if outsideOrder { log.debug("the episode is outside the show's order") }
         } catch {
             log.debug("episodes unavailable in the player: \(type(of: error))")
         }

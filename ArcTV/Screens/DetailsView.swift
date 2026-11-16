@@ -417,7 +417,8 @@ struct DetailsView: View {
         }
     }
 
-    /// A show's Play: the first episode not yet watched (or part-watched), else the first.
+    /// A show's Play: the first episode not yet watched (or part-watched), else the first. It
+    /// follows the order: episodes outside it ("Not in This Order", numbered -1) are left out.
     private var nextEpisode: Item? {
         let all = seasons.filter { $0.seasonNumber > 0 }.flatMap(\.episodes) + seasons.filter { $0.seasonNumber == 0 }.flatMap(\.episodes)
         let available = all.filter(\.available)
@@ -508,7 +509,7 @@ struct DetailsView: View {
                     LazyHStack(alignment: .top, spacing: 40) {
                         ForEach(seasons[season].episodes) { ep in
                             EpisodeCard(episode: ep, focus: $focused, focusKey: "ep|" + ep.id,
-                                        showsOverview: focused == "ep|" + ep.id) {
+                                        showsOverview: focused == "ep|" + ep.id, unplaced: seasons[season].isUnplaced) {
                                 play(PlayRequest(item: ep, startMs: ep.resumeMs))
                             }
                         }
@@ -548,7 +549,8 @@ struct DetailsView: View {
                 similar = (try? await api.similar(itemId)) ?? similar
             }
             if shown.isSeries {
-                seasons = try await api.seasons(seriesId: itemId).seasons
+                // The order's seasons, then "Not in This Order" for episodes the order doesn't place.
+                seasons = try await api.seasons(seriesId: itemId).tabs(unplacedName: L("details.not_in_order"))
                 if let kept = keepSeason, let at = seasons.firstIndex(where: { $0.seasonNumber == kept }) {
                     // Read again after a season was marked: stay on it rather than move to the next episode's.
                     keepSeason = nil
@@ -575,6 +577,8 @@ struct EpisodeCard: View {
     var focus: FocusState<String?>.Binding
     let focusKey: String
     var showsOverview = false
+    /// Outside the show's order ("Not in This Order"): the order gives it no number, so none shows.
+    var unplaced = false
     let action: () -> Void
 
     private var size: CGSize { CardStyle.thumb.size }
@@ -612,7 +616,7 @@ struct EpisodeCard: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
-            Text(L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
+            Text(unplaced || !episode.hasEpisodeCode ? episode.title : L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
                 .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
             // Kept in the layout so the row doesn't jump as the focus moves.
             Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))

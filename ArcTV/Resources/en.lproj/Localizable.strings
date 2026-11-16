@@ -65,6 +65,7 @@
 "details.resume_episode_left" = "S%1$d E%2$d · %3$@";
 "details.start_watching" = "Start watching · S%1$d, E%2$d";
 "details.season" = "Season %d";
+"details.not_in_order" = "Not in This Order";
 "details.runtime" = "%1$dh %2$dm";
 "details.cast" = "Cast";
 "details.collections" = "Collections";
