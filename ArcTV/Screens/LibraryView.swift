@@ -228,7 +228,7 @@ struct LibraryView: View {
             if let answer {
                 recommended = answer.rows.map { row in
                     LoadedRow(id: row.id, title: rowTitle(row), style: rowStyle(row),
-                              cards: row.items.map { MediaCard(item: $0) })
+                              cards: row.items.map { MediaCard(item: $0) }, continueRow: row.type == "continue")
                 }.filter { !$0.cards.isEmpty }
                 ArcLogApp.debug("library \(library.id): \(recommended.count) recommended rows in \(Int(Date().timeIntervalSince(started) * 1000)) ms")
             }
