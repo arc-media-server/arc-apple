@@ -171,6 +171,10 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     }
 
     public var isEpisode: Bool { kind == "episode" }
+    /// An episode with a place in its show's order, so "S1 · E4" means something. Arc sends season
+    /// 0 and episode 0 for one the order doesn't place ("Not in This Order"); specials keep theirs
+    /// (season 0, episode 1 and on).
+    public var hasEpisodeCode: Bool { isEpisode && ((seasonNumber ?? 0) != 0 || (episodeNumber ?? 0) != 0) }
     public var isSeries: Bool { kind == "series" }
     public var playable: Bool { kind == "movie" || kind == "episode" }
 
@@ -467,6 +471,18 @@ public struct Season: Codable, Sendable, Hashable, Identifiable {
     @Default<Defaults.List<Item>> public var episodes: [Item]
     public var id: Int { seasonNumber }
 
+    /// The number of the "Not in This Order" tab, which no real season has.
+    public static let unplacedNumber = -1
+    /// The episodes the order doesn't place, as a tab after the seasons (`SeasonsResponse.tabs`).
+    public var isUnplaced: Bool { seasonNumber == Self.unplacedNumber }
+
+    public init(seasonNumber: Int, name: String = "", poster: String? = nil, episodes: [Item] = []) {
+        self.seasonNumber = seasonNumber
+        self.name = name
+        self.poster = poster
+        self.episodes = episodes
+    }
+
     /// Every episode that can be played is watched (episodes not out yet don't count). A season
     /// with nothing to play isn't watched.
     public var watched: Bool {
@@ -474,12 +490,29 @@ public struct Season: Codable, Sendable, Hashable, Identifiable {
         return !playable.isEmpty && playable.allSatisfy(\.watched)
     }
 
-    /// Whether the season has anything to mark watched or unwatched.
-    public var markable: Bool { episodes.contains(where: \.available) }
+    /// Whether the season has anything to mark watched or unwatched. Not in This Order isn't a
+    /// season Arc can mark (it has no season number), so it never is.
+    public var markable: Bool { !isUnplaced && episodes.contains(where: \.available) }
 }
 
 /// GET /series/{id}/seasons: a show's seasons in the profile's ordering, with their episodes.
 public struct SeasonsResponse: Codable, Sendable {
     public let series: Item
     @Default<Defaults.List<Season>> public var seasons: [Season]
+    /// Episodes the profile has that this order doesn't place. They're shown, never hidden
+    /// (nothing silently disappears), but have no number in it, and Play and Up Next don't reach them.
+    @Default<Defaults.List<Item>> public var unplaced: [Item]
+
+    /// The show's tabs: the order's seasons, then "Not in This Order" (named `unplacedName`) when
+    /// it has such episodes, as the web's show page and the Roku app have them.
+    public func tabs(unplacedName: String) -> [Season] {
+        unplaced.isEmpty ? seasons : seasons + [Season(seasonNumber: Season.unplacedNumber, name: unplacedName, episodes: unplaced)]
+    }
+
+    /// The tab an episode is in, with only the episodes that can be played: the player's Episodes
+    /// card. Nil when the episode isn't in any.
+    public func tab(containing episodeId: String) -> Season? {
+        guard let tab = tabs(unplacedName: "").first(where: { $0.episodes.contains { $0.id == episodeId } }) else { return nil }
+        return Season(seasonNumber: tab.seasonNumber, name: tab.name, poster: tab.poster, episodes: tab.episodes.filter(\.available))
+    }
 }

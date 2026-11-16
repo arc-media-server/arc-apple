@@ -117,9 +117,12 @@ struct MediaCardView: View {
         let item = card.item
         if let season = card.seasonNumber, card.newEpisodes > 0 { return L("card.new_episodes", season, card.newEpisodes) }
         var parts: [String] = []
-        if item.isEpisode, let s = item.seasonNumber, let e = item.episodeNumber {
+        if item.hasEpisodeCode, let s = item.seasonNumber, let e = item.episodeNumber {
             // A part-watched episode's card is short: S8 · E6 (the strip has the time).
             parts.append(style == .poster || card.progress != nil ? L("card.episode_code", s, e) : L("card.episode", s, e, item.title))
+        } else if item.isEpisode {
+            // Outside the show's order there's no "S0 · E0": the episode's name, on a wide card.
+            if style != .poster && card.progress == nil { parts.append(item.title) }
         } else if let year = item.year {
             parts.append(String(year))
         }
@@ -168,8 +171,8 @@ struct PlayLabel: View {
                     Capsule().fill(.secondary).frame(width: 70, height: 6)
                     Capsule().fill(.primary).frame(width: 70 * CGFloat(Double(resume) / Double(duration)), height: 6)
                 }
-                Text(episode ? L("details.resume_episode_left", season, number, runtimeText(left)) : runtimeText(left))
-            } else if episode {
+                Text(episode && item.hasEpisodeCode ? L("details.resume_episode_left", season, number, runtimeText(left)) : runtimeText(left))
+            } else if episode && item.hasEpisodeCode {
                 Text(number == 1 ? L("details.start_watching", season, number) : L("details.play_episode", season, number))
             } else {
                 Text(L("details.play"))
