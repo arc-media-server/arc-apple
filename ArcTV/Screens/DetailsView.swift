@@ -24,6 +24,8 @@ struct DetailsView: View {
     @FocusState private var focused: String?
     @State private var seasons: [Season] = []
     @State private var season = 0
+    /// The season just marked watched or unwatched, kept showing when the page reads again.
+    @State private var keepSeason: Int?
     /// The artwork's four colours from the server, blended behind the whole page: what's left
     /// when the artwork slides away for a show's episodes.
     @State private var wash: [Color]?
@@ -477,6 +479,15 @@ struct DetailsView: View {
                         Button(s.name.isEmpty ? L("details.season", s.seasonNumber) : s.name) { season = index }
                             .buttonStyle(SeasonTabStyle(chosen: index == season))
                             .focused($focused, equals: "season|\(index)")
+                            // Holding Select on a season marks all its episodes, as Plex's season menu.
+                            .contextMenu {
+                                if s.markable {
+                                    Button { markSeason(s, watched: !s.watched) } label: {
+                                        Label(s.watched ? L("actions.season_unwatched") : L("actions.season_watched"),
+                                              systemImage: s.watched ? "eye.slash" : "checkmark.circle")
+                                    }
+                                }
+                            }
                     }
                 }
                 .padding(.vertical, 12)
@@ -511,6 +522,24 @@ struct DetailsView: View {
         }
     }
 
+    /// Marks every episode of a season watched or unwatched, then reads the page (and Home) again.
+    private func markSeason(_ s: Season, watched: Bool) {
+        guard let api = app.api else { return }
+        let id = itemId
+        Task {
+            do {
+                try await api.setPlayed(seriesId: id, seasonNumber: s.seasonNumber, watched)
+                keepSeason = s.seasonNumber
+                ArcLogApp.debug("title action done: season \(watched ? "watched" : "unwatched")")
+                browse.changed()
+            } catch let error as APIError where error.status == 401 {
+                app.tokenRefused()
+            } catch {
+                ArcLogApp.warn("title action season watched failed: \(type(of: error))")
+            }
+        }
+    }
+
     private func load() async {
         guard let api = app.api else { return }
         do {
@@ -522,7 +551,13 @@ struct DetailsView: View {
             if shown.isSeries {
                 // The order's seasons, then "Not in This Order" for episodes the order doesn't place.
                 seasons = try await api.seasons(seriesId: itemId).tabs(unplacedName: L("details.not_in_order"))
-                if let next = nextEpisode, let at = seasons.firstIndex(where: { $0.seasonNumber == next.seasonNumber }) { season = at }
+                if let kept = keepSeason, let at = seasons.firstIndex(where: { $0.seasonNumber == kept }) {
+                    // Read again after a season was marked: stay on it rather than move to the next episode's.
+                    keepSeason = nil
+                    season = at
+                } else if let next = nextEpisode, let at = seasons.firstIndex(where: { $0.seasonNumber == next.seasonNumber }) {
+                    season = at
+                }
             }
         } catch let error as APIError where error.status == 401 {
             app.tokenRefused()

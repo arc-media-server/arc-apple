@@ -18,6 +18,10 @@ struct LibraryView: View {
     @State private var items: [Item] = []
     @State private var total = 0
     @State private var loadingMore = false
+    /// The A–Z bar's letters (sorted by title), a jump under way, and the title it lands on.
+    @State private var letters: [LetterJump] = []
+    @State private var jumping = false
+    @State private var jumpTarget: String?
     @State private var facets: Facets?
     @State private var collections: [CollectionSummary] = []
     @State private var folders: FolderPage?
@@ -68,7 +72,27 @@ struct LibraryView: View {
         }
     }
 
+    /// Browse, Collections and Folders scroll under the pill bar; sorted by title, Browse has the
+    /// A–Z bar down the right, staying in place as the titles scroll.
     private var browsePage: some View {
+        ScrollViewReader { proxy in
+            HStack(alignment: .top, spacing: 0) {
+                browseScroll
+                if showsLetterBar {
+                    LetterBar(letters: letters) { letter in Task { await jump(to: letter, proxy) } }
+                        // The grid keeps its width: 24 + the bar's 44 + 12 is the 80 it had at the right.
+                        .padding(.top, 140)
+                        .padding(.trailing, 12)
+                }
+            }
+        }
+    }
+
+    private var showsLetterBar: Bool {
+        show == .titles && !loading && problem == nil && query.showsLetters && letters.count > 1
+    }
+
+    private var browseScroll: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 40) {
                 header
@@ -84,7 +108,8 @@ struct LibraryView: View {
                     content
                 }
             }
-            .padding(.horizontal, 80)
+            .padding(.leading, 80)
+            .padding(.trailing, showsLetterBar ? 24 : 80)
             .padding(.vertical, 40)
         }
     }
@@ -199,7 +224,7 @@ struct LibraryView: View {
                 Text(query.filtered ? L("library.nothing_matches") : L("library.empty")).foregroundStyle(ArcColor.muted)
                     .frame(maxWidth: .infinity, minHeight: 400)
             } else {
-                TitleGrid(items: items) { Task { await loadMore() } }
+                TitleGrid(items: items, target: jumpTarget) { Task { await loadMore() } }
                 if loadingMore { ProgressView().frame(maxWidth: .infinity) }
             }
         case .collections:
@@ -228,17 +253,19 @@ struct LibraryView: View {
             if let answer {
                 recommended = answer.rows.map { row in
                     LoadedRow(id: row.id, title: rowTitle(row), style: rowStyle(row),
-                              cards: row.items.map { MediaCard(item: $0) })
+                              cards: row.items.map { MediaCard(item: $0) }, continueRow: row.type == "continue")
                 }.filter { !$0.cards.isEmpty }
                 ArcLogApp.debug("library \(library.id): \(recommended.count) recommended rows in \(Int(Date().timeIntervalSince(started) * 1000)) ms")
             }
             problem = failed
         case .titles:
-            let params = query.parameters(library: library, offset: 0, limit: Self.page)
+            let params = query.parameters(library: library, offset: 0, limit: Self.page, letters: true)
             let (page, failed) = await loadPage(app, "library") { try await $0.items(params) }
             if let page {
                 items = page.items
                 total = page.total
+                letters = letterJumps(page.letters, reversed: query.reversed)
+                jumpTarget = nil
                 ArcLogApp.debug("library \(library.id): \(page.items.count) of \(page.total) titles in \(Int(Date().timeIntervalSince(started) * 1000)) ms")
             }
             problem = failed
@@ -256,7 +283,7 @@ struct LibraryView: View {
 
     /// The next page of titles, once the grid nears its end.
     private func loadMore() async {
-        guard !loadingMore, items.count < total, show == .titles else { return }
+        guard !loadingMore, !jumping, items.count < total, show == .titles else { return }
         loadingMore = true
         defer { loadingMore = false }
         let params = query.parameters(library: library, offset: items.count, limit: Self.page)
@@ -268,6 +295,38 @@ struct LibraryView: View {
         let have = Set(items.map(\.id))
         items += page.items.filter { !have.contains($0.id) }
         total = page.total
+    }
+
+    /// Moves to a letter's first title: loads the titles up to it (and a page more) if the grid
+    /// hasn't reached it yet, scrolls there and gives it the focus.
+    private func jump(to letter: LetterJump, _ proxy: ScrollViewProxy) async {
+        guard !jumping, show == .titles else { return }
+        jumping = true
+        defer { jumping = false }
+        let started = Date(), had = items.count
+        let asked = query
+        for chunk in pagesToReach(letter.offset, have: items.count, total: total, page: Self.page) {
+            // A page that arrives after the grid moved on (another sort, a reload) is dropped.
+            guard chunk.offset == items.count, query == asked else { break }
+            let params = query.parameters(library: library, offset: chunk.offset, limit: chunk.limit)
+            let (page, _) = await loadPage(app, "library letter") { try await $0.items(params) }
+            guard let page, query == asked, chunk.offset == items.count else { break }
+            let have = Set(items.map(\.id))
+            items += page.items.filter { !have.contains($0.id) }
+            total = page.total
+            if page.items.isEmpty { break }
+        }
+        guard items.indices.contains(letter.offset) else {
+            ArcLogApp.debug("library \(library.id): a letter's titles didn't load")
+            return
+        }
+        let id = items[letter.offset].id
+        ArcLogApp.debug("library \(library.id): jumped to a letter, \(items.count - had) more titles in \(Int(Date().timeIntervalSince(started) * 1000)) ms")
+        proxy.scrollTo(id, anchor: .top)
+        // A moment later, once the grid has built the card it scrolled to.
+        jumpTarget = nil
+        try? await Task.sleep(for: .milliseconds(100))
+        jumpTarget = id
     }
 
     private func loadFacets() async {

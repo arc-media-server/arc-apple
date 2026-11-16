@@ -215,6 +215,8 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
 public struct ItemPage: Codable, Sendable {
     @Default<Defaults.Zero> public var total: Int
     @Default<Defaults.List<Item>> public var items: [Item]
+    /// With letters=1: the titles counted by their first letter, for the A–Z bar.
+    @Default<Defaults.List<LetterCount>> public var letters: [LetterCount]
 }
 
 /// A TV library's Recently Added card: a new show, new episodes of a season, or one episode.
@@ -480,6 +482,17 @@ public struct Season: Codable, Sendable, Hashable, Identifiable {
         self.poster = poster
         self.episodes = episodes
     }
+
+    /// Every episode that can be played is watched (episodes not out yet don't count). A season
+    /// with nothing to play isn't watched.
+    public var watched: Bool {
+        let playable = episodes.filter(\.available)
+        return !playable.isEmpty && playable.allSatisfy(\.watched)
+    }
+
+    /// Whether the season has anything to mark watched or unwatched. Not in This Order isn't a
+    /// season Arc can mark (it has no season number), so it never is.
+    public var markable: Bool { !isUnplaced && episodes.contains(where: \.available) }
 }
 
 /// GET /series/{id}/seasons: a show's seasons in the profile's ordering, with their episodes.

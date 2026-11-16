@@ -37,7 +37,7 @@ struct HeroRows<Header: View>: View {
                                 LazyHStack(alignment: .top, spacing: 36) {
                                     ForEach(row.cards) { card in
                                         MediaCardView(card: card, style: row.style, seasonPosters: row.seasonPosters,
-                                                      focus: $focused, focusKey: row.id + "|" + card.id) { open(card) }
+                                                      continueRow: row.continueRow, focus: $focused, focusKey: row.id + "|" + card.id) { open(card) }
                                     }
                                 }
                                 .padding(.horizontal, 80)

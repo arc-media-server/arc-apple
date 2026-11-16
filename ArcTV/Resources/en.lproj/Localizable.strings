@@ -83,6 +83,9 @@
 "actions.watchlist_add" = "Add to Watchlist";
 "actions.watchlist_remove" = "Remove from Watchlist";
 "actions.go_to_show" = "Go to Show";
+"actions.remove_from_continue" = "Remove from Continue Watching";
+"actions.season_watched" = "Mark Season as Watched";
+"actions.season_unwatched" = "Mark Season as Unwatched";
 
 "library.count" = "%d titles";
 "library.count_filtered" = "%d titles match";
@@ -138,6 +141,8 @@
 "library.empty" = "This library is empty. Add files to its folders and Arc will find them.";
 "library.nothing_matches" = "Nothing matches these filters.";
 "library.no_collections" = "This library has no collections yet.";
+"library.jump_to" = "Jump to %@";
+"library.letter_other" = "Numbers and Symbols";
 
 "browse.titles_count" = "%d titles";
 "browse.videos_count" = "%d videos";
