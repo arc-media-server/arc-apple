@@ -5,6 +5,8 @@ import SwiftUI
 /// shows its page; `more` is asked for when the last row comes into view, for paging.
 struct TitleGrid: View {
     let items: [Item]
+    /// A title to move the focus to (a letter's first title, from the A–Z bar).
+    var target: String?
     var more: (() -> Void)?
     @Environment(\.openRoute) private var openRoute
     @FocusState private var focused: String?
@@ -18,6 +20,40 @@ struct TitleGrid: View {
                     .onAppear { if index >= items.count - 12 { more?() } }
             }
         }
+        .onChange(of: target) { _, new in if let new { focused = new } }
+    }
+}
+
+/// The A–Z bar down the right of a title-sorted library, as Plex's: only the letters that have
+/// titles, in the list's order; Select moves to that letter's first title.
+struct LetterBar: View {
+    let letters: [LetterJump]
+    let jump: (LetterJump) -> Void
+
+    var body: some View {
+        VStack(spacing: 2) {
+            ForEach(letters) { letter in
+                Button { jump(letter) } label: {
+                    Text(letter.letter).font(.caption.weight(.semibold)).frame(width: 44, height: 30)
+                }
+                .buttonStyle(LetterStyle())
+                .accessibilityLabel(L("library.jump_to", letter.letter == "#" ? L("library.letter_other") : letter.letter))
+            }
+        }
+        .focusSection()
+    }
+}
+
+/// A letter on the A–Z bar: dimmed, and white with black when focused, as the sidebar's places.
+private struct LetterStyle: ButtonStyle {
+    @Environment(\.isFocused) private var focused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(focused ? Color.black : ArcColor.muted)
+            .background(Capsule().fill(focused ? Color.white : Color.clear))
+            .scaleEffect(focused ? 1.2 : 1)
+            .animation(.easeOut(duration: 0.15), value: focused)
     }
 }
 
