@@ -29,8 +29,8 @@ ready-made screen needs AVPlayer, so mpv can't use it.
 The build is GPL-3.0, with FFmpeg's GPL parts enabled. Arc is AGPL-3.0-only, which may be
 combined with GPL-3.0 (section 13), and Arc's source is public, so using it is allowed.
 
-The App Store is the same grey area every GPL app there is in. The App Store exception on
-arc-media-server#80 covers Arc's own code only, not mpv's or FFmpeg's. If a contributor ever
+The App Store is the same grey area every GPL app there is in. The App Store exception (decision:
+arc-media-server#477) would cover Arc's own code only, not mpv's or FFmpeg's. If a contributor ever
 objected and the app were removed, Arc falls back to Apple's player.
 
 The build's Apple-specific patches are mainly by edde746, with Alex Kim (vo_avfoundation) and

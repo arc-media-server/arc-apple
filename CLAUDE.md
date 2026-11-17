@@ -7,7 +7,7 @@ arc-media-server/arc-media-server (Go, with a web app); the Android TV app is
 arc-media-server/arc-android and is the closest model for this one. The owner (GitHub: JonzaUK)
 drives product vision; agents (Claude, Codex) do most implementation. Read `README.md` and
 `docs/changes/` (what was built and why). The server repo's CLAUDE.md and docs/API.md are the
-wider context; decisions waiting for the owner are on arc-media-server#80.
+wider context; decisions waiting for the owner are arc-media-server issues labelled `owner decision`.
 
 ## Workflow (same as the other repos)
 
@@ -19,8 +19,10 @@ wider context; decisions waiting for the owner are on arc-media-server#80.
     agent's branch whose commit message contains `[build]`. macOS minutes count ten times, so
     batch fixes and run it before a PR, not on every push.
 - Record each change in `docs/changes/YYYY-MM-DD-<slug>.md`; commit messages have a summary, a
-  body and the Co-Authored-By trailer. Keep working without check-ins; log product decisions on
-  arc-media-server#80; stop only for risky or irreversible things.
+  body and the Co-Authored-By trailer. Keep working without check-ins; note product decisions in
+  the PR (a "Decisions" section), or, when the owner really has to choose, in its own
+  arc-media-server issue labelled `owner decision` (#80 is closed; don't add to it); stop only for
+  risky or irreversible things.
 - No agent session links in commits or PRs (no `Claude-Session:` or other chat URLs; owner, 13 November): the Co-Authored-By trailer is the only attribution. Earlier links are removed once, before the repository goes public (arc-media-server `docs/ALPHA-CHECKLIST.md`).
 - Never mark device, playback, HDR, Dolby Vision or audio checks done without evidence from a
   real Apple TV (or iPhone/iPad, for the iOS app). Never point tests at the owner's server,
@@ -41,12 +43,12 @@ wider context; decisions waiting for the owner are on arc-media-server#80.
   (no banner). The player's controls follow the web and Android players' set and order. Brand
   colours live only in `ArcTV/App/Theme.swift`.
 - **Plex first:** match how Plex for Apple TV (and Plex for iOS, for the iPhone/iPad app)
-  behaves unless there's a clear reason not to; log differences on arc-media-server#80. Settings come from the server (the profile's prefs) rather
+  behaves unless there's a clear reason not to; note differences in the PR. Settings come from the server (the profile's prefs) rather
   than app-only options where Arc already has them.
 - **Text:** every user-facing string in `ArcTV/Resources/en.lproj/Localizable.strings`, used via `L()`.
 - **Logging:** `ArcLog` (os.Logger, subsystem org.arcmediaserver.apple, category Arc): outcomes and
   failures, detail only at debug; never tokens, passwords or full URLs. Each PR says what it logs.
-- **Licence:** AGPL-3.0-only until the App Store exception on arc-media-server#80 is decided.
+- **Licence:** AGPL-3.0-only until the App Store exception (arc-media-server#477) is decided.
 
 ## Layout
 

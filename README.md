@@ -6,8 +6,8 @@ repository and shared code (ArcKit). It uses only Arc's stable `/api/v1`, like t
 ([arc-android](https://github.com/arc-media-server/arc-android)).
 
 Status: just started. Playback uses Apple's own player first, behind a small player interface,
-so a different playback engine can be added later without rebuilding the app (decisions on
-arc-media-server#80).
+so a different playback engine can be added later without rebuilding the app (see
+`docs/changes/`).
 
 ## Licence
 
