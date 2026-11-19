@@ -113,8 +113,10 @@ public final class ArcAPI: Sendable {
         try await get("items/\(enc(id))/artwork/palette", route: "items/{id}/artwork/palette")
     }
 
-    public func seasons(seriesId: String) async throws -> SeasonsResponse {
-        try await get("series/\(enc(seriesId))/seasons", route: "series/{id}/seasons")
+    /// A show's seasons in the profile's order. `missing` adds the episodes the provider knows
+    /// about that have no file (`available` false), as the web's Show Missing.
+    public func seasons(seriesId: String, missing: Bool = false) async throws -> SeasonsResponse {
+        try await get("series/\(enc(seriesId))/seasons" + (missing ? "?missing=1" : ""), route: "series/{id}/seasons")
     }
 
     public func collection(_ id: String) async throws -> CollectionPage {

@@ -274,6 +274,16 @@ struct TitleActions: View {
                 Label(on ? L("actions.watchlist_remove") : L("actions.watchlist_add"), systemImage: on ? "bookmark.slash" : "bookmark")
             }
         }
+        // What a playlist can hold: films, episodes and whole shows.
+        if item.kind == "movie" || item.isEpisode || item.isSeries {
+            Button { browse.addingToPlaylist = item } label: {
+                Label(L("actions.add_to_playlist"), systemImage: "text.badge.plus")
+            }
+        }
+        // The profile's own stars, on the title's page (as the web's StarRating).
+        if onPage && (item.kind == "movie" || item.isEpisode || item.isSeries) {
+            rate
+        }
         if item.kind == "movie" || item.isEpisode {
             Button { browse.together.inviting = .init(itemId: item.id, title: item.title) } label: {
                 Label(L("together.menu"), systemImage: "person.2")
@@ -284,6 +294,31 @@ struct TitleActions: View {
                 Label(L("actions.go_to_show"), systemImage: "tv")
             }
         }
+    }
+
+    /// Rate…: five stars in halves, best first, the current one ticked, and Clear Rating.
+    private var rate: some View {
+        let current = item.userData?.rating ?? 0
+        return Menu {
+            Section(L("rating.title")) {
+                ForEach(StarRating.choices, id: \.self) { r in
+                    let text = L("rating.choice", StarRating.stars(r) ?? "", StarRating.outOfFive(r))
+                    Button { setRating(r) } label: {
+                        if r == current { Label(text, systemImage: "checkmark") } else { Text(text) }
+                    }
+                }
+                if current > 0 {
+                    Button { setRating(0) } label: { Label(L("rating.clear"), systemImage: "xmark") }
+                }
+            }
+        } label: {
+            Label(StarRating.stars(current).map { L("rating.title") + " " + $0 } ?? L("actions.rate"),
+                  systemImage: current > 0 ? "star.fill" : "star")
+        }
+    }
+
+    private func setRating(_ rating: Int) {
+        act(rating == 0 ? "rating cleared" : "rating") { try await $0.setRating(item.id, rating) }
     }
 
     private func act(_ what: String, _ call: @escaping (ArcAPI) async throws -> Void) {

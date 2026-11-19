@@ -83,4 +83,15 @@ final class ModelTests: XCTestCase {
         XCTAssertFalse(try item(#"{"id":"e10","kind":"episode","title":"Unaired Pilot"}"#).hasEpisodeCode)
         XCTAssertFalse(try item(#"{"id":"m1","kind":"movie","title":"Serenity","season_number":1,"episode_number":1}"#).hasEpisodeCode)
     }
+
+    func testTheMostSoundChannelsAreSentOnlyWhenKnown() throws {
+        let known = PlayerCaps(containers: [], video: [], audio: ["aac"], maxHeight: 1080, maxAudioChannels: 6)
+        let unknown = PlayerCaps(containers: [], video: [], audio: ["aac"], maxHeight: 1080)
+        let a = String(decoding: try ArcJSON.encoder.encode(known), as: UTF8.self)
+        let b = String(decoding: try ArcJSON.encoder.encode(unknown), as: UTF8.self)
+        XCTAssertTrue(a.contains(#""max_audio_channels":6"#))
+        XCTAssertFalse(b.contains("max_audio_channels"))
+        // Trying again after a failure keeps it.
+        XCTAssertEqual(known.fallback(after: "direct").maxAudioChannels, 6)
+    }
 }

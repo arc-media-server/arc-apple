@@ -21,7 +21,8 @@ enum DeviceCaps {
             // Unknown rather than SDR only when the TV isn't showing HDR now (an SDR menu mode):
             // Arc then sends HDR as it is and the Apple TV maps it itself.
             hdrFormats: hdr ? ["hdr10", "hlg", "dolby_vision"] : nil,
-            dolbyVisionProfiles: hdr ? [8] : nil
+            dolbyVisionProfiles: hdr ? [8] : nil,
+            maxAudioChannels: audioChannels
         )
     }
 
@@ -43,8 +44,20 @@ enum DeviceCaps {
             hdrFormats: hdr ? ["hdr10", "hdr10_plus", "hlg", "dolby_vision"] : nil,
             dolbyVisionProfiles: hdr ? [5, 7, 8] : nil,
             // 10-bit H.264 (Hi10P) decodes in software; HEVC and AV1 10-bit in hardware.
-            maxBitDepth: 10
+            maxBitDepth: 10,
+            maxAudioChannels: audioChannels
         )
+    }
+
+    /// The most channels the sound output takes now (the TV or receiver over HDMI: 2, 6 or 8),
+    /// so Arc mixes down only what it can't play; nil when tvOS doesn't say, which leaves the
+    /// sound as it is. Read for each new player, so a receiver switched on later counts.
+    @MainActor
+    private static var audioChannels: Int? {
+        let n = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
+        let channels: Int? = (1...32).contains(n) ? n : nil
+        ArcLogApp.debug("sound output channels: \(channels.map(String.init) ?? "unknown")")
+        return channels
     }
 
     @MainActor
