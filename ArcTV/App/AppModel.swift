@@ -29,6 +29,8 @@ final class AppModel {
     private(set) var onLocalNetwork: Bool?
     /// A Top Shelf link waiting for Home (after the profile is chosen, on a cold start).
     var pendingLink: Shared.Link?
+    /// The profile's Hide Spoilers, for every screen (from its prefs, kept up to date by Settings).
+    var hideSpoilers = false
 
     private let token = TokenBox()
     private let log = ArcLog.shared

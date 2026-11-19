@@ -40,6 +40,7 @@ extension View {
 /// A title on a row or grid, in its row's style: rounded artwork that lifts on focus (tvOS's
 /// card), how far through as a thin bar inside it, and its name with the year or time left under.
 struct MediaCardView: View {
+    @Environment(AppModel.self) private var app
     let card: MediaCard
     let style: CardStyle
     var seasonPosters = false
@@ -54,8 +55,10 @@ struct MediaCardView: View {
         VStack(alignment: .center, spacing: 10) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: card.art(style, seasonPosters: seasonPosters))
+                    let art = card.spoilerSafe(app.hideSpoilers)
+                    ArtworkImage(path: art.art(style, seasonPosters: seasonPosters))
                         .frame(width: style.size.width, height: style.size.height)
+                        .blur(radius: style != .poster && art.blurred ? 24 : 0)
                         .clipped()
                     if style == .backdrop, let logo = card.logo {
                         ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
@@ -376,5 +379,14 @@ struct TitleActions: View {
                 ArcLogApp.warn("title action \(what) failed: \(type(of: error))")
             }
         }
+    }
+}
+
+extension Item {
+    /// Its description, or a note in its place while it's an episode Hide Spoilers keeps back;
+    /// nil when it has none.
+    func overview(hidingSpoilers hide: Bool) -> String? {
+        if spoilerHidden(hide) { return L("spoiler.hidden_description") }
+        return overview.flatMap { $0.isEmpty ? nil : $0 }
     }
 }

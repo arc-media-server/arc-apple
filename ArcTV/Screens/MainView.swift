@@ -412,6 +412,7 @@ struct MainView: View {
             let (prefs, all) = try await (prefsAnswer, librariesAnswer)
             libraries = orderedLibraries(all, order: prefs.libraryOrder)
             watchlistAt = prefs.watchlistPosition
+            app.hideSpoilers = prefs.hideSpoilers
         } catch let error as APIError where error.status == 401 {
             app.tokenRefused()
         } catch is CancellationError {

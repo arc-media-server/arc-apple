@@ -244,7 +244,7 @@ struct DetailsView: View {
                     if !shown.genres.isEmpty { Text(shown.genres.prefix(3).joined(separator: " · ")) }
                 }
                 .font(.callout.weight(.medium))
-                if let overview = shown.overview {
+                if let overview = shown.overview(hidingSpoilers: app.hideSpoilers) {
                     Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(4).frame(maxWidth: 900, alignment: .leading)
                 }
                 HStack(spacing: 12) {
@@ -380,7 +380,7 @@ struct DetailsView: View {
         let playback = playbackLines(file)
         return VStack(alignment: .leading, spacing: 24) {
             Text(L("details.about")).font(.title3.weight(.semibold))
-            if let overview = shown.overview, !overview.isEmpty {
+            if let overview = shown.overview(hidingSpoilers: app.hideSpoilers) {
                 InfoCard(title: nil, width: 1100) {
                     Text(shown.title).font(.headline)
                     Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(10)
@@ -658,6 +658,7 @@ struct DetailsView: View {
 /// name, and its overview while it has the focus. One that hasn't aired yet is dimmed with the day
 /// it releases; it can take the focus but doesn't play.
 struct EpisodeCard: View {
+    @Environment(AppModel.self) private var app
     let episode: Item
     var focus: FocusState<String?>.Binding
     let focusKey: String
@@ -670,12 +671,14 @@ struct EpisodeCard: View {
 
     var body: some View {
         let card = MediaCard(item: episode)
+        let art = card.spoilerSafe(app.hideSpoilers)
         let releases = episode.upcomingRelease()
         VStack(alignment: .leading, spacing: 10) {
             Button { if episode.available { action() } } label: {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: episode.images?.primary ?? episode.images?.seriesBackdrop)
-                        .frame(width: size.width, height: size.height).clipped()
+                    ArtworkImage(path: art.thumb)
+                        .frame(width: size.width, height: size.height)
+                        .blur(radius: art.blurred ? 24 : 0).clipped()
                         .opacity(episode.available ? 1 : 0.25)
                     // Not out yet: the day it releases. Out, but with no file (Show Missing
                     // Episodes): says so.
@@ -708,7 +711,7 @@ struct EpisodeCard: View {
                 .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
                 .belowLiftedCard(focus.wrappedValue == focusKey)
             // Kept in the layout so the row doesn't jump as the focus moves.
-            Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
+            Text(episode.overview(hidingSpoilers: app.hideSpoilers) ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
                 .lineLimit(3, reservesSpace: true).frame(width: size.width, alignment: .leading)
                 .opacity(showsOverview ? 1 : 0)
                 .animation(.easeInOut(duration: 0.2), value: showsOverview)
