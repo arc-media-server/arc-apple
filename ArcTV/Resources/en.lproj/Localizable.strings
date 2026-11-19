@@ -217,6 +217,8 @@
 "settings.auto_play" = "Auto-Play Next Episode";
 "settings.auto_skip" = "Skip Intros Automatically";
 "settings.theme_music" = "Theme Music";
+"settings.hide_spoilers" = "Hide Spoilers";
+"spoiler.hidden_description" = "Description hidden until you watch it.";
 "settings.subtitles" = "Subtitles";
 "settings.subtitles_last" = "In the language I last chose";
 "settings.subtitles_foreign" = "When the audio is in another language";
