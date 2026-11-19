@@ -240,6 +240,7 @@
 "about.address" = "Address";
 "about.licences" = "Licences";
 "about.open_source" = "Open Source Licences";
+"about.product_name" = "Arc Media Server";
 "about.licences_note" = "Arc for Apple TV is free software. Its source, and the source of the open source code it is built with, is at github.com/arc-media-server.";
 "settings.attribution" = "Metadata and artwork from TMDB and TheTVDB. This product uses the TMDB API but is not endorsed or certified by TMDB.";
 

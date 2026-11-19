@@ -2,7 +2,7 @@ import ArcKit
 import SwiftUI
 
 /// Arc's colours: the web app's dark tokens (web/src/index.css), the same as the Android app's
-/// Theme.kt. Arc is dark only. The brand accent is defined here and nowhere else.
+/// Theme.kt. Arc is dark only, with no brand colour: the logo is white (docs/brand).
 enum ArcColor {
     /// A soft dark grey, as the reference design's dark look, rather than near-black.
     static let background = Color(hex: 0x1C1D21)
@@ -15,15 +15,8 @@ enum ArcColor {
     static let foreground = Color(hex: 0xF5F5F7)
     static let muted = Color(hex: 0xA1A1AD)
     static let subtle = Color(hex: 0x6B6B78)
-    /// Focus, highlights and text on dark.
-    static let accent = Color(hex: 0x2BB3A3)
-    /// Filled buttons, progress and toggles (with white text).
-    static let accentStrong = Color(hex: 0x0B7D72)
-    /// The light end of the logo's gradient (#7fdccd → #0b7d72).
-    static let accentLight = Color(hex: 0x7FDCCD)
     static let error = Color(hex: 0xFF6B6B)
 
-    static let accentGradient = LinearGradient(colors: [accentLight, accentStrong], startPoint: .topLeading, endPoint: .bottomTrailing)
 
     /// A profile's colour (web/src/components/Avatar.tsx), as a gradient's two ends.
     static func profile(_ name: String) -> [Color] {
@@ -86,7 +79,7 @@ extension Color {
 extension View {
     /// A glass button; `prominent` for the page's main action (Play) and the chosen option: white
     /// with black text, as the sidebar's chosen place (owner, 1 November: no UI colour, only white
-    /// and black; the accent stays for the logo alone).
+    /// and black; the logo is white too).
     @ViewBuilder func arcGlassButton(prominent: Bool = false) -> some View {
         #if compiler(>=6.2) // Xcode 26: the tvOS 26 SDK has the glass styles
         if #available(tvOS 26.0, *) {
