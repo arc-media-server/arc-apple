@@ -29,6 +29,14 @@ func runtimeText(_ minutes: Int) -> String {
     return minutes % 60 == 0 ? L("details.hours", minutes / 60) : L("details.hours_minutes", minutes / 60, minutes % 60)
 }
 
+extension View {
+    /// The words under a card move down as its artwork lifts on focus (tvOS's card grows about a
+    /// tenth), so the two never touch, as tvOS's own lockups and Plex's posters do.
+    func belowLiftedCard(_ lifted: Bool) -> some View {
+        offset(y: lifted ? 22 : 0).animation(.easeOut(duration: 0.18), value: lifted)
+    }
+}
+
 /// A title on a row or grid, in its row's style: rounded artwork that lifts on focus (tvOS's
 /// card), how far through as a thin bar inside it, and its name with the year or time left under.
 struct MediaCardView: View {
@@ -106,6 +114,7 @@ struct MediaCardView: View {
                 if let sub = subtitle { Text(sub).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
             .frame(width: style.size.width, alignment: .center)
+            .belowLiftedCard(focus.wrappedValue == focusKey)
         }
     }
 

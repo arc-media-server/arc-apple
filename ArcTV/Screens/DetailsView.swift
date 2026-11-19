@@ -214,8 +214,11 @@ struct DetailsView: View {
                     }
                     .buttonStyle(.card)
                     .focused($focused, equals: "extra|" + e.id)
-                    Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
-                    Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
+                    Group {
+                        Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
+                        Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
+                    }
+                    .belowLiftedCard(focused == "extra|" + e.id)
                 }
             }
         }
@@ -703,11 +706,13 @@ struct EpisodeCard: View {
             .focused(focus, equals: focusKey)
             Text(unplaced || !episode.hasEpisodeCode ? episode.title : L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
                 .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
+                .belowLiftedCard(focus.wrappedValue == focusKey)
             // Kept in the layout so the row doesn't jump as the focus moves.
             Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
                 .lineLimit(3, reservesSpace: true).frame(width: size.width, alignment: .leading)
                 .opacity(showsOverview ? 1 : 0)
                 .animation(.easeInOut(duration: 0.2), value: showsOverview)
+                .belowLiftedCard(focus.wrappedValue == focusKey)
         }
     }
 }
