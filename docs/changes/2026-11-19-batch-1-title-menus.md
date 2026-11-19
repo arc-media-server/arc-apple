@@ -48,7 +48,7 @@ with Play queues: it plays through a server play queue, which the Apple TV app d
   round icons, so the star is one more. Plex for Apple TV has Rate in its title's menu.
 - **Ratings on title pages only,** not card menus, as on Android.
 - **No new playlists from the TV,** as on Android: typing a name with the remote is slow.
-- **One change note for the batch** rather than one per feature, to save effort (owner, 19 November).
+- **One change note for the batch** rather than one per feature, to save effort; easy to split if the owner prefers.
 
 ## Checks
 
