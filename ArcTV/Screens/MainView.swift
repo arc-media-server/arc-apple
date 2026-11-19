@@ -21,6 +21,11 @@ final class Browse {
     private(set) var changes = 0
     /// Watch Together: Home's rooms and the room this Apple TV is in.
     let together = WatchTogetherModel()
+    /// This Apple TV's play queue, which Arc keeps (Home's Queue row), and whether the server has
+    /// queues for the profile (Play Next, Add to Queue and Shuffle show only then).
+    let queues = PlayQueues()
+    private(set) var queue: PlayQueue?
+    private(set) var queuesUsable = false
     /// Add to Playlist's list is open for this title, over the pages.
     var addingToPlaylist: Item?
     /// A short note at the top of the screen ("Added “Heat” to Movie Night"), gone after a moment.
@@ -29,6 +34,20 @@ final class Browse {
 
     func play(_ request: PlayRequest) { playing = request }
     func changed() { changes += 1 }
+
+    /// Reads the queue Arc has for this Apple TV and profile (Home, after playing).
+    func refreshQueue(_ api: ArcAPI) async {
+        queuesUsable = await queues.supported(api)
+        queue = queuesUsable ? await queues.refresh(api) : nil
+    }
+
+    /// Runs a queue call and shows what the queue is now.
+    @discardableResult
+    func withQueue<T>(_ call: (PlayQueues) async -> T) async -> T {
+        let answer = await call(queues)
+        queue = await queues.queue
+        return answer
+    }
 
     func note(_ text: String) {
         notice = text

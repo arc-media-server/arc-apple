@@ -91,6 +91,17 @@
 "actions.hide_missing" = "Hide Missing Episodes";
 "actions.add_to_playlist" = "Add to Playlist…";
 "actions.rate" = "Rate…";
+"actions.more" = "More";
+"actions.play_next" = "Play Next";
+"actions.add_to_queue" = "Add to Queue";
+"rating.rated" = "Rate… %@";
+"queue.playing_next" = "“%@” plays next";
+"queue.added" = "Added “%@” to the queue";
+"queue.failed" = "Couldn't queue “%@”. Try again.";
+"queue.shuffle_failed" = "Couldn't shuffle. Try again.";
+"home.queue" = "Queue";
+"details.shuffle" = "Shuffle";
+"actions.shuffle_season" = "Shuffle Season";
 "rating.title" = "Your Rating";
 "rating.choice" = "%1$@ (%2$@ of 5)";
 "rating.clear" = "Clear Rating";
