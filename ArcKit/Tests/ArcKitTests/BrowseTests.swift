@@ -242,4 +242,38 @@ final class BrowseTests: XCTestCase {
         season.episodes[0].userData = try ArcJSON.decoder.decode(UserData.self, from: Data(#"{"played":true}"#.utf8))
         XCTAssertTrue(season.watched)
     }
+
+    func testMediaFiltersBecomeItemsParameters() {
+        let movies = Library(id: 3, name: "Films", kind: "movies")
+        var q = LibraryQuery()
+        q.setUnwatched(true)
+        q.setWatchState("played")
+        XCTAssertFalse(q.unwatchedOnly, "Watch Status turns Unwatched Only off")
+        q.dynamicRange = "dolby_vision"
+        q.videoCodec = "hevc"
+        q.audioCodec = "truehd"
+        q.audioChannels = "8"
+        XCTAssertEqual(q.filterCount, 5)
+        XCTAssertEqual(q.parameters(library: movies, offset: 0, limit: 60),
+                       ["library_id": "3", "kind": "movie", "sort": "title", "offset": "0", "limit": "60", "watch_state": "played",
+                        "dynamic_range": "dolby_vision", "video_codec": "hevc", "audio_codec": "truehd", "audio_channels": "8"])
+        q.setUnwatched(true)
+        XCTAssertNil(q.watchState, "Unwatched Only turns Watch Status off")
+        q.sort = .added
+        let cleared = q.cleared
+        XCTAssertFalse(cleared.filtered)
+        XCTAssertEqual(cleared.sort, .added)
+    }
+
+    func testAMediaFilterIsOfferedOnlyWhenThereIsAChoice() throws {
+        let facets = try ArcJSON.decoder.decode(Facets.self, from: Data(#"{"video_codecs":[{"value":"hevc","count":9}],"audio_codecs":[{"value":"truehd","count":2},{"value":"eac3","count":7}],"audio_channels":[{"value":"6","count":3}],"dynamic_ranges":[]}"#.utf8))
+        XCTAssertEqual(Facets.offered(facets.videoCodecs, chosen: nil), [], "all HEVC: nothing to narrow")
+        XCTAssertEqual(Facets.offered(facets.audioCodecs, chosen: nil), ["truehd", "eac3"])
+        XCTAssertEqual(Facets.offered(facets.videoCodecs, chosen: "hevc"), ["hevc"], "a chosen value stays")
+        XCTAssertEqual(Facets.offered(facets.dynamicRanges, chosen: "hlg"), ["hlg"], "even when the library no longer has it")
+        XCTAssertEqual(Quality.videoCodec("h264"), "H.264")
+        XCTAssertEqual(Quality.audioCodec("eac3"), "DD+")
+        XCTAssertEqual(Quality.dynamicRange("hdr10_plus"), "HDR10+")
+        XCTAssertNil(Quality.dynamicRange("unknown"))
+    }
 }
