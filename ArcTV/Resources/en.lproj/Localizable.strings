@@ -297,7 +297,7 @@
 "player.restart" = "Start from the Beginning";
 "player.previous" = "Previous Episode";
 "details.extras" = "Trailers & Extras";
-"details.related" = "Related";
+"details.more_like_this" = "More Like This";
 "details.starring" = "Starring";
 "details.about" = "About";
 "details.details" = "Details";
