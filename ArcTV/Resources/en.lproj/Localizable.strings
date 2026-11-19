@@ -104,6 +104,10 @@
 "queue.added" = "Added “%@” to the queue";
 "queue.failed" = "Couldn't queue “%@”. Try again.";
 "queue.shuffle_failed" = "Couldn't shuffle. Try again.";
+"queue.move_earlier" = "Move Earlier";
+"queue.move_later" = "Move Later";
+"queue.remove" = "Remove from Queue";
+"queue.edit_failed" = "Couldn't change the queue. Try again.";
 "home.queue" = "Queue";
 "details.shuffle" = "Shuffle";
 "actions.shuffle_season" = "Shuffle Season";
