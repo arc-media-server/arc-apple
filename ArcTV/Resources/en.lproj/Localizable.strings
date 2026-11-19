@@ -16,6 +16,11 @@
 "server.invalid" = "That doesn't look like an address. Try something like 192.168.1.20.";
 "server.not_arc" = "That address answered, but it isn't an Arc server.";
 "server.unreachable" = "Nothing answered at that address. Check it, and that the Apple TV is on the same network.";
+"server.on_network" = "On your network";
+"server.looking" = "Looking for Arc on your network…";
+"server.none_found" = "No Arc server answered on this network. Type its address above.";
+"server.search_again" = "Search Again";
+"server.found_detail" = "%@ · Arc %@";
 
 "signin.title" = "Sign in to Arc";
 "signin.step_open" = "On your phone or computer, open Arc and choose Link a Device in the profile menu.";

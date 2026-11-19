@@ -7,6 +7,10 @@ struct ServerView: View {
     @State private var address = ""
     @State private var problem: String?
     @State private var checking = false
+    /// Arc servers found on the home network (as Android's server screen): nil off a home network.
+    @State private var found: [FoundServer]? = nil
+    @State private var searching = false
+    @FocusState private var focus: String?
 
     var body: some View {
         VStack(spacing: 32) {
@@ -18,6 +22,7 @@ struct ServerView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .frame(width: 900)
+                .focused($focus, equals: "address")
                 .onSubmit(connect)
             Text(L("server.port_note")).font(.caption).foregroundStyle(ArcColor.subtle)
             if let problem {
@@ -28,8 +33,69 @@ struct ServerView: View {
             }
             .arcGlassButton(prominent: true)
             .disabled(checking)
+            if let found { onNetwork(found) }
         }
         .padding(80)
+        .task { await search() }
+    }
+
+    /// On your network: each Arc that answered, then Search Again when none did.
+    @ViewBuilder private func onNetwork(_ servers: [FoundServer]) -> some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 16) {
+                Text(L("server.on_network")).font(.headline)
+                if searching { ProgressView() }
+            }
+            ForEach(servers) { server in
+                Button { connect(to: server.address) } label: {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(server.name).font(.body.weight(.semibold))
+                        Text(L("server.found_detail", server.address.host ?? ServerAddress.display(server.address), server.version))
+                            .font(.caption).foregroundStyle(ArcColor.muted)
+                    }
+                    .frame(width: 600, alignment: .leading)
+                }
+                .arcGlassButton()
+                .focused($focus, equals: server.id)
+                .disabled(checking)
+            }
+            if servers.isEmpty && searching {
+                Text(L("server.looking")).font(.callout).foregroundStyle(ArcColor.muted)
+            } else if servers.isEmpty {
+                Text(L("server.none_found")).font(.callout).foregroundStyle(ArcColor.muted)
+                Button(L("server.search_again")) { Task { await search() } }.arcGlassButton()
+            }
+        }
+        .focusSection()
+    }
+
+    /// Asks each address on the Apple TV's home network for Arc (arc-media-server `GET /discover`).
+    private func search() async {
+        guard !searching else { return }
+        guard let me = LocalNetwork.ipv4() else {
+            found = nil
+            ArcLogApp.info("network search skipped: not on a home network")
+            return
+        }
+        found = []
+        searching = true
+        let started = Date()
+        let session = Discovery.quickSession()
+        let hosts = Discovery.candidates(address: me.address, prefix: me.prefix)
+        let all = await Discovery.scan(hosts: hosts, session: session) { server in
+            await MainActor.run {
+                guard found?.contains(where: { $0.id == server.id }) == false else { return }
+                found?.append(server)
+                // The first server takes the focus, so one press connects (as Plex lists its
+                // servers), unless an address is being typed.
+                if found?.count == 1 && address.isEmpty && focus != "address" { focus = server.id }
+            }
+        }
+        session.finishTasksAndInvalidate()
+        found = all
+        searching = false
+        let ms = Int(Date().timeIntervalSince(started) * 1000)
+        ArcLogApp.info("network search: \(all.count) Arc found of \(hosts.count) addresses in \(ms) ms")
     }
 
     private func connect() {
@@ -37,6 +103,10 @@ struct ServerView: View {
             problem = L("server.invalid")
             return
         }
+        connect(to: url)
+    }
+
+    private func connect(to url: URL) {
         problem = nil
         checking = true
         Task {
