@@ -165,6 +165,7 @@ struct RouteView: View {
 /// libraries on the web), Playlists and Settings. Back from a place's first page opens the sidebar.
 struct MainView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
     @State private var browse = Browse()
     @State private var libraries: [Library] = []
     @State private var watchlistAt = 0
@@ -296,6 +297,15 @@ struct MainView: View {
             await loadTabs()
         }
         .task(id: app.pendingLink) { await followLink() }
+        // Live updates while the profile's pages are on screen; in the background the stream
+        // closes, and it catches up (resuming from its place) on coming back.
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { app.live.start() } else { app.live.stop() }
+        }
+        .onDisappear { app.live.stop() }
+        // The sidebar's libraries, and Home's Watch Together rooms, as Arc says they change.
+        .onChange(of: app.liveHome) { Task { await loadTabs() } }
+        .onChange(of: app.liveTogether) { if let api = app.api { Task { await browse.together.refreshRooms(api) } } }
     }
 
     /// A Top Shelf link: Select opens the title's page on Home, Play plays it.
