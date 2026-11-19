@@ -361,7 +361,7 @@ struct DetailsView: View {
     }
 
     private var related: some View {
-        section(L("details.related")) {
+        section(L("details.more_like_this")) {
             ForEach(similar) { other in
                 MediaCardView(card: MediaCard(item: other), style: .poster, focus: $focused, focusKey: other.id) { openRoute(.item(other)) }
             }
