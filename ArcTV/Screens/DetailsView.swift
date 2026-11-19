@@ -40,6 +40,9 @@ struct DetailsView: View {
     @State private var entered = false
     @State private var problem: String?
     @State private var extra: Extra?
+    /// The title's theme tune, played once per visit (not again on coming back from the player).
+    @State private var theme = ThemeMusic()
+    @State private var themePlayed = false
 
     private var shown: Item { item ?? initial }
     private var backdropPath: String? { shown.images?.backdrop ?? shown.images?.seriesBackdrop }
@@ -169,6 +172,23 @@ struct DetailsView: View {
             wash = colors.map(Color.init)
         }
         .fullScreenCover(item: $extra) { ExtraPlayerScreen(extra: $0) }
+        // The theme tune, once the title is read; it fades out when anything opens over the page.
+        .task(id: item?.id) { await startTheme() }
+        .onDisappear { theme.stop() }
+        .onChange(of: browse.playing) { _, now in if now != nil { theme.stop() } }
+        .onChange(of: extra?.id) { _, now in if now != nil { theme.stop() } }
+    }
+
+    /// Plays the theme tune of a film or show (not an episode), as the web does, when the
+    /// profile's Theme Music is on.
+    private func startTheme() async {
+        guard !themePlayed, let item, !item.isEpisode, let path = item.themeUrl,
+              browse.playing == nil, let api = app.api, let url = api.absolute(path) else { return }
+        themePlayed = true
+        // On unless turned off; if the preferences can't be read, play it as the web would.
+        let on = (try? await api.prefs())?.themeMusic ?? true
+        guard on, !Task.isCancelled, browse.playing == nil else { return }
+        theme.play(url, headers: api.authorization)
     }
 
     /// Trailers and other extras, as Plex's page has them; each plays in a simple player.
