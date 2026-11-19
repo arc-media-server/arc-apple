@@ -21,9 +21,23 @@ final class Browse {
     private(set) var changes = 0
     /// Watch Together: Home's rooms and the room this Apple TV is in.
     let together = WatchTogetherModel()
+    /// Add to Playlist's list is open for this title, over the pages.
+    var addingToPlaylist: Item?
+    /// A short note at the top of the screen ("Added “Heat” to Movie Night"), gone after a moment.
+    private(set) var notice: String?
+    @ObservationIgnored private var noticeTask: Task<Void, Never>?
 
     func play(_ request: PlayRequest) { playing = request }
     func changed() { changes += 1 }
+
+    func note(_ text: String) {
+        notice = text
+        noticeTask?.cancel()
+        noticeTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(3))
+            if !Task.isCancelled { self?.notice = nil }
+        }
+    }
 }
 
 /// Opens a page on the current tab's stack.
@@ -245,10 +259,16 @@ struct MainView: View {
                                               set: { browse.together.enteringCode = $0 })) {
             JoinCodeView().environment(browse)
         }
+        // Add to Playlist's list, from a card's menu or a title's page.
+        .fullScreenCover(item: Binding(get: { browse.playing == nil ? browse.addingToPlaylist : nil },
+                                       set: { browse.addingToPlaylist = $0 })) { item in
+            PlaylistPanel(item: item).environment(browse).presentationBackground(.clear)
+        }
         .overlay {
-            if browse.playing == nil, let notice = browse.together.notice { NoticeCapsule(text: notice) }
+            if browse.playing == nil, let notice = browse.together.notice ?? browse.notice { NoticeCapsule(text: notice) }
         }
         .animation(.easeInOut(duration: 0.25), value: browse.together.notice)
+        .animation(.easeInOut(duration: 0.25), value: browse.notice)
         .task {
             // Joining a room, or the room moving to another title, opens the player on it.
             browse.together.openPlayer = { [browse] item, startMs in

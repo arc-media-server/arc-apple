@@ -86,6 +86,22 @@
 "actions.remove_from_continue" = "Remove from Continue Watching";
 "actions.season_watched" = "Mark Season as Watched";
 "actions.season_unwatched" = "Mark Season as Unwatched";
+"actions.show_missing" = "Show Missing Episodes";
+"actions.hide_missing" = "Hide Missing Episodes";
+"actions.add_to_playlist" = "Add to Playlist…";
+"actions.rate" = "Rate…";
+"rating.title" = "Your Rating";
+"rating.choice" = "%1$@ (%2$@ of 5)";
+"rating.clear" = "Clear Rating";
+"playlist_add.title" = "Add to Playlist";
+"playlist_add.body" = "Add “%@” to:";
+"playlist_add.body_show" = "Add every episode of “%@” to:";
+"playlist_add.count" = "%d titles";
+"playlist_add.none" = "You have no playlists to add to. Make one on the web first.";
+"playlist_add.load_failed" = "Your playlists couldn't be loaded.";
+"playlist_add.added" = "Added “%1$@” to %2$@";
+"playlist_add.failed" = "Couldn't add “%@”. Try again.";
+"details.not_on_disk" = "Not on Disk";
 
 "library.count" = "%d titles";
 "library.count_filtered" = "%d titles match";
