@@ -28,6 +28,21 @@ public struct Facets: Codable, Sendable {
     @Default<Defaults.List<FacetValue>> public var genres: [FacetValue]
     @Default<Defaults.List<FacetValue>> public var decades: [FacetValue]
     @Default<Defaults.List<FacetValue>> public var resolutions: [FacetValue]
+    /// What the files are (arc-media-server FILTER-DISCOVERY-API.md): lower-case ffprobe names,
+    /// channel counts as strings ("6" is 5.1), and dolby_vision, hdr10_plus, hlg, hdr10, sdr or unknown.
+    @Default<Defaults.List<FacetValue>> public var videoCodecs: [FacetValue]
+    @Default<Defaults.List<FacetValue>> public var audioCodecs: [FacetValue]
+    @Default<Defaults.List<FacetValue>> public var audioChannels: [FacetValue]
+    @Default<Defaults.List<FacetValue>> public var dynamicRanges: [FacetValue]
+
+    /// The choices a media filter offers, as the web's `offered`: none when the library has only
+    /// one value (nothing to narrow), unless one is already chosen; a chosen value the library no
+    /// longer has stays listed, so it can be seen and changed.
+    public static func offered(_ values: [FacetValue], chosen: String?) -> [String] {
+        var out = values.map(\.value)
+        if let chosen, !out.contains(chosen) { out.append(chosen) }
+        return out.count > 1 || chosen != nil ? out : []
+    }
 }
 
 /// A collection as listed (libraries/{id}/collections, search).
@@ -113,8 +128,35 @@ public struct LibraryQuery: Sendable, Hashable {
     public var genre: String?
     public var decade: String?
     public var resolution: String?
+    /// Watched or Not Started (`played` / `unstarted`); excludes Unwatched Only, as Arc requires.
+    public private(set) var watchState: String?
+    public var dynamicRange: String?
+    public var videoCodec: String?
+    public var audioCodec: String?
+    /// A channel count, as a string ("6" is 5.1).
+    public var audioChannels: String?
 
     public init() {}
+
+    /// Unwatched Only on or off; on turns Watch Status off (Arc refuses both).
+    public mutating func setUnwatched(_ on: Bool) {
+        unwatchedOnly = on
+        if on { watchState = nil }
+    }
+
+    /// Watch Status (`played`, `unstarted`, or nil for any); a choice turns Unwatched Only off.
+    public mutating func setWatchState(_ state: String?) {
+        watchState = state
+        if state != nil { unwatchedOnly = false }
+    }
+
+    /// Every filter off; the sort stays.
+    public var cleared: LibraryQuery {
+        var q = LibraryQuery()
+        q.sort = sort
+        q.reversed = reversed
+        return q
+    }
 
     /// The /items parameters for `library`'s grid, `limit` titles from `offset`. `letters` asks
     /// for the A–Z bar's counts too (only sorted by title, where letters mean something).
@@ -127,10 +169,21 @@ public struct LibraryQuery: Sendable, Hashable {
         if let genre { p["genre"] = genre }
         if let decade { p["decade"] = decade }
         if let resolution { p["resolution"] = resolution }
+        if let watchState { p["watch_state"] = watchState }
+        if let dynamicRange { p["dynamic_range"] = dynamicRange }
+        if let videoCodec { p["video_codec"] = videoCodec }
+        if let audioCodec { p["audio_codec"] = audioCodec }
+        if let audioChannels { p["audio_channels"] = audioChannels }
         return p
     }
 
-    public var filtered: Bool { unwatchedOnly || genre != nil || decade != nil || resolution != nil }
+    /// The filters chosen, for the Filters button's name and Clear Filters.
+    public var filterCount: Int {
+        [unwatchedOnly ? "1" : nil, genre, decade, resolution, watchState, dynamicRange, videoCodec, audioCodec, audioChannels]
+            .compactMap { $0 }.count
+    }
+
+    public var filtered: Bool { filterCount > 0 }
 
     /// The A–Z bar is offered with the title sort only, as on the web and Android.
     public var showsLetters: Bool { sort == .title }
