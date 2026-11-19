@@ -247,7 +247,7 @@ struct MainView: View {
         .environment(browse)
         .fullScreenCover(item: Binding(get: { browse.playing }, set: { browse.playing = $0 }),
                          onDismiss: { browse.changed() }) { request in
-            PlayerScreen(request: request).environment(browse)
+            PrerollGate(request: request) { PlayerScreen(request: request) }.environment(browse)
         }
         // Watch Together's invite panel and code entry, over the pages. (Inside the player the
         // player shows the invite panel itself: one full-screen cover at a time.)

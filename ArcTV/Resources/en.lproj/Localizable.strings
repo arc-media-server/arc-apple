@@ -4,6 +4,7 @@
 "common.cancel" = "Cancel";
 "common.retry" = "Try Again";
 "common.close" = "Close";
+"player.skip_preroll" = "Skip";
 "common.unreachable" = "Arc couldn't be reached. Check the server is running and on the same network.";
 
 "server.title" = "Connect to your Arc server";

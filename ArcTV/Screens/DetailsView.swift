@@ -7,7 +7,13 @@ struct PlayRequest: Identifiable, Hashable {
     let startMs: Int64
     /// Played in a Watch Together room: the room decides where and whether it plays.
     var together = false
-    var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") }
+    /// The player moving on by itself (Up Next, the queue): no pre-rolls.
+    var playingOn = false
+    var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") + (playingOn ? "|on" : "") }
+
+    /// A film started from the beginning plays the pre-roll videos first, as on the web: not when
+    /// resuming, in Watch Together, or when the player moves on.
+    var wantsPreroll: Bool { item.kind == "movie" && startMs == 0 && !together && !playingOn }
 }
 
 /// A title's page: its background, logo or title, details, Play and its actions; a show's seasons

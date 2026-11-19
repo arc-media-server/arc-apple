@@ -62,7 +62,8 @@ struct ExtraPlayerScreen: View {
     }
 }
 
-private struct ExtraSurface: UIViewRepresentable {
+/// An engine's picture as a view (extras and pre-rolls).
+struct ExtraSurface: UIViewRepresentable {
     let engine: PlaybackEngine
     func makeUIView(context: Context) -> UIView { engine.view }
     func updateUIView(_ uiView: UIView, context: Context) {}
