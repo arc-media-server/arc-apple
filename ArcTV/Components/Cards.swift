@@ -274,15 +274,17 @@ struct TitleActions: View {
                 Label(on ? L("actions.watchlist_remove") : L("actions.watchlist_add"), systemImage: on ? "bookmark.slash" : "bookmark")
             }
         }
-        // What a playlist can hold: films, episodes and whole shows.
-        if item.kind == "movie" || item.isEpisode || item.isSeries {
-            Button { browse.addingToPlaylist = item } label: {
-                Label(L("actions.add_to_playlist"), systemImage: "text.badge.plus")
+        // A card's menu lists them all; the page keeps them in its ⋯ menu, as Plex's and Android's.
+        if !onPage {
+            queueAndPlaylist
+        } else if queueable {
+            Menu {
+                queueAndPlaylist
+                // The profile's own stars, on the title's page (as the web's StarRating).
+                rate
+            } label: {
+                Label(L("actions.more"), systemImage: "ellipsis")
             }
-        }
-        // The profile's own stars, on the title's page (as the web's StarRating).
-        if onPage && (item.kind == "movie" || item.isEpisode || item.isSeries) {
-            rate
         }
         if item.kind == "movie" || item.isEpisode {
             Button { browse.together.inviting = .init(itemId: item.id, title: item.title) } label: {
@@ -293,6 +295,37 @@ struct TitleActions: View {
             Button { openRoute(.item(Item(id: show, kind: "series", title: item.seriesTitle ?? item.title))) } label: {
                 Label(L("actions.go_to_show"), systemImage: "tv")
             }
+        }
+    }
+
+    /// Films, episodes and whole shows: what queues and playlists hold, and what can be rated.
+    private var queueable: Bool { item.kind == "movie" || item.isEpisode || item.isSeries }
+
+    @ViewBuilder private var queueAndPlaylist: some View {
+        if queueable {
+            if browse.queuesUsable {
+                Button { addToQueue(next: true) } label: {
+                    Label(L("actions.play_next"), systemImage: "text.line.first.and.arrowtriangle.forward")
+                }
+                Button { addToQueue(next: false) } label: {
+                    Label(L("actions.add_to_queue"), systemImage: "text.append")
+                }
+            }
+            Button { browse.addingToPlaylist = item } label: {
+                Label(L("actions.add_to_playlist"), systemImage: "text.badge.plus")
+            }
+        }
+    }
+
+    /// Play Next or Add to Queue (a show adds its episodes); with no queue yet, it starts one
+    /// without playing, and Home's Queue row appears.
+    private func addToQueue(next: Bool) {
+        guard let api = app.api else { return }
+        let item = item, browse = browse
+        Task {
+            let q = await browse.withQueue { await $0.add(api, [item.id], next: next) }
+            if q != nil { ArcLogApp.debug("title action done: \(next ? "play next" : "add to queue")") }
+            browse.note(q == nil ? L("queue.failed", item.title) : L(next ? "queue.playing_next" : "queue.added", item.title))
         }
     }
 
@@ -312,7 +345,7 @@ struct TitleActions: View {
                 }
             }
         } label: {
-            Label(StarRating.stars(current).map { L("rating.title") + " " + $0 } ?? L("actions.rate"),
+            Label(StarRating.stars(current).map { L("rating.rated", $0) } ?? L("actions.rate"),
                   systemImage: current > 0 ? "star.fill" : "star")
         }
     }

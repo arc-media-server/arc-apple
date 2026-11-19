@@ -9,6 +9,8 @@ struct PlayRequest: Identifiable, Hashable {
     var together = false
     /// The player moving on by itself (Up Next, the queue): no pre-rolls.
     var playingOn = false
+    /// The play queue's entry this is (Home's Queue row, Shuffle, the queue moving on).
+    var queueEntry: String?
     var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") + (playingOn ? "|on" : "") }
 
     /// A film started from the beginning plays the pre-roll videos first, as on the web: not when
@@ -312,6 +314,13 @@ struct DetailsView: View {
                 }
                 .arcGlassButton()
                 .focused($focused, equals: Self.playKey)
+                // A show's episodes in a random order, as a new play queue (as the web's Shuffle).
+                if browse.queuesUsable && shuffleCandidates(nil).count > 1 {
+                    Button { shuffle(nil) } label: {
+                        Label(L("details.shuffle"), systemImage: "shuffle")
+                    }
+                    .roundIconButton()
+                }
             }
             // The page's other actions are round glass icons, as the Android app's title page.
             TitleActions(item: shown, onPage: true).roundIconButton()
@@ -516,6 +525,11 @@ struct DetailsView: View {
                                               systemImage: s.watched ? "eye.slash" : "checkmark.circle")
                                     }
                                 }
+                                if browse.queuesUsable && shuffleCandidates(s).count > 1 {
+                                    Button { shuffle(s) } label: {
+                                        Label(L("actions.shuffle_season"), systemImage: "shuffle")
+                                    }
+                                }
                                 if !s.isUnplaced {
                                     Button { toggleMissing(on: s) } label: {
                                         Label(showMissing ? L("actions.hide_missing") : L("actions.show_missing"),
@@ -572,6 +586,31 @@ struct DetailsView: View {
             } catch {
                 ArcLogApp.warn("title action season watched failed: \(type(of: error))")
             }
+        }
+    }
+
+    /// The episodes Shuffle plays: a season's on disk, or the show's (its order's seasons, then
+    /// specials). Not the Not in This Order tab, which has no place in the order.
+    private func shuffleCandidates(_ s: Season?) -> [Item] {
+        if let s { return s.isUnplaced ? [] : s.episodes.filter(\.available) }
+        let ordered = seasons.filter { $0.seasonNumber > 0 } + seasons.filter { $0.seasonNumber == 0 }
+        return ordered.flatMap(\.episodes).filter(\.available)
+    }
+
+    /// Shuffle (the show) or Shuffle Season: a new queue in a random order, playing its first.
+    private func shuffle(_ s: Season?) {
+        guard let api = app.api else { return }
+        let ids = shuffleCandidates(s).map(\.id)
+        let browse = browse
+        Task {
+            let entry = await browse.withQueue { await $0.startShuffled(api, ids) }
+            guard let entry, let first = entry.item else {
+                ArcLogApp.warn("shuffling \(s == nil ? "a show" : "a season") failed")
+                browse.note(L("queue.shuffle_failed"))
+                return
+            }
+            ArcLogApp.debug("shuffled \(ids.count) episodes")
+            play(PlayRequest(item: first, startMs: 0, queueEntry: entry.id))
         }
     }
 

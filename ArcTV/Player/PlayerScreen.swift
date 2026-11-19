@@ -127,6 +127,7 @@ struct PlayerScreen: View {
             let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: EngineChoice.make()) { app.tokenRefused() }
             model = m
             m.start()
+            Task { await syncQueue(m) }
             nowPlaying.start(m.item, durationMs: m.durationMs, api: api, actions: .init(
                 toggle: { togglePlay(); showControls() },
                 play: { if model?.playing == false { togglePlay() } },
@@ -158,7 +159,14 @@ struct PlayerScreen: View {
                 if room.isHost, let next = model?.next, model?.prefs?.autoPlay != false, !upNextDismissed { playNext(next) }
                 return
             }
-            if let next = model?.next, model?.prefs?.autoPlay != false, !upNextDismissed { playNext(next) } else { dismiss() }
+            if let next = model?.next, playsOn, !upNextDismissed {
+                playNext(next)
+            } else {
+                // Played to its end with nothing queued after it: Arc forgets the queue. (Back
+                // keeps it, so more can be added from Home.)
+                if model?.nextIsQueued != true { endQueue() }
+                dismiss()
+            }
         }
         .onChange(of: together.room) { _, now in
             guard request.together, let now else { return }
@@ -192,7 +200,7 @@ struct PlayerScreen: View {
         .onChange(of: model?.upNextDue ?? false) { _, due in
             guard due, !upNextDismissed, !menuOpen, room?.isHost ?? true else { return }
             focus = .upNext
-            if model?.prefs?.autoPlay != false { startCountdown() }
+            if playsOn { startCountdown() }
         }
     }
 
@@ -317,7 +325,39 @@ struct PlayerScreen: View {
             return
         }
         ArcLogApp.info("playing the next episode")
-        browse.play(PlayRequest(item: next, startMs: next.resumeMs, playingOn: true))
+        let entry = model?.queued.flatMap { $0.item.id == next.id ? $0.entry : nil }
+        browse.play(PlayRequest(item: next, startMs: next.resumeMs, playingOn: true, queueEntry: entry))
+    }
+
+    /// The next title plays by itself: Auto-Play is on, or it was queued on purpose.
+    private var playsOn: Bool { model?.prefs?.autoPlay != false || model?.nextIsQueued == true }
+
+    // MARK: - Play queue
+
+    /// Keeps Arc's play queue in step with what's playing, as the web player does: playing a
+    /// title starts a new queue of it; one from the queue moves it there; Auto-Play's next episode
+    /// is added to the end. Then the queue's next title becomes Up Next. (Not in Watch Together,
+    /// where the room decides.)
+    private func syncQueue(_ m: PlayerModel) async {
+        guard !request.together, let api = app.api else { return }
+        let item = request.item
+        await browse.withQueue { queues in
+            if let entry = request.queueEntry {
+                await queues.moveTo(api, entry)
+            } else if request.playingOn {
+                await queues.carryOn(api, with: item.id)
+            } else {
+                await queues.start(api, [item.id])
+            }
+        }
+        let next = browse.queue?.nextPlayable()
+        m.setQueued(next?.item, entry: next?.id)
+    }
+
+    private func endQueue() {
+        guard !request.together, let api = app.api else { return }
+        let browse = browse
+        Task { await browse.withQueue { await $0.end(api) } }
     }
 
     // MARK: - Watch Together

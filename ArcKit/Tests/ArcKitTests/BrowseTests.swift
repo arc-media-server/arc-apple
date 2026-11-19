@@ -276,4 +276,52 @@ final class BrowseTests: XCTestCase {
         XCTAssertEqual(Quality.dynamicRange("hdr10_plus"), "HDR10+")
         XCTAssertNil(Quality.dynamicRange("unknown"))
     }
+
+    private static let caps = #"{"api_version":1,"features":{"play_queues":{"supported":true,"available":true,"allowed":true}}}"#
+    private static func queue(_ rev: Int, current: String, _ entries: [(String, String, Bool)]) -> String {
+        let list = entries.map { id, item, ok in #"{"id":"\#(id)","item_id":"\#(item)","available":\#(ok),"item":{"id":"\#(item)","kind":"movie","title":"T"}}"# }
+        return #"{"id":"q1","revision":\#(rev),"current_entry_id":"\#(current)","entries":[\#(list.joined(separator: ","))]}"#
+    }
+
+    func testAQueueStartsAddsAndRetriesAfterAChangeElsewhere() async throws {
+        let queues = PlayQueues()
+        answer(200, Self.caps)
+        answer(201, Self.queue(1, current: "a", [("a", "m1", true)]))
+        // Play Next: Arc refuses the old revision, the queue is read again and the edit retried.
+        answer(409, #"{"error":"changed"}"#)
+        answer(200, Self.queue(2, current: "a", [("a", "m1", true)]))
+        answer(200, Self.queue(3, current: "a", [("a", "m1", true), ("b", "m2", false), ("c", "m3", true)]))
+        let started = await queues.start(api, ["m1"])
+        XCTAssertEqual(started?.revision, 1)
+        let added = await queues.add(api, ["m2", "m3"], next: true)
+        XCTAssertEqual(added?.revision, 3)
+        XCTAssertEqual(StubArc.requests.map(\.httpMethod), ["GET", "POST", "PATCH", "GET", "PATCH"])
+        XCTAssertEqual(StubArc.bodies[1], #"{"item_ids":["m1"]}"#)
+        XCTAssertEqual(StubArc.bodies[2], #"{"item_ids":["m2","m3"],"operation":"next","revision":1}"#)
+        XCTAssertEqual(StubArc.bodies[4], #"{"item_ids":["m2","m3"],"operation":"next","revision":2}"#)
+        // The next one to play passes over an entry that can't be played.
+        XCTAssertEqual(added?.nextPlayable()?.id, "c")
+        XCTAssertEqual(added?.upcoming().map(\.id), ["a", "c"])
+    }
+
+    func testAServerWithoutQueuesIsLeftAlone() async {
+        let queues = PlayQueues()
+        answer(200, #"{"api_version":1,"features":{}}"#)
+        let q = await queues.start(api, ["m1"])
+        XCTAssertNil(q)
+        XCTAssertEqual(StubArc.requests.count, 1, "only capabilities was asked")
+    }
+
+    func testMovingOnAdvancesOrSelects() async throws {
+        let queues = PlayQueues()
+        answer(200, Self.caps)
+        answer(201, Self.queue(1, current: "a", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        answer(200, Self.queue(2, current: "b", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        answer(200, Self.queue(3, current: "a", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        await queues.start(api, ["m1", "m2", "m3"])
+        await queues.moveTo(api, "b")
+        await queues.moveTo(api, "a")
+        XCTAssertEqual(StubArc.bodies[2], #"{"operation":"advance","revision":1}"#)
+        XCTAssertEqual(StubArc.bodies[3], #"{"entry_id":"a","operation":"select","revision":2}"#)
+    }
 }
