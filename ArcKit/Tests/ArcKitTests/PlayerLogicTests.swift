@@ -103,4 +103,21 @@ final class PlayerAPITests: XCTestCase {
         XCTAssertTrue(body.contains(#""burn_subtitle":"s:4""#), body)
         XCTAssertTrue(body.contains(#""audio_stream":2"#), body)
     }
+
+    func testSubtitleTiming() {
+        XCTAssertEqual(SubtitleTiming.shifted(0, SubtitleTiming.stepMs), 500)
+        XCTAssertEqual(SubtitleTiming.shifted(-500, -500), -1_000)
+        XCTAssertEqual(SubtitleTiming.shifted(10_000, 500), 10_000)
+        XCTAssertEqual(SubtitleTiming.shifted(-10_000, -500), -10_000)
+        XCTAssertEqual(SubtitleTiming.shifted(3_000, nil), 0)
+        XCTAssertEqual(SubtitleTiming.key(fileId: 7, trackId: "s:2"), "7:s:2")
+        // Later subtitles show the line that was due earlier.
+        let cues = [SubtitleCue(startMs: 1_000, endMs: 2_000, text: "one"), SubtitleCue(startMs: 3_000, endMs: 4_000, text: "two")]
+        XCTAssertEqual(cue(at: SubtitleTiming.cueTimeMs(2_500, offsetMs: 1_000), in: cues)?.text, "one")
+        XCTAssertEqual(cue(at: SubtitleTiming.cueTimeMs(2_500, offsetMs: -1_000), in: cues)?.text, "two")
+        XCTAssertEqual(SubtitleTiming.seconds(1_500), "+1.5")
+        XCTAssertEqual(SubtitleTiming.seconds(-500), "\u{2212}0.5")
+        XCTAssertEqual(SubtitleTiming.seconds(0), "0.0")
+        XCTAssertEqual(SubtitleTiming.seconds(10_000), "+10.0")
+    }
 }
