@@ -125,12 +125,17 @@ struct ServerView: View {
     }
 }
 
-/// Arc's name in the logo's teal gradient.
+/// Arc's logo (arc-media-server `docs/brand`, chosen 13 November): white, no colour. The main
+/// logo (the TV beside "arc / MEDIA SERVER") tops the server, sign-in and profile screens, as on
+/// Android; the stacked one (the TV above the name) is for About.
 struct ArcWordmark: View {
+    var stacked = false
+
     var body: some View {
-        Text("Arc")
-            .font(.system(size: 76, weight: .bold, design: .rounded))
-            .foregroundStyle(ArcColor.accentGradient)
-            .accessibilityHidden(true)
+        Image(stacked ? "ArcLogoStacked" : "ArcLogo")
+            .resizable()
+            .scaledToFit()
+            .frame(height: stacked ? 220 : 88)
+            .accessibilityLabel(Text(L("about.product_name")))
     }
 }
