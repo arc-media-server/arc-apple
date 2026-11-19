@@ -211,6 +211,16 @@ public final class ArcAPI: Sendable {
         return APIError(status: status, message: message, needs: obj?["needs"] as? String)
     }
 
+    /// The live updates stream (GET /api/v1/events), resuming after `cursor` when there is one.
+    func eventsRequest(cursor: String?) -> URLRequest? {
+        guard let url = URL(string: base + "/api/v1/events") else { return nil }
+        var request = URLRequest(url: url)
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        if let token = token() { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
+        if let cursor { request.setValue(cursor, forHTTPHeaderField: "Last-Event-ID") }
+        return request
+    }
+
     /// Sends a request to /api/v1/`path`; `route` names it in logs without ids or query strings.
     func raw(_ method: String, _ path: String, body: Data? = nil, route: String) async throws -> (Int, Data) {
         guard let url = URL(string: base + "/api/v1/" + path) else { throw UnexpectedAnswer() }

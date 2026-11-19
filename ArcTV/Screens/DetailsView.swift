@@ -172,6 +172,14 @@ struct DetailsView: View {
             withAnimation(.easeOut(duration: 0.4).delay(0.35)) { entered = true }
         }
         .task(id: "\(browse.changes)|\(showMissing)") { await load() }
+        // Live updates: the page reloads in place when Arc says the title changed (not under the
+        // player: it reads again after playing anyway).
+        .onChange(of: app.liveTitle) {
+            guard browse.playing == nil else { return }
+            // Staying on the season being looked at.
+            if seasons.indices.contains(season) { keepSeason = seasons[season].seasonNumber }
+            Task { await load() }
+        }
         .task(id: paletteSource) {
             // The server keeps each backdrop's colours; an older server without them, or a title
             // without artwork, keeps Arc's grey blend.

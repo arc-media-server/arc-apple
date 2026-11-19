@@ -12,6 +12,17 @@ final class TokenBox: @unchecked Sendable {
     func set(_ token: String?) { lock.lock(); value = token; lock.unlock() }
 }
 
+/// The API client and change handler live updates read from their own thread.
+final class LiveRelay: @unchecked Sendable {
+    private let lock = NSLock()
+    private var current: ArcAPI?
+    var api: ArcAPI? {
+        get { lock.lock(); defer { lock.unlock() }; return current }
+        set { lock.lock(); current = newValue; lock.unlock() }
+    }
+    var changed: @MainActor (Set<String>) -> Void = { _ in }
+}
+
 /// What the app knows about its server and who's watching. The server's address is kept in
 /// UserDefaults; the device token in the Keychain.
 @MainActor
@@ -32,10 +43,37 @@ final class AppModel {
     /// The profile's Hide Spoilers, for every screen (from its prefs, kept up to date by Settings).
     var hideSpoilers = false
 
+    /// Arc's live updates (GET /api/v1/events) while a profile's pages are on screen: each count
+    /// goes up when Arc says something those pages show changed, and they reload in place.
+    private(set) var liveHome = 0
+    private(set) var liveTitle = 0
+    private(set) var liveTogether = 0
+    @ObservationIgnored private let relay: LiveRelay
+    @ObservationIgnored let live: LiveUpdates
+
+    init() {
+        let relay = LiveRelay()
+        self.relay = relay
+        live = LiveUpdates(api: { relay.api }) { topics in
+            Task { @MainActor in relay.changed(topics) }
+        }
+        relay.changed = { [weak self] topics in self?.liveChanged(topics) }
+    }
+
     private let token = TokenBox()
     private let log = ArcLog.shared
     private static let serverKey = "server"
     private static let serverNameKey = "server_name"
+
+    private func liveChanged(_ topics: Set<String>) {
+        log.debug("live updates: \(topics.sorted().joined(separator: ", "))")
+        if LiveTopics.touches(topics, LiveTopics.home) { liveHome += 1 }
+        if LiveTopics.touches(topics, LiveTopics.title) { liveTitle += 1 }
+        if LiveTopics.touches(topics, LiveTopics.together) { liveTogether += 1 }
+        if LiveTopics.touches(topics, LiveTopics.prefs), let api {
+            Task { if let prefs = try? await api.prefs() { hideSpoilers = prefs.hideSpoilers } }
+        }
+    }
 
     var serverAddress: String? { api.map { ServerAddress.display($0.baseURL) } }
 
@@ -84,6 +122,9 @@ final class AppModel {
     func chose(_ profile: Profile) {
         self.profile = profile
         stage = .home
+        // This profile's own stream, from the start (MainView opens it while on screen).
+        relay.api = api
+        live.reset()
         Task { await learnServerName() }
     }
 
