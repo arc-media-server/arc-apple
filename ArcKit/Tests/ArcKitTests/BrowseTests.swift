@@ -324,4 +324,15 @@ final class BrowseTests: XCTestCase {
         XCTAssertEqual(StubArc.bodies[2], #"{"operation":"advance","revision":1}"#)
         XCTAssertEqual(StubArc.bodies[3], #"{"entry_id":"a","operation":"select","revision":2}"#)
     }
+
+    func testThemeMusicIsOnUnlessTurnedOffAndPrerollsAreListed() async throws {
+        XCTAssertTrue(try ArcJSON.decoder.decode(Prefs.self, from: Data("{}".utf8)).themeMusic)
+        XCTAssertFalse(try ArcJSON.decoder.decode(Prefs.self, from: Data(#"{"theme_music":false}"#.utf8)).themeMusic)
+        let film = try ArcJSON.decoder.decode(Item.self, from: Data(#"{"id":"m1","kind":"movie","title":"Heat","theme_url":"/api/items/m1/theme"}"#.utf8))
+        XCTAssertEqual(film.themeUrl, "/api/items/m1/theme")
+        answer(200, #"[{"title":"Arc intro","url":"/api/preroll/0"}]"#)
+        let clips = try await api.preroll("m1")
+        XCTAssertEqual(clips.map(\.url), ["/api/preroll/0"])
+        XCTAssertEqual(StubArc.requests[0].url?.path, "/api/v1/items/m1/preroll")
+    }
 }
