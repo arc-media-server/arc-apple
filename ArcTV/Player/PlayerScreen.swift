@@ -317,7 +317,7 @@ struct PlayerScreen: View {
             return
         }
         ArcLogApp.info("playing the next episode")
-        browse.play(PlayRequest(item: next, startMs: next.resumeMs))
+        browse.play(PlayRequest(item: next, startMs: next.resumeMs, playingOn: true))
     }
 
     // MARK: - Watch Together

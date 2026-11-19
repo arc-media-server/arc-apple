@@ -331,6 +331,20 @@ extension ArcAPI {
     }
 }
 
+/// A pre-roll video Arc plays before a film (Plex's cinema trailers): `url` is its /api/preroll/{n}.
+public struct PrerollClip: Codable, Sendable, Hashable {
+    @Default<Defaults.Empty> public var title: String
+    public let url: String
+}
+
+extension ArcAPI {
+    /// The pre-roll videos to play before a film, in order; none for episodes, home videos, or
+    /// when none are set in Arc's Settings.
+    public func preroll(_ itemId: String) async throws -> [PrerollClip] {
+        try await get("items/\(enc(itemId))/preroll", route: "items/{id}/preroll")
+    }
+}
+
 private struct PlaylistItems: Encodable { let itemIds: [String] }
 private struct PlaylistAdded: Decodable { @Default<Defaults.Zero> var added: Int }
 
