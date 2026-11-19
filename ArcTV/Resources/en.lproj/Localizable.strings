@@ -199,6 +199,7 @@
 "settings.playback" = "Playback";
 "settings.auto_play" = "Auto-Play Next Episode";
 "settings.auto_skip" = "Skip Intros Automatically";
+"settings.theme_music" = "Theme Music";
 "settings.subtitles" = "Subtitles";
 "settings.subtitles_last" = "In the language I last chose";
 "settings.subtitles_foreign" = "When the audio is in another language";
