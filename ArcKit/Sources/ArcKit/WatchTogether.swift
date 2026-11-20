@@ -351,7 +351,8 @@ public struct SSEParser: Sendable {
     public mutating func feed(_ line: String) -> Event? {
         if line.isEmpty {
             defer { name = ""; data = []; id = nil }
-            guard !data.isEmpty else { return nil }
+            // A named event with no data still counts (Arc's `resync` can come bare).
+            guard !data.isEmpty || !name.isEmpty else { return nil }
             return Event(name: name.isEmpty ? "message" : name, data: data.joined(separator: "\n"), id: id)
         }
         if line.hasPrefix(":") { return nil }

@@ -40,11 +40,14 @@ extension View {
 /// A title on a row or grid, in its row's style: rounded artwork that lifts on focus (tvOS's
 /// card), how far through as a thin bar inside it, and its name with the year or time left under.
 struct MediaCardView: View {
+    @Environment(AppModel.self) private var app
     let card: MediaCard
     let style: CardStyle
     var seasonPosters = false
     /// The card is in Continue Watching or Up Next: its menu offers Remove from Continue Watching.
     var continueRow = false
+    /// The card is an entry (this id) of Home's Queue row: its menu can move or remove it.
+    var queueEntry: String?
     /// Where the row keeps which card has the focus (Home's hero follows it).
     var focus: FocusState<String?>.Binding
     let focusKey: String
@@ -54,8 +57,10 @@ struct MediaCardView: View {
         VStack(alignment: .center, spacing: 10) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: card.art(style, seasonPosters: seasonPosters))
+                    let art = card.spoilerSafe(app.hideSpoilers)
+                    ArtworkImage(path: art.art(style, seasonPosters: seasonPosters))
                         .frame(width: style.size.width, height: style.size.height)
+                        .blur(radius: style != .poster && art.blurred ? 24 : 0)
                         .clipped()
                     if style == .backdrop, let logo = card.logo {
                         ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
@@ -106,7 +111,7 @@ struct MediaCardView: View {
             .focused(focus, equals: focusKey)
             // VoiceOver (and the walk-through) know a card by its title.
             .accessibilityLabel(Text(name))
-            .contextMenu { TitleActions(item: card.item, continueRow: continueRow) }
+            .contextMenu { TitleActions(item: card.item, continueRow: continueRow, queueEntry: queueEntry) }
             // Names centred under the art.
             VStack(alignment: .center, spacing: 2) {
                 Text(name)
@@ -252,6 +257,8 @@ struct TitleActions: View {
     var onPage = false
     /// Opened from a card in Continue Watching or Up Next.
     var continueRow = false
+    /// Opened from this entry's card in Home's Queue row.
+    var queueEntry: String?
 
     var body: some View {
         if !onPage && item.playable {
@@ -275,6 +282,24 @@ struct TitleActions: View {
         if continueRow && !onPage {
             Button { act("remove from continue") { try await $0.removeFromContinue(item.id) } } label: {
                 Label(L("actions.remove_from_continue"), systemImage: "xmark.circle")
+            }
+        }
+        // Rearranging the Queue row, as Android's card menu: entries after the one playing.
+        if !onPage, let entry = queueEntry, let edits = browse.queue?.edits(entry) {
+            if edits.earlier {
+                Button { editQueue("move earlier") { await $0.move($1, entry, by: -1) } } label: {
+                    Label(L("queue.move_earlier"), systemImage: "arrow.left")
+                }
+            }
+            if edits.later {
+                Button { editQueue("move later") { await $0.move($1, entry, by: 1) } } label: {
+                    Label(L("queue.move_later"), systemImage: "arrow.right")
+                }
+            }
+            if edits.remove {
+                Button { editQueue("remove") { await $0.remove($1, entry) } } label: {
+                    Label(L("queue.remove"), systemImage: "xmark.circle")
+                }
             }
         }
         if item.kind == "movie" || item.isSeries {
@@ -323,6 +348,15 @@ struct TitleActions: View {
             Button { browse.addingToPlaylist = item } label: {
                 Label(L("actions.add_to_playlist"), systemImage: "text.badge.plus")
             }
+        }
+    }
+
+    /// Moves or removes a Queue row entry; Home's row follows the queue Arc answers with.
+    private func editQueue(_ what: String, _ call: @escaping (PlayQueues, ArcAPI) async -> PlayQueue?) {
+        guard let api = app.api else { return }
+        Task {
+            let q = await browse.withQueue { await call($0, api) }
+            if q == nil { browse.note(L("queue.edit_failed")) } else { ArcLogApp.debug("title action done: queue \(what)") }
         }
     }
 
@@ -376,5 +410,14 @@ struct TitleActions: View {
                 ArcLogApp.warn("title action \(what) failed: \(type(of: error))")
             }
         }
+    }
+}
+
+extension Item {
+    /// Its description, or a note in its place while it's an episode Hide Spoilers keeps back;
+    /// nil when it has none.
+    func overview(hidingSpoilers hide: Bool) -> String? {
+        if spoilerHidden(hide) { return L("spoiler.hidden_description") }
+        return overview.flatMap { $0.isEmpty ? nil : $0 }
     }
 }

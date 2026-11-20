@@ -53,6 +53,25 @@ public struct PlayQueue: Codable, Sendable, Hashable {
         guard let at = currentIndex else { return [] }
         return entries[at...].filter(\.playable)
     }
+
+    /// What can be done to `entryId` from its card: only entries after the one playing now can be
+    /// moved or removed (Arc refuses to remove the current one), and never to before it.
+    public func edits(_ entryId: String) -> (earlier: Bool, later: Bool, remove: Bool) {
+        guard let at = entries.firstIndex(where: { $0.id == entryId }) else { return (false, false, false) }
+        let current = currentIndex ?? -1
+        return (at > current + 1, at > current && at < entries.count - 1, at > current)
+    }
+
+    /// The entries' ids with `entryId` moved one place earlier (`by` -1) or later (+1); nil when it
+    /// can't go there.
+    public func reordered(_ entryId: String, by: Int) -> [String]? {
+        var ids = entries.map(\.id)
+        guard let at = ids.firstIndex(of: entryId) else { return nil }
+        let to = at + by
+        guard to > (currentIndex ?? -1), to < ids.count else { return nil }
+        ids.swapAt(at, to)
+        return ids
+    }
 }
 
 extension ArcAPI {
@@ -196,6 +215,25 @@ public actor PlayQueues {
         guard let q = await add(api, [itemId], next: false),
               let entry = q.entries.last(where: { $0.itemId == itemId }) else { return }
         await moveTo(api, entry.id)
+    }
+
+    /// Takes `entryId` out of the queue (Remove from Queue).
+    @discardableResult
+    public func remove(_ api: ArcAPI, _ entryId: String) async -> PlayQueue? {
+        await serial(api, "removing from the queue") { api, known in
+            guard let known else { return nil }
+            return try await Self.edit(api, known, "remove", ["entry_ids": .array([.string(entryId)])], log: self.log)
+        }
+    }
+
+    /// Moves `entryId` one place earlier (`by` -1) or later (+1), staying after the one playing.
+    @discardableResult
+    public func move(_ api: ArcAPI, _ entryId: String, by: Int) async -> PlayQueue? {
+        await serial(api, "rearranging the queue") { api, known in
+            guard let known else { return nil }
+            guard let ids = known.reordered(entryId, by: by) else { return known }
+            return try await Self.edit(api, known, "reorder", ["entry_ids": .array(ids.map(JSONValue.string))], log: self.log)
+        }
     }
 
     /// The queue played to its end: Arc forgets it.
