@@ -242,4 +242,118 @@ final class BrowseTests: XCTestCase {
         season.episodes[0].userData = try ArcJSON.decoder.decode(UserData.self, from: Data(#"{"played":true}"#.utf8))
         XCTAssertTrue(season.watched)
     }
+
+    func testMediaFiltersBecomeItemsParameters() {
+        let movies = Library(id: 3, name: "Films", kind: "movies")
+        var q = LibraryQuery()
+        q.setUnwatched(true)
+        q.setWatchState("played")
+        XCTAssertFalse(q.unwatchedOnly, "Watch Status turns Unwatched Only off")
+        q.dynamicRange = "dolby_vision"
+        q.videoCodec = "hevc"
+        q.audioCodec = "truehd"
+        q.audioChannels = "8"
+        XCTAssertEqual(q.filterCount, 5)
+        XCTAssertEqual(q.parameters(library: movies, offset: 0, limit: 60),
+                       ["library_id": "3", "kind": "movie", "sort": "title", "offset": "0", "limit": "60", "watch_state": "played",
+                        "dynamic_range": "dolby_vision", "video_codec": "hevc", "audio_codec": "truehd", "audio_channels": "8"])
+        q.setUnwatched(true)
+        XCTAssertNil(q.watchState, "Unwatched Only turns Watch Status off")
+        q.sort = .added
+        let cleared = q.cleared
+        XCTAssertFalse(cleared.filtered)
+        XCTAssertEqual(cleared.sort, .added)
+    }
+
+    func testAMediaFilterIsOfferedOnlyWhenThereIsAChoice() throws {
+        let facets = try ArcJSON.decoder.decode(Facets.self, from: Data(#"{"video_codecs":[{"value":"hevc","count":9}],"audio_codecs":[{"value":"truehd","count":2},{"value":"eac3","count":7}],"audio_channels":[{"value":"6","count":3}],"dynamic_ranges":[]}"#.utf8))
+        XCTAssertEqual(Facets.offered(facets.videoCodecs, chosen: nil), [], "all HEVC: nothing to narrow")
+        XCTAssertEqual(Facets.offered(facets.audioCodecs, chosen: nil), ["truehd", "eac3"])
+        XCTAssertEqual(Facets.offered(facets.videoCodecs, chosen: "hevc"), ["hevc"], "a chosen value stays")
+        XCTAssertEqual(Facets.offered(facets.dynamicRanges, chosen: "hlg"), ["hlg"], "even when the library no longer has it")
+        XCTAssertEqual(Quality.videoCodec("h264"), "H.264")
+        XCTAssertEqual(Quality.audioCodec("eac3"), "DD+")
+        XCTAssertEqual(Quality.dynamicRange("hdr10_plus"), "HDR10+")
+        XCTAssertNil(Quality.dynamicRange("unknown"))
+    }
+
+    private static let caps = #"{"api_version":1,"features":{"play_queues":{"supported":true,"available":true,"allowed":true}}}"#
+    private static func queue(_ rev: Int, current: String, _ entries: [(String, String, Bool)]) -> String {
+        let list = entries.map { id, item, ok in #"{"id":"\#(id)","item_id":"\#(item)","available":\#(ok),"item":{"id":"\#(item)","kind":"movie","title":"T"}}"# }
+        return #"{"id":"q1","revision":\#(rev),"current_entry_id":"\#(current)","entries":[\#(list.joined(separator: ","))]}"#
+    }
+
+    func testAQueueStartsAddsAndRetriesAfterAChangeElsewhere() async throws {
+        let queues = PlayQueues()
+        answer(200, Self.caps)
+        answer(201, Self.queue(1, current: "a", [("a", "m1", true)]))
+        // Play Next: Arc refuses the old revision, the queue is read again and the edit retried.
+        answer(409, #"{"error":"changed"}"#)
+        answer(200, Self.queue(2, current: "a", [("a", "m1", true)]))
+        answer(200, Self.queue(3, current: "a", [("a", "m1", true), ("b", "m2", false), ("c", "m3", true)]))
+        let started = await queues.start(api, ["m1"])
+        XCTAssertEqual(started?.revision, 1)
+        let added = await queues.add(api, ["m2", "m3"], next: true)
+        XCTAssertEqual(added?.revision, 3)
+        XCTAssertEqual(StubArc.requests.map(\.httpMethod), ["GET", "POST", "PATCH", "GET", "PATCH"])
+        XCTAssertEqual(StubArc.bodies[1], #"{"item_ids":["m1"]}"#)
+        XCTAssertEqual(StubArc.bodies[2], #"{"item_ids":["m2","m3"],"operation":"next","revision":1}"#)
+        XCTAssertEqual(StubArc.bodies[4], #"{"item_ids":["m2","m3"],"operation":"next","revision":2}"#)
+        // The next one to play passes over an entry that can't be played.
+        XCTAssertEqual(added?.nextPlayable()?.id, "c")
+        XCTAssertEqual(added?.upcoming().map(\.id), ["a", "c"])
+    }
+
+    func testQueueEntriesAfterTheCurrentOneCanBeMovedAndRemoved() async throws {
+        let queues = PlayQueues()
+        answer(200, Self.caps)
+        answer(200, Self.queue(4, current: "a", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        answer(200, Self.queue(5, current: "a", [("a", "m1", true), ("c", "m3", true), ("b", "m2", true)]))
+        answer(200, Self.queue(6, current: "a", [("a", "m1", true), ("c", "m3", true)]))
+        let refreshed = await queues.refresh(api)
+        let q = try XCTUnwrap(refreshed)
+        XCTAssertTrue(q.edits("a") == (false, false, false))
+        XCTAssertTrue(q.edits("b") == (false, true, true))
+        XCTAssertTrue(q.edits("c") == (true, false, true))
+        XCTAssertNil(q.reordered("b", by: -1))
+        XCTAssertEqual(q.reordered("c", by: -1), ["a", "c", "b"])
+        let moved = await queues.move(api, "b", by: 1)
+        XCTAssertEqual(moved?.revision, 5)
+        let removed = await queues.remove(api, "b")
+        XCTAssertEqual(removed?.revision, 6)
+        XCTAssertEqual(StubArc.bodies[2], #"{"entry_ids":["a","c","b"],"operation":"reorder","revision":4}"#)
+        XCTAssertEqual(StubArc.bodies[3], #"{"entry_ids":["b"],"operation":"remove","revision":5}"#)
+    }
+
+    func testAServerWithoutQueuesIsLeftAlone() async {
+        let queues = PlayQueues()
+        answer(200, #"{"api_version":1,"features":{}}"#)
+        let q = await queues.start(api, ["m1"])
+        XCTAssertNil(q)
+        XCTAssertEqual(StubArc.requests.count, 1, "only capabilities was asked")
+    }
+
+    func testMovingOnAdvancesOrSelects() async throws {
+        let queues = PlayQueues()
+        answer(200, Self.caps)
+        answer(201, Self.queue(1, current: "a", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        answer(200, Self.queue(2, current: "b", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        answer(200, Self.queue(3, current: "a", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        await queues.start(api, ["m1", "m2", "m3"])
+        await queues.moveTo(api, "b")
+        await queues.moveTo(api, "a")
+        XCTAssertEqual(StubArc.bodies[2], #"{"operation":"advance","revision":1}"#)
+        XCTAssertEqual(StubArc.bodies[3], #"{"entry_id":"a","operation":"select","revision":2}"#)
+    }
+
+    func testThemeMusicIsOnUnlessTurnedOffAndPrerollsAreListed() async throws {
+        XCTAssertTrue(try ArcJSON.decoder.decode(Prefs.self, from: Data("{}".utf8)).themeMusic)
+        XCTAssertFalse(try ArcJSON.decoder.decode(Prefs.self, from: Data(#"{"theme_music":false}"#.utf8)).themeMusic)
+        let film = try ArcJSON.decoder.decode(Item.self, from: Data(#"{"id":"m1","kind":"movie","title":"Heat","theme_url":"/api/items/m1/theme"}"#.utf8))
+        XCTAssertEqual(film.themeUrl, "/api/items/m1/theme")
+        answer(200, #"[{"title":"Arc intro","url":"/api/preroll/0"}]"#)
+        let clips = try await api.preroll("m1")
+        XCTAssertEqual(clips.map(\.url), ["/api/preroll/0"])
+        XCTAssertEqual(StubArc.requests[0].url?.path, "/api/v1/items/m1/preroll")
+    }
 }

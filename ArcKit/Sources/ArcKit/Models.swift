@@ -140,6 +140,8 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     public var year: Int?
     public var overview: String?
     public var tagline: String?
+    /// The title's theme tune (`items/{id}/theme`), for films and shows that have one.
+    public var themeUrl: String?
     public var runtimeMin: Int?
     public var contentRating: String?
     @Default<Defaults.List<String>> public var genres: [String]
@@ -280,6 +282,10 @@ public struct Prefs: Codable, Sendable {
     @Default<Defaults.True> public var autoPlay: Bool
     /// Skip intros and recaps without pressing Skip.
     @Default<Defaults.False> public var autoSkip: Bool
+    /// Play a film's or show's theme tune quietly on its page (on unless turned off).
+    @Default<Defaults.True> public var themeMusic: Bool
+    /// Hide Spoilers: unwatched episodes' stills and descriptions stay back.
+    @Default<Defaults.False> public var hideSpoilers: Bool
     public var subtitleStyle: SubtitleStyle?
 
     public init(home: [HomeRowPref] = [], splitUpNext: Bool = false, libraryOrder: [Int64] = [], watchlistPosition: Int = 0) {

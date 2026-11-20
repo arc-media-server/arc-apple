@@ -55,6 +55,8 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: org.arcmediaserver.apple.tv
         PRODUCT_NAME: Arc
+        # The layered icon and Top Shelf images, from arc-media-server's docs/brand.
+        ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.0"

@@ -7,7 +7,15 @@ struct PlayRequest: Identifiable, Hashable {
     let startMs: Int64
     /// Played in a Watch Together room: the room decides where and whether it plays.
     var together = false
-    var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") }
+    /// The player moving on by itself (Up Next, the queue): no pre-rolls.
+    var playingOn = false
+    /// The play queue's entry this is (Home's Queue row, Shuffle, the queue moving on).
+    var queueEntry: String?
+    var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") + (playingOn ? "|on" : "") }
+
+    /// A film started from the beginning plays the pre-roll videos first, as on the web: not when
+    /// resuming, in Watch Together, or when the player moves on.
+    var wantsPreroll: Bool { item.kind == "movie" && startMs == 0 && !together && !playingOn }
 }
 
 /// A title's page: its background, logo or title, details, Play and its actions; a show's seasons
@@ -40,6 +48,9 @@ struct DetailsView: View {
     @State private var entered = false
     @State private var problem: String?
     @State private var extra: Extra?
+    /// The title's theme tune, played once per visit (not again on coming back from the player).
+    @State private var theme = ThemeMusic()
+    @State private var themePlayed = false
 
     private var shown: Item { item ?? initial }
     private var backdropPath: String? { shown.images?.backdrop ?? shown.images?.seriesBackdrop }
@@ -161,6 +172,14 @@ struct DetailsView: View {
             withAnimation(.easeOut(duration: 0.4).delay(0.35)) { entered = true }
         }
         .task(id: "\(browse.changes)|\(showMissing)") { await load() }
+        // Live updates: the page reloads in place when Arc says the title changed (not under the
+        // player: it reads again after playing anyway).
+        .onChange(of: app.liveTitle) {
+            guard browse.playing == nil else { return }
+            // Staying on the season being looked at.
+            if seasons.indices.contains(season) { keepSeason = seasons[season].seasonNumber }
+            Task { await load() }
+        }
         .task(id: paletteSource) {
             // The server keeps each backdrop's colours; an older server without them, or a title
             // without artwork, keeps Arc's grey blend.
@@ -169,6 +188,23 @@ struct DetailsView: View {
             wash = colors.map(Color.init)
         }
         .fullScreenCover(item: $extra) { ExtraPlayerScreen(extra: $0) }
+        // The theme tune, once the title is read; it fades out when anything opens over the page.
+        .task(id: item?.id) { await startTheme() }
+        .onDisappear { theme.stop() }
+        .onChange(of: browse.playing) { _, now in if now != nil { theme.stop() } }
+        .onChange(of: extra?.id) { _, now in if now != nil { theme.stop() } }
+    }
+
+    /// Plays the theme tune of a film or show (not an episode), as the web does, when the
+    /// profile's Theme Music is on.
+    private func startTheme() async {
+        guard !themePlayed, let item, !item.isEpisode, let path = item.themeUrl,
+              browse.playing == nil, let api = app.api, let url = api.absolute(path) else { return }
+        themePlayed = true
+        // On unless turned off; if the preferences can't be read, play it as the web would.
+        let on = (try? await api.prefs())?.themeMusic ?? true
+        guard on, !Task.isCancelled, browse.playing == nil else { return }
+        theme.play(url, headers: api.authorization)
     }
 
     /// Trailers and other extras, as Plex's page has them; each plays in a simple player.
@@ -186,8 +222,11 @@ struct DetailsView: View {
                     }
                     .buttonStyle(.card)
                     .focused($focused, equals: "extra|" + e.id)
-                    Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
-                    Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
+                    Group {
+                        Text(e.title).font(.caption.weight(.semibold)).lineLimit(1).frame(width: 384, alignment: .leading)
+                        Text(extraKind(e)).font(.caption2).foregroundStyle(ArcColor.muted)
+                    }
+                    .belowLiftedCard(focused == "extra|" + e.id)
                 }
             }
         }
@@ -213,7 +252,7 @@ struct DetailsView: View {
                     if !shown.genres.isEmpty { Text(shown.genres.prefix(3).joined(separator: " · ")) }
                 }
                 .font(.callout.weight(.medium))
-                if let overview = shown.overview {
+                if let overview = shown.overview(hidingSpoilers: app.hideSpoilers) {
                     Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(4).frame(maxWidth: 900, alignment: .leading)
                 }
                 HStack(spacing: 12) {
@@ -286,6 +325,13 @@ struct DetailsView: View {
                 }
                 .arcGlassButton()
                 .focused($focused, equals: Self.playKey)
+                // A show's episodes in a random order, as a new play queue (as the web's Shuffle).
+                if browse.queuesUsable && shuffleCandidates(nil).count > 1 {
+                    Button { shuffle(nil) } label: {
+                        Label(L("details.shuffle"), systemImage: "shuffle")
+                    }
+                    .roundIconButton()
+                }
             }
             // The page's other actions are round glass icons, as the Android app's title page.
             TitleActions(item: shown, onPage: true).roundIconButton()
@@ -315,7 +361,7 @@ struct DetailsView: View {
     }
 
     private var related: some View {
-        section(L("details.related")) {
+        section(L("details.more_like_this")) {
             ForEach(similar) { other in
                 MediaCardView(card: MediaCard(item: other), style: .poster, focus: $focused, focusKey: other.id) { openRoute(.item(other)) }
             }
@@ -342,7 +388,7 @@ struct DetailsView: View {
         let playback = playbackLines(file)
         return VStack(alignment: .leading, spacing: 24) {
             Text(L("details.about")).font(.title3.weight(.semibold))
-            if let overview = shown.overview, !overview.isEmpty {
+            if let overview = shown.overview(hidingSpoilers: app.hideSpoilers) {
                 InfoCard(title: nil, width: 1100) {
                     Text(shown.title).font(.headline)
                     Text(overview).font(.callout).foregroundStyle(.white.opacity(0.85)).lineLimit(10)
@@ -490,6 +536,11 @@ struct DetailsView: View {
                                               systemImage: s.watched ? "eye.slash" : "checkmark.circle")
                                     }
                                 }
+                                if browse.queuesUsable && shuffleCandidates(s).count > 1 {
+                                    Button { shuffle(s) } label: {
+                                        Label(L("actions.shuffle_season"), systemImage: "shuffle")
+                                    }
+                                }
                                 if !s.isUnplaced {
                                     Button { toggleMissing(on: s) } label: {
                                         Label(showMissing ? L("actions.hide_missing") : L("actions.show_missing"),
@@ -549,6 +600,31 @@ struct DetailsView: View {
         }
     }
 
+    /// The episodes Shuffle plays: a season's on disk, or the show's (its order's seasons, then
+    /// specials). Not the Not in This Order tab, which has no place in the order.
+    private func shuffleCandidates(_ s: Season?) -> [Item] {
+        if let s { return s.isUnplaced ? [] : s.episodes.filter(\.available) }
+        let ordered = seasons.filter { $0.seasonNumber > 0 } + seasons.filter { $0.seasonNumber == 0 }
+        return ordered.flatMap(\.episodes).filter(\.available)
+    }
+
+    /// Shuffle (the show) or Shuffle Season: a new queue in a random order, playing its first.
+    private func shuffle(_ s: Season?) {
+        guard let api = app.api else { return }
+        let ids = shuffleCandidates(s).map(\.id)
+        let browse = browse
+        Task {
+            let entry = await browse.withQueue { await $0.startShuffled(api, ids) }
+            guard let entry, let first = entry.item else {
+                ArcLogApp.warn("shuffling \(s == nil ? "a show" : "a season") failed")
+                browse.note(L("queue.shuffle_failed"))
+                return
+            }
+            ArcLogApp.debug("shuffled \(ids.count) episodes")
+            play(PlayRequest(item: first, startMs: 0, queueEntry: entry.id))
+        }
+    }
+
     /// Shows or hides the missing episodes, staying on the season the menu was opened on (seasons
     /// with only missing episodes may appear in front of it).
     private func toggleMissing(on s: Season) {
@@ -590,6 +666,7 @@ struct DetailsView: View {
 /// name, and its overview while it has the focus. One that hasn't aired yet is dimmed with the day
 /// it releases; it can take the focus but doesn't play.
 struct EpisodeCard: View {
+    @Environment(AppModel.self) private var app
     let episode: Item
     var focus: FocusState<String?>.Binding
     let focusKey: String
@@ -602,12 +679,14 @@ struct EpisodeCard: View {
 
     var body: some View {
         let card = MediaCard(item: episode)
+        let art = card.spoilerSafe(app.hideSpoilers)
         let releases = episode.upcomingRelease()
         VStack(alignment: .leading, spacing: 10) {
             Button { if episode.available { action() } } label: {
                 ZStack(alignment: .bottomLeading) {
-                    ArtworkImage(path: episode.images?.primary ?? episode.images?.seriesBackdrop)
-                        .frame(width: size.width, height: size.height).clipped()
+                    ArtworkImage(path: art.thumb)
+                        .frame(width: size.width, height: size.height)
+                        .blur(radius: art.blurred ? 24 : 0).clipped()
                         .opacity(episode.available ? 1 : 0.25)
                     // Not out yet: the day it releases. Out, but with no file (Show Missing
                     // Episodes): says so.
@@ -638,11 +717,13 @@ struct EpisodeCard: View {
             .focused(focus, equals: focusKey)
             Text(unplaced || !episode.hasEpisodeCode ? episode.title : L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
                 .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
+                .belowLiftedCard(focus.wrappedValue == focusKey)
             // Kept in the layout so the row doesn't jump as the focus moves.
-            Text(episode.overview ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
+            Text(episode.overview(hidingSpoilers: app.hideSpoilers) ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
                 .lineLimit(3, reservesSpace: true).frame(width: size.width, alignment: .leading)
                 .opacity(showsOverview ? 1 : 0)
                 .animation(.easeInOut(duration: 0.2), value: showsOverview)
+                .belowLiftedCard(focus.wrappedValue == focusKey)
         }
     }
 }

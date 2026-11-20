@@ -21,6 +21,11 @@ final class Browse {
     private(set) var changes = 0
     /// Watch Together: Home's rooms and the room this Apple TV is in.
     let together = WatchTogetherModel()
+    /// This Apple TV's play queue, which Arc keeps (Home's Queue row), and whether the server has
+    /// queues for the profile (Play Next, Add to Queue and Shuffle show only then).
+    let queues = PlayQueues()
+    private(set) var queue: PlayQueue?
+    private(set) var queuesUsable = false
     /// Add to Playlist's list is open for this title, over the pages.
     var addingToPlaylist: Item?
     /// A short note at the top of the screen ("Added “Heat” to Movie Night"), gone after a moment.
@@ -29,6 +34,20 @@ final class Browse {
 
     func play(_ request: PlayRequest) { playing = request }
     func changed() { changes += 1 }
+
+    /// Reads the queue Arc has for this Apple TV and profile (Home, after playing).
+    func refreshQueue(_ api: ArcAPI) async {
+        queuesUsable = await queues.supported(api)
+        queue = queuesUsable ? await queues.refresh(api) : nil
+    }
+
+    /// Runs a queue call and shows what the queue is now.
+    @discardableResult
+    func withQueue<T>(_ call: (PlayQueues) async -> T) async -> T {
+        let answer = await call(queues)
+        queue = await queues.queue
+        return answer
+    }
 
     func note(_ text: String) {
         notice = text
@@ -146,6 +165,7 @@ struct RouteView: View {
 /// libraries on the web), Playlists and Settings. Back from a place's first page opens the sidebar.
 struct MainView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
     @State private var browse = Browse()
     @State private var libraries: [Library] = []
     @State private var watchlistAt = 0
@@ -247,7 +267,7 @@ struct MainView: View {
         .environment(browse)
         .fullScreenCover(item: Binding(get: { browse.playing }, set: { browse.playing = $0 }),
                          onDismiss: { browse.changed() }) { request in
-            PlayerScreen(request: request).environment(browse)
+            PrerollGate(request: request) { PlayerScreen(request: request) }.environment(browse)
         }
         // Watch Together's invite panel and code entry, over the pages. (Inside the player the
         // player shows the invite panel itself: one full-screen cover at a time.)
@@ -277,6 +297,15 @@ struct MainView: View {
             await loadTabs()
         }
         .task(id: app.pendingLink) { await followLink() }
+        // Live updates while the profile's pages are on screen; in the background the stream
+        // closes, and it catches up (resuming from its place) on coming back.
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { app.live.start() } else { app.live.stop() }
+        }
+        .onDisappear { app.live.stop() }
+        // The sidebar's libraries, and Home's Watch Together rooms, as Arc says they change.
+        .onChange(of: app.liveHome) { Task { await loadTabs() } }
+        .onChange(of: app.liveTogether) { if let api = app.api { Task { await browse.together.refreshRooms(api) } } }
     }
 
     /// A Top Shelf link: Select opens the title's page on Home, Play plays it.
@@ -393,6 +422,7 @@ struct MainView: View {
             let (prefs, all) = try await (prefsAnswer, librariesAnswer)
             libraries = orderedLibraries(all, order: prefs.libraryOrder)
             watchlistAt = prefs.watchlistPosition
+            app.hideSpoilers = prefs.hideSpoilers
         } catch let error as APIError where error.status == 401 {
             app.tokenRefused()
         } catch is CancellationError {
