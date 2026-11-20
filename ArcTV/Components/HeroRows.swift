@@ -37,7 +37,7 @@ struct HeroRows<Header: View>: View {
                                 LazyHStack(alignment: .top, spacing: 36) {
                                     ForEach(row.cards) { card in
                                         MediaCardView(card: card, style: row.style, seasonPosters: row.seasonPosters,
-                                                      continueRow: row.continueRow, focus: $focused, focusKey: row.id + "|" + card.id) { open(card) }
+                                                      continueRow: row.continueRow, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
                                     }
                                 }
                                 .padding(.horizontal, 80)
@@ -144,8 +144,13 @@ struct HeroRows<Header: View>: View {
         return rows.first { $0.id == parts[0] }?.cards.first { $0.id == parts[1] }
     }
 
-    private func open(_ card: MediaCard) {
+    private func open(_ card: MediaCard, in row: LoadedRow) {
         let item = card.item
+        // The Queue row plays on from that entry.
+        if row.queueRow {
+            browse.play(PlayRequest(item: item, startMs: item.resumeMs, queueEntry: card.id))
+            return
+        }
         // Episodes on Continue Watching play at once, as Plex's do; everything else opens its page.
         if item.isEpisode && card.progress != nil {
             browse.play(PlayRequest(item: item, startMs: item.resumeMs))

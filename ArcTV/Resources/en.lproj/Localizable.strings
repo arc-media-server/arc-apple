@@ -4,6 +4,7 @@
 "common.cancel" = "Cancel";
 "common.retry" = "Try Again";
 "common.close" = "Close";
+"player.skip_preroll" = "Skip";
 "common.unreachable" = "Arc couldn't be reached. Check the server is running and on the same network.";
 
 "server.title" = "Connect to your Arc server";
@@ -90,6 +91,17 @@
 "actions.hide_missing" = "Hide Missing Episodes";
 "actions.add_to_playlist" = "Add to Playlist…";
 "actions.rate" = "Rate…";
+"actions.more" = "More";
+"actions.play_next" = "Play Next";
+"actions.add_to_queue" = "Add to Queue";
+"rating.rated" = "Rate… %@";
+"queue.playing_next" = "“%@” plays next";
+"queue.added" = "Added “%@” to the queue";
+"queue.failed" = "Couldn't queue “%@”. Try again.";
+"queue.shuffle_failed" = "Couldn't shuffle. Try again.";
+"home.queue" = "Queue";
+"details.shuffle" = "Shuffle";
+"actions.shuffle_season" = "Shuffle Season";
 "rating.title" = "Your Rating";
 "rating.choice" = "%1$@ (%2$@ of 5)";
 "rating.clear" = "Clear Rating";
@@ -139,7 +151,17 @@
 "library.sort_runtime" = "Duration";
 "library.sort_watched" = "Last Watched";
 "library.filter" = "Filter";
-"library.filtered" = "Filtered";
+"library.filtered_count" = "%d Filters";
+"library.watch_status" = "Watch Status";
+"library.watch_played" = "Watched";
+"library.watch_unstarted" = "Not Started";
+"library.hdr" = "HDR";
+"library.hdr_unknown" = "Not Known Yet";
+"library.video_format" = "Video Format";
+"library.audio_format" = "Audio Format";
+"library.audio_channels" = "Audio Channels";
+"library.stereo" = "Stereo";
+"library.mono" = "Mono";
 "library.unwatched" = "Unwatched Only";
 "library.unwatched_short" = "Unwatched";
 "library.all" = "All";
@@ -189,6 +211,7 @@
 "settings.playback" = "Playback";
 "settings.auto_play" = "Auto-Play Next Episode";
 "settings.auto_skip" = "Skip Intros Automatically";
+"settings.theme_music" = "Theme Music";
 "settings.subtitles" = "Subtitles";
 "settings.subtitles_last" = "In the language I last chose";
 "settings.subtitles_foreign" = "When the audio is in another language";
