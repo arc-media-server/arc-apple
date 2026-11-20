@@ -58,6 +58,16 @@ public struct PlaylistSummary: Codable, Sendable, Hashable, Identifiable {
     public let title: String
     @Default<Defaults.Zero> public var count: Int
     @Default<Defaults.List<String>> public var images: [String]
+    /// A smart playlist's rules: it fills itself, so titles can't be added to it.
+    public var smartFilter: JSONValue?
+
+    /// Titles can be added to it (not a smart playlist).
+    public var editable: Bool {
+        switch smartFilter {
+        case nil, .null?: return true
+        default: return false
+        }
+    }
 }
 
 public struct Person: Codable, Sendable, Hashable, Identifiable {
@@ -227,6 +237,21 @@ extension ArcAPI {
         guard (200...299).contains(status) else { throw failure(status, data, route) }
     }
 
+    /// The profile's own rating of a movie, show or episode: 1–10 (half stars out of five), or 0
+    /// to clear it.
+    public func setRating(_ itemId: String, _ rating: Int) async throws {
+        try await sendJSON("PUT", "items/\(enc(itemId))/rating", ["rating": .number(Double(min(max(rating, 0), 10)))], route: "items/{id}/rating")
+    }
+
+    /// Adds titles (movies, episodes or whole shows) to the end of a playlist; answers with how
+    /// many were added.
+    @discardableResult
+    public func addToPlaylist(_ playlistId: String, itemIds: [String]) async throws -> Int {
+        let added: PlaylistAdded = try await sendJSON("POST", "playlists/\(enc(playlistId))/items", PlaylistItems(itemIds: itemIds),
+                                                      route: "playlists/{id}/items")
+        return added.added
+    }
+
     /// Puts a movie or show on the profile's Watchlist, or takes it off.
     public func setWatchlisted(_ itemId: String, _ on: Bool) async throws {
         try await sendJSON("PUT", "items/\(enc(itemId))/watchlist", ["on": .bool(on)], route: "items/{id}/watchlist")
@@ -250,5 +275,26 @@ extension ArcAPI {
     func sendJSON(_ method: String, _ path: String, _ body: [String: JSONValue], route: String) async throws {
         let (status, data) = try await raw(method, path, body: try ArcJSON.encoder.encode(body), route: route)
         guard (200...299).contains(status) else { throw failure(status, data, route) }
+    }
+}
+
+private struct PlaylistItems: Encodable { let itemIds: [String] }
+private struct PlaylistAdded: Decodable { @Default<Defaults.Zero> var added: Int }
+
+/// The profile's own star rating as the apps show it: Arc keeps 1–10, shown as half stars out of
+/// five (the web's StarRating).
+public enum StarRating {
+    /// The choices, best first: 10 (five stars) down to 1 (half a star).
+    public static let choices = Array((1...10).reversed())
+
+    /// "★★★½" for 7; nil when not rated.
+    public static func stars(_ rating: Int?) -> String? {
+        guard let r = rating, (1...10).contains(r) else { return nil }
+        return String(repeating: "★", count: r / 2) + (r % 2 == 1 ? "½" : "")
+    }
+
+    /// Stars out of five for 7: "3.5" (what VoiceOver reads after "of 5").
+    public static func outOfFive(_ rating: Int) -> String {
+        rating % 2 == 0 ? String(rating / 2) : String(rating / 2) + ".5"
     }
 }

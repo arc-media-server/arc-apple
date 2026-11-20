@@ -189,4 +189,57 @@ final class BrowseTests: XCTestCase {
             XCTFail("unexpected \(error)")
         }
     }
+
+    func testARatingIsSavedAndReadBack() async throws {
+        answer(204, "")
+        answer(204, "")
+        try await api.setRating("m1", 7)
+        try await api.setRating("m1", 0)
+        XCTAssertEqual(StubArc.requests.map(\.httpMethod), ["PUT", "PUT"])
+        XCTAssertEqual(StubArc.requests[0].url?.path, "/api/v1/items/m1/rating")
+        XCTAssertEqual(StubArc.bodies, [#"{"rating":7}"#, #"{"rating":0}"#])
+        let rated = try ArcJSON.decoder.decode(Item.self, from: Data(#"{"id":"m1","kind":"movie","title":"Heat","user_data":{"rating":7}}"#.utf8))
+        XCTAssertEqual(rated.userData?.rating, 7)
+        let unrated = try ArcJSON.decoder.decode(Item.self, from: Data(#"{"id":"m1","kind":"movie","title":"Heat","user_data":{"played":true}}"#.utf8))
+        XCTAssertNil(unrated.userData?.rating)
+    }
+
+    func testStarsShowHalves() {
+        XCTAssertEqual(StarRating.stars(7), "★★★½")
+        XCTAssertEqual(StarRating.stars(10), "★★★★★")
+        XCTAssertEqual(StarRating.stars(1), "½")
+        XCTAssertNil(StarRating.stars(0))
+        XCTAssertNil(StarRating.stars(nil))
+        XCTAssertEqual(StarRating.outOfFive(7), "3.5")
+        XCTAssertEqual(StarRating.outOfFive(4), "2")
+        XCTAssertEqual(StarRating.choices.first, 10)
+        XCTAssertEqual(StarRating.choices.last, 1)
+    }
+
+    func testTitlesAreAddedToOrdinaryPlaylistsOnly() async throws {
+        answer(200, #"[{"id":"p1","title":"Movie Night","count":2},{"id":"p2","title":"Unwatched 4K","smart_filter":{"resolution":"4k"}},{"id":"p3","title":"Short","smart_filter":null}]"#)
+        answer(200, #"{"added":3}"#)
+        let lists = try await api.playlists()
+        XCTAssertEqual(lists.map(\.editable), [true, false, true])
+        let added = try await api.addToPlaylist("p 1", itemIds: ["s1"])
+        XCTAssertEqual(added, 3)
+        XCTAssertEqual(StubArc.requests[1].httpMethod, "POST")
+        XCTAssertEqual(StubArc.requests[1].url?.path, "/api/v1/playlists/p 1/items")
+        XCTAssertEqual(StubArc.bodies[1], #"{"item_ids":["s1"]}"#)
+    }
+
+    func testMissingEpisodesAreAskedForOnlyWhenShown() async throws {
+        let body = #"{"series":{"id":"s1","kind":"series","title":"Firefly"},"seasons":[{"season_number":1,"episodes":[{"id":"e1","kind":"episode","title":"Serenity","available":true},{"id":"e2","kind":"episode","title":"Lost","available":false}]}]}"#
+        answer(200, body)
+        answer(200, body)
+        _ = try await api.seasons(seriesId: "s1")
+        let shown = try await api.seasons(seriesId: "s1", missing: true)
+        XCTAssertEqual(StubArc.requests[0].url?.absoluteString, "http://arc.test:8099/api/v1/series/s1/seasons")
+        XCTAssertEqual(StubArc.requests[1].url?.absoluteString, "http://arc.test:8099/api/v1/series/s1/seasons?missing=1")
+        XCTAssertEqual(shown.seasons[0].episodes.map(\.available), [true, false])
+        // A missing episode doesn't stop the season counting as watched.
+        var season = shown.seasons[0]
+        season.episodes[0].userData = try ArcJSON.decoder.decode(UserData.self, from: Data(#"{"played":true}"#.utf8))
+        XCTAssertTrue(season.watched)
+    }
 }

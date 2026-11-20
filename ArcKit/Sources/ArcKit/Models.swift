@@ -60,6 +60,8 @@ public struct UserData: Codable, Sendable, Hashable {
     @Default<Defaults.Zero64> public var positionMs: Int64
     @Default<Defaults.False> public var played: Bool
     @Default<Defaults.False> public var watchlisted: Bool
+    /// The profile's own rating: 1–10, half stars out of five (nil or 0: not rated).
+    public var rating: Int?
 }
 
 public struct Images: Codable, Sendable, Hashable {
@@ -325,10 +327,14 @@ public struct PlayerCaps: Codable, Sendable, Hashable {
     public var dolbyVisionProfiles: [Int]?
     /// The deepest colour (bits) the decoder plays; nil for the server's default (8-bit H.264).
     public var maxBitDepth: Int?
+    /// The most sound channels the output takes (2 for stereo, 6 for 5.1, 8 for 7.1); nil when
+    /// unknown, which leaves the sound as it is.
+    public var maxAudioChannels: Int?
 
     public init(containers: [String], video: [String], audio: [String], maxHeight: Int, audioPassthrough: [String] = [],
-                hdrFormats: [String]? = nil, dolbyVisionProfiles: [Int]? = nil, maxBitDepth: Int? = nil) {
+                hdrFormats: [String]? = nil, dolbyVisionProfiles: [Int]? = nil, maxBitDepth: Int? = nil, maxAudioChannels: Int? = nil) {
         self.maxBitDepth = maxBitDepth
+        self.maxAudioChannels = maxAudioChannels
         self.containers = containers
         self.video = video
         self.audio = audio
