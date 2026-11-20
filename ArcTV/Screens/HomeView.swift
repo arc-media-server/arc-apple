@@ -118,14 +118,9 @@ struct HomeView: View {
         }
         // Read again after playing or a change of watch state, so Continue Watching is current.
         .task(id: browse.changes) { await reload() }
-        // Watch Together rooms come and go while Home is showing (someone invites this profile):
-        // look again every half minute. (Live updates from Arc's events stream are still to come.)
-        .task {
-            while !Task.isCancelled {
-                try? await Task.sleep(for: .seconds(30))
-                if let api = app.api { await browse.together.refreshRooms(api) }
-            }
-        }
+        // Live updates: the rows reload in place (never under the player; Home reads them again
+        // after playing anyway). Watch Together's rooms follow their own hint (MainView).
+        .onChange(of: app.liveHome) { if browse.playing == nil { Task { await reload() } } }
     }
 
     /// The play queue, after everything else (as on Android): the title playing and what follows.
