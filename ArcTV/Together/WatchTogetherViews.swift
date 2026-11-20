@@ -84,6 +84,7 @@ private struct RoomCard: View {
                 }
             }
             .frame(width: size.width)
+            .belowLiftedCard(focus.wrappedValue == focusKey)
         }
     }
 

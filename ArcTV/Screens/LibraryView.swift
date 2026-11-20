@@ -95,7 +95,7 @@ struct LibraryView: View {
     private var browseScroll: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 40) {
-                header
+                header.padding(.bottom, 24)
                 if loading {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 400)
                 } else if let problem {
@@ -133,7 +133,7 @@ struct LibraryView: View {
         .focusSection()
     }
 
-    /// Recommended, Browse, Collections and (Other videos) Folders as pills in one glass capsule,
+    /// Recommended, Browse, Collections and (Other videos) Folders as tabs in one glass capsule,
     /// as the Android app's library header. The sidebar says which library it is.
     private var showTabs: some View {
         HStack(spacing: 8) {
@@ -142,15 +142,15 @@ struct LibraryView: View {
             showTab(L("library.collections"), .collections)
             if isVideos { showTab(L("library.folders"), .folders) }
         }
-        .padding(8)
-        .arcGlassPanel(cornerRadius: 44)
+        .padding(6)
+        .arcGlassPanel(cornerRadius: 40)
         .focusSection()
     }
 
     private func showTab(_ title: String, _ value: Show) -> some View {
-        Button { show = value } label: { Text(title).padding(.horizontal, 8) }
-            .arcGlassButton(prominent: show == value)
-            .buttonBorderShape(.capsule)
+        // The season tabs' smaller style, so the bar is no taller than Sort and Filter beside it.
+        Button(title) { show = value }
+            .buttonStyle(SeasonTabStyle(chosen: show == value))
             .accessibilityAddTraits(show == value ? .isSelected : [])
     }
 
