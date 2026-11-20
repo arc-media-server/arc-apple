@@ -24,8 +24,8 @@ when the server is checked out beside this one, otherwise from GitHub. The essen
   (`AVPlayerEngine`) is behind it for now. Never use AVPlayerViewController or engine types in
   screens.
 - **Feel:** on Apple TV the focus engine, `.card` buttons and Back always working; on iPhone/iPad,
-  iOS conventions. Plex for Apple TV (and for iOS) first. Arc identity through the wordmark; brand
-  colours only in `ArcTV/App/Theme.swift`. Settings come from the server (the profile's prefs)
+  iOS conventions. Plex for Apple TV (and for iOS) first. Arc identity through the white logo
+  (arc-media-server `docs/brand`, in `Assets.xcassets`); colours only in `ArcTV/App/Theme.swift`. Settings come from the server (the profile's prefs)
   where Arc has them.
 - **Text:** every user-facing string in `ArcTV/Resources/en.lproj/Localizable.strings`, via `L()`.
 - **Logging:** `ArcLog` (os.Logger, subsystem org.arcmediaserver.apple, category Arc).
