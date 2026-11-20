@@ -21,7 +21,17 @@ final class PlayerModel {
     private(set) var subtitle: SubtitleTrack?
     private var cues: [SubtitleCue] = []
     /// The episode that follows, for Up Next (found when an episode starts).
-    private(set) var next: Item?
+    private var episodeNext: Item?
+    /// The play queue's next title to play, and its entry: it comes before the next episode, and
+    /// plays on whatever Auto-Play is set to, since it was queued on purpose.
+    private(set) var queued: (item: Item, entry: String)?
+    /// What Up Next and the end of the title move on to.
+    var next: Item? { queued?.item ?? episodeNext }
+    var nextIsQueued: Bool { queued != nil }
+
+    func setQueued(_ item: Item?, entry: String?) {
+        if let item, let entry { queued = (item, entry) } else { queued = nil }
+    }
     /// The profile's playback preferences (Auto-Play, auto-skip, subtitles).
     private(set) var prefs: Prefs?
     var subtitleTracks: [SubtitleTrack] { plan?.subtitleTracks ?? [] }
@@ -180,7 +190,7 @@ final class PlayerModel {
             log.debug("preferences unavailable in the player: \(type(of: error))")
         }
         if item.isEpisode {
-            do { next = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
+            do { episodeNext = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
         }
         await loadCastAndEpisodes()
     }

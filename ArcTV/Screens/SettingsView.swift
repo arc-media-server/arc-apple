@@ -28,6 +28,7 @@ struct SettingsView: View {
                     if let prefs {
                         Toggle(L("settings.auto_play"), isOn: binding(prefs.autoPlay, "auto_play") { $0.autoPlay = $1 })
                         Toggle(L("settings.auto_skip"), isOn: binding(prefs.autoSkip, "auto_skip") { $0.autoSkip = $1 })
+                        Toggle(L("settings.theme_music"), isOn: binding(prefs.themeMusic, "theme_music") { $0.themeMusic = $1 })
                         Picker(L("settings.subtitles"), selection: Binding(get: { prefs.subtitleMode }, set: { mode in save("subtitle_mode", .string(mode)) { $0.subtitleMode = mode } })) {
                             Text(L("settings.subtitles_last")).tag("")
                             Text(L("settings.subtitles_foreign")).tag("foreign")
