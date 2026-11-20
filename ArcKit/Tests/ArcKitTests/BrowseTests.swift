@@ -304,6 +304,27 @@ final class BrowseTests: XCTestCase {
         XCTAssertEqual(added?.upcoming().map(\.id), ["a", "c"])
     }
 
+    func testQueueEntriesAfterTheCurrentOneCanBeMovedAndRemoved() async throws {
+        let queues = PlayQueues()
+        answer(200, Self.caps)
+        answer(200, Self.queue(4, current: "a", [("a", "m1", true), ("b", "m2", true), ("c", "m3", true)]))
+        answer(200, Self.queue(5, current: "a", [("a", "m1", true), ("c", "m3", true), ("b", "m2", true)]))
+        answer(200, Self.queue(6, current: "a", [("a", "m1", true), ("c", "m3", true)]))
+        let refreshed = await queues.refresh(api)
+        let q = try XCTUnwrap(refreshed)
+        XCTAssertTrue(q.edits("a") == (false, false, false))
+        XCTAssertTrue(q.edits("b") == (false, true, true))
+        XCTAssertTrue(q.edits("c") == (true, false, true))
+        XCTAssertNil(q.reordered("b", by: -1))
+        XCTAssertEqual(q.reordered("c", by: -1), ["a", "c", "b"])
+        let moved = await queues.move(api, "b", by: 1)
+        XCTAssertEqual(moved?.revision, 5)
+        let removed = await queues.remove(api, "b")
+        XCTAssertEqual(removed?.revision, 6)
+        XCTAssertEqual(StubArc.bodies[2], #"{"entry_ids":["a","c","b"],"operation":"reorder","revision":4}"#)
+        XCTAssertEqual(StubArc.bodies[3], #"{"entry_ids":["b"],"operation":"remove","revision":5}"#)
+    }
+
     func testAServerWithoutQueuesIsLeftAlone() async {
         let queues = PlayQueues()
         answer(200, #"{"api_version":1,"features":{}}"#)

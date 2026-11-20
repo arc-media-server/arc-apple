@@ -284,6 +284,8 @@ public struct Prefs: Codable, Sendable {
     @Default<Defaults.False> public var autoSkip: Bool
     /// Play a film's or show's theme tune quietly on its page (on unless turned off).
     @Default<Defaults.True> public var themeMusic: Bool
+    /// Hide Spoilers: unwatched episodes' stills and descriptions stay back.
+    @Default<Defaults.False> public var hideSpoilers: Bool
     public var subtitleStyle: SubtitleStyle?
 
     public init(home: [HomeRowPref] = [], splitUpNext: Bool = false, libraryOrder: [Int64] = [], watchlistPosition: Int = 0) {

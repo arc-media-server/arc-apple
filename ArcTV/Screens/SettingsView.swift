@@ -29,6 +29,7 @@ struct SettingsView: View {
                         Toggle(L("settings.auto_play"), isOn: binding(prefs.autoPlay, "auto_play") { $0.autoPlay = $1 })
                         Toggle(L("settings.auto_skip"), isOn: binding(prefs.autoSkip, "auto_skip") { $0.autoSkip = $1 })
                         Toggle(L("settings.theme_music"), isOn: binding(prefs.themeMusic, "theme_music") { $0.themeMusic = $1 })
+                        Toggle(L("settings.hide_spoilers"), isOn: binding(prefs.hideSpoilers, "hide_spoilers") { $0.hideSpoilers = $1 })
                         Picker(L("settings.subtitles"), selection: Binding(get: { prefs.subtitleMode }, set: { mode in save("subtitle_mode", .string(mode)) { $0.subtitleMode = mode } })) {
                             Text(L("settings.subtitles_last")).tag("")
                             Text(L("settings.subtitles_foreign")).tag("foreign")
@@ -60,6 +61,8 @@ struct SettingsView: View {
             }
         }
         .task { await load() }
+        // Every screen keeps unwatched episodes' stills and descriptions back at once.
+        .onChange(of: prefs?.hideSpoilers) { _, on in if let on { app.hideSpoilers = on } }
         .confirmationDialog(L("settings.sign_out_title"), isPresented: $confirmSignOut) {
             Button(L("profiles.sign_out"), role: .destructive) { Task { await app.signOut() } }
             Button(L("common.cancel"), role: .cancel) {}

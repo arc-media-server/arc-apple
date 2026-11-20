@@ -6,6 +6,7 @@ import SwiftUI
 /// The hero has no buttons: Select on a card plays it or opens its page, and holding
 /// Select gives its actions. `header` floats above the hero (a library's pill bar).
 struct HeroRows<Header: View>: View {
+    @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     let rows: [LoadedRow]
@@ -37,7 +38,7 @@ struct HeroRows<Header: View>: View {
                                 LazyHStack(alignment: .top, spacing: 36) {
                                     ForEach(row.cards) { card in
                                         MediaCardView(card: card, style: row.style, seasonPosters: row.seasonPosters,
-                                                      continueRow: row.continueRow, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
+                                                      continueRow: row.continueRow, queueEntry: row.queueRow ? card.id : nil, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
                                     }
                                 }
                                 .padding(.horizontal, 80)
@@ -99,7 +100,7 @@ struct HeroRows<Header: View>: View {
             }
             // Under a header there's no room for the overview: the first row would push the
             // title under the bar. The title's page has it.
-            if headerHeight == 0, let overview = item.overview, !overview.isEmpty {
+            if headerHeight == 0, let overview = item.overview(hidingSpoilers: app.hideSpoilers) {
                 Text(overview).font(.callout).foregroundStyle(.white.opacity(0.75)).lineLimit(3).frame(maxWidth: 760, alignment: .leading)
             }
         }
