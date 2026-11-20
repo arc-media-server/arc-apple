@@ -51,7 +51,7 @@ final class NowPlaying {
         ]
         if item.isEpisode {
             if let show = item.seriesTitle { info[MPMediaItemPropertyArtist] = show }
-            info[MPMediaItemPropertyAlbumTitle] = item.hasEpisodeCode ? L("card.episode_code", item.seasonNumber ?? 0, item.episodeNumber ?? 0) : item.title
+            info[MPMediaItemPropertyAlbumTitle] = item.episodeCodeText ?? item.title
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
 

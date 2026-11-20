@@ -38,7 +38,7 @@ enum OSDTab: Hashable {
 }
 
 /// The player's on-screen controls, in the reference design's arrangement:
-/// - at the bottom left the title (for an episode, "S2, E4 • its name" over the show's name), and
+/// - at the bottom left the title (for an episode, "S2 · E4 · its name" over the show's name), and
 ///   to its right three small round buttons, Playback, Audio and Subtitles, each opening a menu
 ///   above it;
 /// - the timeline, split at the chapters, with the time played under its marker and the time
@@ -108,8 +108,8 @@ struct PlayerOSD: View {
         let item = model.item
         return VStack(alignment: .leading, spacing: 6) {
             if item.isEpisode {
-                // Outside the show's order, an episode has no "S2, E4" in it: just its name.
-                Text(model.outsideOrder || !item.hasEpisodeCode ? item.title : L("player.episode_line", item.seasonNumber ?? 0, item.episodeNumber ?? 0, item.title))
+                // Outside the show's order, an episode has no "S2 · E4" in it: just its name.
+                Text(model.outsideOrder ? item.title : item.episodeLine)
                     .font(.callout.weight(.medium)).foregroundStyle(.white.opacity(0.8)).lineLimit(1)
             }
             Text(item.isEpisode ? (item.seriesTitle ?? item.title) : item.title)
@@ -302,9 +302,7 @@ struct PlayerOSD: View {
     private var meta: String {
         let item = model.item
         var parts: [String] = []
-        if item.hasEpisodeCode && !model.outsideOrder {
-            parts.append(L("card.episode_code", item.seasonNumber ?? 0, item.episodeNumber ?? 0))
-        }
+        if !model.outsideOrder, let code = item.episodeCodeText { parts.append(code) }
         let minutes = Int(model.durationMs / 60_000)
         if minutes > 0 {
             parts.append(minutes >= 60 ? L("details.runtime", minutes / 60, minutes % 60) : L("card.minutes_short", minutes))
@@ -388,7 +386,7 @@ struct PlayerOSD: View {
                                 ArtworkImage(path: episode.images?.primary ?? episode.images?.backdrop)
                                     .frame(width: 300, height: 169)
                                     .overlay(alignment: .bottomLeading) {
-                                        Text(model.outsideOrder || !episode.hasEpisodeCode ? "" : L("card.episode_code", episode.seasonNumber ?? 0, episode.episodeNumber ?? 0))
+                                        Text(model.outsideOrder ? "" : episode.episodeCodeText ?? "")
                                             .font(.caption2.weight(.bold))
                                             .shadow(color: .black.opacity(0.8), radius: 3)
                                             .padding(12)

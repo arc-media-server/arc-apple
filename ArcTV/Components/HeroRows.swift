@@ -119,8 +119,7 @@ struct HeroRows<Header: View>: View {
     private func detailLine(_ item: Item) -> String? {
         guard item.isEpisode else { return nil }
         // Outside the show's order there's no "S0 · E0": just the episode's name.
-        guard item.hasEpisodeCode, let s = item.seasonNumber, let e = item.episodeNumber else { return item.title }
-        return L("card.episode", s, e, item.title)
+        return item.episodeLine
     }
 
     /// The focused title's background across the whole screen, darkened at the left and bottom

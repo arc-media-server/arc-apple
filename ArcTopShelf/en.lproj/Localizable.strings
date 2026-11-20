@@ -1,4 +1,5 @@
 /* The Top Shelf (Arc's row on the Apple TV Home Screen). */
 "topshelf.continue" = "Continue Watching";
 "topshelf.episode" = "%1$@ · S%2$d · E%3$d";
+"topshelf.special" = "%1$@ · Special %2$d";
 "topshelf.episode_unnumbered" = "%1$@ · %2$@";

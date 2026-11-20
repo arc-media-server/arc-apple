@@ -131,9 +131,9 @@ struct MediaCardView: View {
         let item = card.item
         if let season = card.seasonNumber, card.newEpisodes > 0 { return L("card.new_episodes", season, card.newEpisodes) }
         var parts: [String] = []
-        if item.hasEpisodeCode, let s = item.seasonNumber, let e = item.episodeNumber {
-            // A part-watched episode's card is short: S8 · E6 (the strip has the time).
-            parts.append(style == .poster || card.progress != nil ? L("card.episode_code", s, e) : L("card.episode", s, e, item.title))
+        if let code = item.episodeCodeText {
+            // Under the show's name, just the number ("S8 · E6"): the episode's name never shares it.
+            parts.append(code)
         } else if item.isEpisode {
             // Outside the show's order there's no "S0 · E0": the episode's name, on a wide card.
             if style != .poster && card.progress == nil { parts.append(item.title) }
@@ -165,9 +165,9 @@ struct ResumeStrip: View {
     }
 }
 
-/// The Play button's label. Not started: "Play" for a film, "Start watching · S1, E1" for a
-/// season's first episode, "Play S21 E8" for any other. Part watched: a bar of how far through
-/// with what's left, after the episode's number ("S5 E12 · 43m") or alone for a film ("1h 2m").
+/// The Play button's label. Not started: "Play" for a film, "Start watching · S1 · E1" for a
+/// season's first episode, "Play S21 · E8" for any other. Part watched: a bar of how far through
+/// with what's left, after the episode's number ("S5 · E12 · 43m") or alone for a film ("1h 2m").
 struct PlayLabel: View {
     let item: Item
     let episode: Bool
@@ -175,7 +175,7 @@ struct PlayLabel: View {
     var body: some View {
         let resume = item.resumeMs
         let duration = item.durationMs
-        let season = item.seasonNumber ?? 0, number = item.episodeNumber ?? 0
+        let code = episode ? item.episodeCodeText : nil
         HStack(spacing: 14) {
             Image(systemName: "play.fill")
             if resume > 0, duration > resume {
@@ -185,15 +185,30 @@ struct PlayLabel: View {
                     Capsule().fill(.secondary).frame(width: 70, height: 6)
                     Capsule().fill(.primary).frame(width: 70 * CGFloat(Double(resume) / Double(duration)), height: 6)
                 }
-                Text(episode && item.hasEpisodeCode ? L("details.resume_episode_left", season, number, runtimeText(left)) : runtimeText(left))
-            } else if episode && item.hasEpisodeCode {
-                Text(number == 1 ? L("details.start_watching", season, number) : L("details.play_episode", season, number))
+                Text(code.map { L("details.resume_episode_left", $0, runtimeText(left)) } ?? runtimeText(left))
+            } else if let code {
+                Text(item.episodeNumber == 1 ? L("details.start_watching", code) : L("details.play_episode", code))
             } else {
                 Text(L("details.play"))
             }
         }
         .accessibilityElement(children: .combine)
     }
+}
+
+extension Item {
+    /// The episode's number: "S1 · E4", or "Special 3"; nil when the show's order doesn't place it.
+    var episodeCodeText: String? {
+        switch episodeCode {
+        case .numbered(let season, let number)?: return L("episode.code", season, number)
+        case .special(let number)?: return L("episode.special", number)
+        case nil: return nil
+        }
+    }
+
+    /// Where the episode is the subject, its number then its name ("S1 · E4 · Pilot"); just its
+    /// name when it has no number.
+    var episodeLine: String { episodeCodeText.map { L("episode.with_title", $0, title) } ?? title }
 }
 
 /// A content rating (PG-13, TV-14) in an outlined box, as the title pages and the hero show it.
