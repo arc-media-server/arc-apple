@@ -95,7 +95,7 @@ struct LibraryView: View {
     private var browseScroll: some View {
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 40) {
-                header
+                header.padding(.bottom, 24)
                 if loading {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 400)
                 } else if let problem {
@@ -133,7 +133,7 @@ struct LibraryView: View {
         .focusSection()
     }
 
-    /// Recommended, Browse, Collections and (Other videos) Folders as pills in one glass capsule,
+    /// Recommended, Browse, Collections and (Other videos) Folders as tabs in one glass capsule,
     /// as the Android app's library header. The sidebar says which library it is.
     private var showTabs: some View {
         HStack(spacing: 8) {
@@ -142,15 +142,15 @@ struct LibraryView: View {
             showTab(L("library.collections"), .collections)
             if isVideos { showTab(L("library.folders"), .folders) }
         }
-        .padding(8)
-        .arcGlassPanel(cornerRadius: 44)
+        .padding(6)
+        .arcGlassPanel(cornerRadius: 40)
         .focusSection()
     }
 
     private func showTab(_ title: String, _ value: Show) -> some View {
-        Button { show = value } label: { Text(title).padding(.horizontal, 8) }
-            .arcGlassButton(prominent: show == value)
-            .buttonBorderShape(.capsule)
+        // The season tabs' smaller style, so the bar is no taller than Sort and Filter beside it.
+        Button(title) { show = value }
+            .buttonStyle(SeasonTabStyle(chosen: show == value))
             .accessibilityAddTraits(show == value ? .isSelected : [])
     }
 
@@ -174,29 +174,39 @@ struct LibraryView: View {
 
     private var filterName: String {
         let chosen = [query.unwatchedOnly ? L("library.unwatched_short") : nil, query.genre,
-                      query.decade.map { L("library.decade_value", $0) }, query.resolution.map { resolutionName($0) }].compactMap { $0 }
+                      query.decade.map { L("library.decade_value", $0) }, query.resolution.map { resolutionName($0) },
+                      query.watchState.map(watchStateName), query.dynamicRange.map(dynamicRangeName),
+                      query.videoCodec.map(Quality.videoCodec), query.audioCodec.map { Quality.audioCodec($0) ?? $0 },
+                      query.audioChannels.map(channelsName)].compactMap { $0 }
         switch chosen.count {
         case 0: return L("library.all")
         case 1: return chosen[0]
-        default: return L("library.filtered")
+        default: return L("library.filtered_count", chosen.count)
         }
     }
 
     private var filterMenu: some View {
         Menu {
-            Toggle(L("library.unwatched"), isOn: $query.unwatchedOnly)
+            // Unwatched Only and Watch Status exclude each other, as Arc requires: one turns the other off.
+            Toggle(L("library.unwatched"), isOn: Binding(get: { query.unwatchedOnly }, set: { query.setUnwatched($0) }))
+            Picker(L("library.watch_status"), selection: Binding(get: { query.watchState }, set: { query.setWatchState($0) })) {
+                Text(L("library.any")).tag(String?.none)
+                Text(L("library.watch_played")).tag(Optional("played"))
+                Text(L("library.watch_unstarted")).tag(Optional("unstarted"))
+            }
+            .pickerStyle(.menu)
             facetMenu(L("library.genre"), values: facets?.genres ?? [], selection: $query.genre) { $0 }
             facetMenu(L("library.decade"), values: facets?.decades ?? [], selection: $query.decade) { L("library.decade_value", $0) }
             if !isVideos && library.kind != "shows" {
                 facetMenu(L("library.resolution"), values: facets?.resolutions ?? [], selection: $query.resolution) { resolutionName($0) }
             }
+            // What the files are: offered only where the library has more than one (as the web's).
+            offeredMenu(L("library.hdr"), values: facets?.dynamicRanges, selection: $query.dynamicRange, name: dynamicRangeName)
+            offeredMenu(L("library.video_format"), values: facets?.videoCodecs, selection: $query.videoCodec, name: Quality.videoCodec)
+            offeredMenu(L("library.audio_format"), values: facets?.audioCodecs, selection: $query.audioCodec) { Quality.audioCodec($0) ?? $0 }
+            offeredMenu(L("library.audio_channels"), values: facets?.audioChannels, selection: $query.audioChannels, name: channelsName, mostFirst: true)
             if query.filtered {
-                Button(L("library.clear_filters"), role: .destructive) {
-                    let sort = query.sort, reversed = query.reversed
-                    query = LibraryQuery()
-                    query.sort = sort
-                    query.reversed = reversed
-                }
+                Button(L("library.clear_filters"), role: .destructive) { query = query.cleared }
             }
         } label: {
             // The button names what's shown: All, Unwatched, a genre, or Filtered for several.
@@ -213,6 +223,32 @@ struct LibraryView: View {
             }
             .pickerStyle(.menu)
         }
+    }
+
+    /// A media filter's list: Any, then the library's values (or the one chosen), when there's a choice.
+    @ViewBuilder
+    private func offeredMenu(_ title: String, values: [FacetValue]?, selection: Binding<String?>,
+                             name: @escaping (String) -> String, mostFirst: Bool = false) -> some View {
+        let offered = Facets.offered(values ?? [], chosen: selection.wrappedValue)
+        let shown = mostFirst ? offered.sorted { (Int($0) ?? 0) > (Int($1) ?? 0) } : offered
+        if !shown.isEmpty {
+            Picker(title, selection: selection) {
+                Text(L("library.any")).tag(String?.none)
+                ForEach(shown, id: \.self) { v in Text(name(v)).tag(Optional(v)) }
+            }
+            .pickerStyle(.menu)
+        }
+    }
+
+    private func watchStateName(_ value: String) -> String {
+        value == "played" ? L("library.watch_played") : L("library.watch_unstarted")
+    }
+
+    private func dynamicRangeName(_ value: String) -> String { Quality.dynamicRange(value) ?? L("library.hdr_unknown") }
+
+    private func channelsName(_ value: String) -> String {
+        let n = Int(value)
+        return n == 2 ? L("library.stereo") : n == 1 ? L("library.mono") : Quality.channels(n) ?? value
     }
 
     @ViewBuilder private var content: some View {

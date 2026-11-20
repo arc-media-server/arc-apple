@@ -21,14 +21,41 @@ final class PlayerModel {
     private(set) var subtitle: SubtitleTrack?
     private var cues: [SubtitleCue] = []
     /// The episode that follows, for Up Next (found when an episode starts).
-    private(set) var next: Item?
+    private var episodeNext: Item?
+    /// The play queue's next title to play, and its entry: it comes before the next episode, and
+    /// plays on whatever Auto-Play is set to, since it was queued on purpose.
+    private(set) var queued: (item: Item, entry: String)?
+    /// What Up Next and the end of the title move on to.
+    var next: Item? { queued?.item ?? episodeNext }
+    var nextIsQueued: Bool { queued != nil }
+
+    func setQueued(_ item: Item?, entry: String?) {
+        if let item, let entry { queued = (item, entry) } else { queued = nil }
+    }
     /// The profile's playback preferences (Auto-Play, auto-skip, subtitles).
     private(set) var prefs: Prefs?
     var subtitleTracks: [SubtitleTrack] { plan?.subtitleTracks ?? [] }
     var audioTracks: [AudioTrack] { plan?.audioTracks ?? [] }
     var audioStream: Int { plan?.audioStream ?? -1 }
     /// The line of subtitles showing now.
-    var caption: String? { cues.isEmpty ? nil : cue(at: positionMs, in: cues)?.text }
+    var caption: String? {
+        cues.isEmpty ? nil : cue(at: SubtitleTiming.cueTimeMs(positionMs, offsetMs: subtitleOffsetMs), in: cues)?.text
+    }
+    /// Subtitle timing, per file and track, for this playback only (as the web's and Android's).
+    private var subtitleOffsets: [String: Int64] = [:]
+    /// Only text subtitles, which the app draws, can be moved; pictures are part of the video.
+    var subtitleTimingAdjustable: Bool { subtitle.map { !$0.image } ?? false }
+    var subtitleOffsetMs: Int64 {
+        guard subtitleTimingAdjustable, let track = subtitle else { return 0 }
+        return subtitleOffsets[SubtitleTiming.key(fileId: fileId, trackId: track.id)] ?? 0
+    }
+    /// Show the subtitles half a second earlier or later, or Reset (nil).
+    func shiftSubtitles(_ deltaMs: Int64?) {
+        guard subtitleTimingAdjustable, let track = subtitle else { return }
+        let key = SubtitleTiming.key(fileId: fileId, trackId: track.id)
+        subtitleOffsets[key] = SubtitleTiming.shifted(subtitleOffsets[key] ?? 0, deltaMs)
+        log.debug("subtitle timing now \(subtitleOffsets[key] ?? 0) ms")
+    }
     /// The intro, recap or credits playing now (for Skip).
     var marker: Marker? { plan.flatMap { activeMarker($0.markers, at: positionMs) } }
     /// Whether the Up Next card is due.
@@ -180,7 +207,7 @@ final class PlayerModel {
             log.debug("preferences unavailable in the player: \(type(of: error))")
         }
         if item.isEpisode {
-            do { next = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
+            do { episodeNext = try await api.nextEpisode(item.id) } catch { log.debug("next episode unavailable: \(type(of: error))") }
         }
         await loadCastAndEpisodes()
     }

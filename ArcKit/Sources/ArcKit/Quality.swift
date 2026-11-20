@@ -114,8 +114,13 @@ public enum Quality {
     }
 
     public static func audioCodec(_ audio: MediaStream) -> String? {
-        let p = audio.profile?.lowercased() ?? ""
-        switch audio.codec {
+        audioCodec(audio.codec, profile: audio.profile)
+    }
+
+    /// A sound format's short name from its ffprobe name ("eac3" is DD+), as the badges show it.
+    public static func audioCodec(_ codec: String, profile: String? = nil) -> String? {
+        let p = profile?.lowercased() ?? ""
+        switch codec {
         case "eac3": return "DD+"
         case "ac3": return "DD"
         case "truehd": return "TrueHD"
@@ -128,7 +133,35 @@ public enum Quality {
         case "opus": return "Opus"
         case "mp3": return "MP3"
         case "": return nil
-        default: return audio.codec.hasPrefix("pcm") ? "PCM" : audio.codec.uppercased()
+        default: return codec.hasPrefix("pcm") ? "PCM" : codec.uppercased()
+        }
+    }
+
+    /// A picture format's name from its ffprobe name: HEVC, H.264, AV1…
+    public static func videoCodec(_ codec: String) -> String {
+        switch codec {
+        case "hevc": return "HEVC"
+        case "h264": return "H.264"
+        case "av1": return "AV1"
+        case "vp9": return "VP9"
+        case "vp8": return "VP8"
+        case "mpeg2video": return "MPEG-2"
+        case "mpeg4": return "MPEG-4"
+        case "vc1": return "VC-1"
+        default: return codec.uppercased()
+        }
+    }
+
+    /// A library filter's dynamic range ("dolby_vision" is Dolby Vision); nil for "unknown",
+    /// which the app words itself.
+    public static func dynamicRange(_ value: String) -> String? {
+        switch value {
+        case "dolby_vision": return "Dolby Vision"
+        case "hdr10_plus": return "HDR10+"
+        case "hlg": return "HLG"
+        case "hdr10": return "HDR10"
+        case "sdr": return "SDR"
+        default: return nil
         }
     }
 
