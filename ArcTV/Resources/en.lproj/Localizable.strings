@@ -104,6 +104,10 @@
 "queue.added" = "Added “%@” to the queue";
 "queue.failed" = "Couldn't queue “%@”. Try again.";
 "queue.shuffle_failed" = "Couldn't shuffle. Try again.";
+"queue.move_earlier" = "Move Earlier";
+"queue.move_later" = "Move Later";
+"queue.remove" = "Remove from Queue";
+"queue.edit_failed" = "Couldn't change the queue. Try again.";
 "home.queue" = "Queue";
 "details.shuffle" = "Shuffle";
 "actions.shuffle_season" = "Shuffle Season";
@@ -217,6 +221,8 @@
 "settings.auto_play" = "Auto-Play Next Episode";
 "settings.auto_skip" = "Skip Intros Automatically";
 "settings.theme_music" = "Theme Music";
+"settings.hide_spoilers" = "Hide Spoilers";
+"spoiler.hidden_description" = "Description hidden until you watch it.";
 "settings.subtitles" = "Subtitles";
 "settings.subtitles_last" = "In the language I last chose";
 "settings.subtitles_foreign" = "When the audio is in another language";
@@ -291,7 +297,7 @@
 "player.restart" = "Start from the Beginning";
 "player.previous" = "Previous Episode";
 "details.extras" = "Trailers & Extras";
-"details.related" = "Related";
+"details.more_like_this" = "More Like This";
 "details.starring" = "Starring";
 "details.about" = "About";
 "details.details" = "Details";

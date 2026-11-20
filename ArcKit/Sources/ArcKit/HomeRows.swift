@@ -177,6 +177,8 @@ public struct MediaCard: Sendable, Hashable, Identifiable {
 
     /// Whether the wide picture is the show's own (with its logo on it) rather than an episode's.
     public var showArt = false
+    /// The wide picture is an episode's still kept back by Hide Spoilers: shown blurred.
+    public var blurred = false
 
     /// The same card with the show's own picture in place of the episode's still, so a row of
     /// shows (Continue Watching) is easy to tell apart; films are unchanged.
