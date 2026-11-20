@@ -715,7 +715,7 @@ struct EpisodeCard: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
-            Text(unplaced || !episode.hasEpisodeCode ? episode.title : L("card.episode_short", episode.episodeNumber ?? 0, episode.title))
+            Text(unplaced ? episode.title : episode.episodeLine)
                 .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
                 .belowLiftedCard(focus.wrappedValue == focusKey)
             // Kept in the layout so the row doesn't jump as the focus moves.

@@ -179,6 +179,13 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     /// 0 and episode 0 for one the order doesn't place ("Not in This Order"); specials keep theirs
     /// (season 0, episode 1 and on).
     public var hasEpisodeCode: Bool { isEpisode && ((seasonNumber ?? 0) != 0 || (episodeNumber ?? 0) != 0) }
+    /// The episode's number as every Arc app writes it: "S1 · E4", or "Special 3" for a special
+    /// (season 0). Nil when the show's order doesn't place it.
+    public var episodeCode: EpisodeCode? {
+        guard hasEpisodeCode else { return nil }
+        let season = seasonNumber ?? 0, number = episodeNumber ?? 0
+        return season == 0 ? .special(number) : .numbered(season: season, episode: number)
+    }
     public var isSeries: Bool { kind == "series" }
     public var playable: Bool { kind == "movie" || kind == "episode" }
 
@@ -527,4 +534,11 @@ public struct SeasonsResponse: Codable, Sendable {
         guard let tab = tabs(unplacedName: "").first(where: { $0.episodes.contains { $0.id == episodeId } }) else { return nil }
         return Season(seasonNumber: tab.seasonNumber, name: tab.name, poster: tab.poster, episodes: tab.episodes.filter(\.available))
     }
+}
+
+/// An episode's place in its show: a season and number ("S1 · E4"), or a special's number
+/// ("Special 3"). The apps turn it into text through their string catalogues.
+public enum EpisodeCode: Equatable, Sendable {
+    case numbered(season: Int, episode: Int)
+    case special(Int)
 }

@@ -55,10 +55,12 @@
 "row.collection" = "Collection";
 "row.playlist" = "Playlist";
 
-"card.episode" = "S%1$d · E%2$d · %3$@";
-"card.episode_short" = "E%1$d · %2$@";
 "card.new_episodes" = "Season %1$d · %2$d new";
-"card.episode_code" = "S%1$d · E%2$d";
+/* Episode numbers, the same in every Arc app: "S1 · E4", a special "Special 3", and where the
+   episode is the subject its name after ("S1 · E4 · Pilot"). */
+"episode.code" = "S%1$d · E%2$d";
+"episode.special" = "Special %d";
+"episode.with_title" = "%1$@ · %2$@";
 "card.minutes_left" = "%dm left";
 "card.minutes_short" = "%dm";
 "home.more_info" = "More Info";
@@ -66,10 +68,10 @@
 "details.play" = "Play";
 "details.resume" = "Resume";
 "details.from_beginning" = "Play from Beginning";
-"details.play_episode" = "Play S%1$d E%2$d";
-"details.resume_episode" = "Resume S%1$d E%2$d";
-"details.resume_episode_left" = "S%1$d E%2$d · %3$@";
-"details.start_watching" = "Start watching · S%1$d, E%2$d";
+"details.play_episode" = "Play %@";
+"details.resume_episode" = "Resume %@";
+"details.resume_episode_left" = "%1$@ · %2$@";
+"details.start_watching" = "Start watching · %@";
 "details.season" = "Season %d";
 "details.not_in_order" = "Not in This Order";
 "details.runtime" = "%1$dh %2$dm";
@@ -286,7 +288,6 @@
 "player.method_transcode" = "Converting";
 "player.engine_mpv" = "mpv";
 "player.engine_apple" = "Apple player";
-"player.episode_line" = "S%1$d, E%2$d • %3$@";
 "player.cast" = "Cast";
 "player.episodes" = "Episodes";
 "player.zoom_mode" = "Zoom Mode";

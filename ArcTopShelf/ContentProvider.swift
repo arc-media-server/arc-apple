@@ -38,11 +38,17 @@ final class ContentProvider: TVTopShelfContentProvider {
         for item in items {
             let entry = TVTopShelfSectionedItem(identifier: item.id)
             // An episode outside its show's order has no "S0 · E0": the show and the episode's name.
-            entry.title = item.hasEpisodeCode
-                ? String(format: NSLocalizedString("topshelf.episode", comment: ""), item.seriesTitle ?? item.title, item.seasonNumber ?? 0, item.episodeNumber ?? 0)
-                : item.isEpisode
-                ? String(format: NSLocalizedString("topshelf.episode_unnumbered", comment: ""), item.seriesTitle ?? item.title, item.title)
-                : item.title
+            let show = item.seriesTitle ?? item.title
+            switch item.episodeCode {
+            case .numbered(let season, let number)?:
+                entry.title = String(format: NSLocalizedString("topshelf.episode", comment: ""), show, season, number)
+            case .special(let number)?:
+                entry.title = String(format: NSLocalizedString("topshelf.special", comment: ""), show, number)
+            case nil:
+                entry.title = item.isEpisode
+                    ? String(format: NSLocalizedString("topshelf.episode_unnumbered", comment: ""), show, item.title)
+                    : item.title
+            }
             entry.imageShape = .hdtv
             if let folder, let file = await picture(for: item, api: api, in: folder) {
                 entry.setImageURL(file, for: .screenScale1x)
