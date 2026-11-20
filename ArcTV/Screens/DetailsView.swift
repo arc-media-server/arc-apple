@@ -26,6 +26,9 @@ struct DetailsView: View {
     @State private var season = 0
     /// The season just marked watched or unwatched, kept showing when the page reads again.
     @State private var keepSeason: Int?
+    /// Show Missing Episodes: the episodes the show's provider knows about that have no file,
+    /// for as long as the page is open (as the web's switch; not saved).
+    @State private var showMissing = false
     /// The artwork's four colours from the server, blended behind the whole page: what's left
     /// when the artwork slides away for a show's episodes.
     @State private var wash: [Color]?
@@ -157,7 +160,7 @@ struct DetailsView: View {
             guard !entered else { return }
             withAnimation(.easeOut(duration: 0.4).delay(0.35)) { entered = true }
         }
-        .task(id: browse.changes) { await load() }
+        .task(id: "\(browse.changes)|\(showMissing)") { await load() }
         .task(id: paletteSource) {
             // The server keeps each backdrop's colours; an older server without them, or a title
             // without artwork, keeps Arc's grey blend.
@@ -487,6 +490,12 @@ struct DetailsView: View {
                                               systemImage: s.watched ? "eye.slash" : "checkmark.circle")
                                     }
                                 }
+                                if !s.isUnplaced {
+                                    Button { toggleMissing(on: s) } label: {
+                                        Label(showMissing ? L("actions.hide_missing") : L("actions.show_missing"),
+                                              systemImage: showMissing ? "eye.slash" : "eye")
+                                    }
+                                }
                             }
                     }
                 }
@@ -540,6 +549,14 @@ struct DetailsView: View {
         }
     }
 
+    /// Shows or hides the missing episodes, staying on the season the menu was opened on (seasons
+    /// with only missing episodes may appear in front of it).
+    private func toggleMissing(on s: Season) {
+        keepSeason = s.seasonNumber
+        showMissing.toggle()
+        ArcLogApp.debug("missing episodes \(showMissing ? "shown" : "hidden")")
+    }
+
     private func load() async {
         guard let api = app.api else { return }
         do {
@@ -550,7 +567,7 @@ struct DetailsView: View {
             }
             if shown.isSeries {
                 // The order's seasons, then "Not in This Order" for episodes the order doesn't place.
-                seasons = try await api.seasons(seriesId: itemId).tabs(unplacedName: L("details.not_in_order"))
+                seasons = try await api.seasons(seriesId: itemId, missing: showMissing).tabs(unplacedName: L("details.not_in_order"))
                 if let kept = keepSeason, let at = seasons.firstIndex(where: { $0.seasonNumber == kept }) {
                     // Read again after a season was marked: stay on it rather than move to the next episode's.
                     keepSeason = nil
@@ -592,8 +609,11 @@ struct EpisodeCard: View {
                     ArtworkImage(path: episode.images?.primary ?? episode.images?.seriesBackdrop)
                         .frame(width: size.width, height: size.height).clipped()
                         .opacity(episode.available ? 1 : 0.25)
-                    if let releases {
-                        Label(L("details.releases", Item.releaseDay(releases)), systemImage: "clock")
+                    // Not out yet: the day it releases. Out, but with no file (Show Missing
+                    // Episodes): says so.
+                    if !episode.available {
+                        Label(releases.map { L("details.releases", Item.releaseDay($0)) } ?? L("details.not_on_disk"),
+                              systemImage: releases == nil ? "externaldrive.badge.xmark" : "clock")
                             .font(.caption.weight(.semibold))
                             .padding(.horizontal, 14).padding(.vertical, 8)
                             .background(Capsule().fill(.black.opacity(0.6)))
