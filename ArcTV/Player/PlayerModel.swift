@@ -38,7 +38,24 @@ final class PlayerModel {
     var audioTracks: [AudioTrack] { plan?.audioTracks ?? [] }
     var audioStream: Int { plan?.audioStream ?? -1 }
     /// The line of subtitles showing now.
-    var caption: String? { cues.isEmpty ? nil : cue(at: positionMs, in: cues)?.text }
+    var caption: String? {
+        cues.isEmpty ? nil : cue(at: SubtitleTiming.cueTimeMs(positionMs, offsetMs: subtitleOffsetMs), in: cues)?.text
+    }
+    /// Subtitle timing, per file and track, for this playback only (as the web's and Android's).
+    private var subtitleOffsets: [String: Int64] = [:]
+    /// Only text subtitles, which the app draws, can be moved; pictures are part of the video.
+    var subtitleTimingAdjustable: Bool { subtitle.map { !$0.image } ?? false }
+    var subtitleOffsetMs: Int64 {
+        guard subtitleTimingAdjustable, let track = subtitle else { return 0 }
+        return subtitleOffsets[SubtitleTiming.key(fileId: fileId, trackId: track.id)] ?? 0
+    }
+    /// Show the subtitles half a second earlier or later, or Reset (nil).
+    func shiftSubtitles(_ deltaMs: Int64?) {
+        guard subtitleTimingAdjustable, let track = subtitle else { return }
+        let key = SubtitleTiming.key(fileId: fileId, trackId: track.id)
+        subtitleOffsets[key] = SubtitleTiming.shifted(subtitleOffsets[key] ?? 0, deltaMs)
+        log.debug("subtitle timing now \(subtitleOffsets[key] ?? 0) ms")
+    }
     /// The intro, recap or credits playing now (for Skip).
     var marker: Marker? { plan.flatMap { activeMarker($0.markers, at: positionMs) } }
     /// Whether the Up Next card is due.

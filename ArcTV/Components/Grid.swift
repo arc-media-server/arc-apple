@@ -64,6 +64,7 @@ struct TileButton: View {
     let art: String?
     var wide = false
     let action: () -> Void
+    @FocusState private var lifted: Bool
 
     var body: some View {
         let size = wide ? CardStyle.thumb.size : CardStyle.poster.size
@@ -79,8 +80,12 @@ struct TileButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
             }
             .buttonStyle(.card)
-            Text(title).font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
-            if let subtitle { Text(subtitle).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
+            .focused($lifted)
+            VStack(alignment: .leading, spacing: 10) {
+                Text(title).font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
+                if let subtitle { Text(subtitle).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
+            }
+            .belowLiftedCard(lifted)
         }
     }
 }
