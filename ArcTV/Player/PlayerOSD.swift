@@ -469,6 +469,18 @@ struct PlayerOSD: View {
                 ForEach(model.subtitleTracks) { Text(PlayerOSD.trackName($0)).tag($0.id) }
             }
             .pickerStyle(.inline)
+            // Timing (arc-media-server#479): the menu's heading already says Subtitles.
+            if model.subtitleTimingAdjustable {
+                let offset = model.subtitleOffsetMs
+                Section(PlayerOSD.timingName(offset)) {
+                    Button(L("player.timing_show_earlier")) { model.shiftSubtitles(-SubtitleTiming.stepMs) }
+                        .disabled(offset <= -SubtitleTiming.maxMs)
+                    Button(L("player.timing_show_later")) { model.shiftSubtitles(SubtitleTiming.stepMs) }
+                        .disabled(offset >= SubtitleTiming.maxMs)
+                    Button(L("player.timing_reset")) { model.shiftSubtitles(nil) }
+                        .disabled(offset == 0)
+                }
+            }
         }
     }
 
@@ -492,6 +504,12 @@ struct PlayerOSD: View {
         let out = DateFormatter()
         out.setLocalizedDateFormatFromTemplate("d MMM yyyy")
         return out.string(from: d)
+    }
+
+    /// "Timing: +1.5s (later)", "Timing: −0.5s (earlier)" or "Timing: 0.0s".
+    static func timingName(_ ms: Int64) -> String {
+        let seconds = SubtitleTiming.seconds(ms)
+        return ms > 0 ? L("player.timing_later", seconds) : ms < 0 ? L("player.timing_earlier", seconds) : L("player.timing_zero")
     }
 
     static func trackName(_ t: SubtitleTrack) -> String {

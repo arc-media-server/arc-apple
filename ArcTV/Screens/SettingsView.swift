@@ -133,7 +133,7 @@ struct AboutView: View {
     var body: some View {
         SettingsLayout {
             VStack(spacing: 18) {
-                ArcWordmark().scaleEffect(1.6).padding(.bottom, 24)
+                ArcWordmark(stacked: true).padding(.bottom, 24)
                 Text(L("about.for_apple_tv")).font(.title3.weight(.semibold))
                 Text(L("settings.version", Self.appVersion)).foregroundStyle(ArcColor.muted)
                 // TheTVDB and TMDB ask to be credited where their details and pictures show.

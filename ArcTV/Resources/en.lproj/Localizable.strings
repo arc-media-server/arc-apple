@@ -16,6 +16,11 @@
 "server.invalid" = "That doesn't look like an address. Try something like 192.168.1.20.";
 "server.not_arc" = "That address answered, but it isn't an Arc server.";
 "server.unreachable" = "Nothing answered at that address. Check it, and that the Apple TV is on the same network.";
+"server.on_network" = "On your network";
+"server.looking" = "Looking for Arc on your network…";
+"server.none_found" = "No Arc server answered on this network. Type its address above.";
+"server.search_again" = "Search Again";
+"server.found_detail" = "%@ · Arc %@";
 
 "signin.title" = "Sign in to Arc";
 "signin.step_open" = "On your phone or computer, open Arc and choose Link a Device in the profile menu.";
@@ -235,6 +240,7 @@
 "about.address" = "Address";
 "about.licences" = "Licences";
 "about.open_source" = "Open Source Licences";
+"about.product_name" = "Arc Media Server";
 "about.licences_note" = "Arc for Apple TV is free software. Its source, and the source of the open source code it is built with, is at github.com/arc-media-server.";
 "settings.attribution" = "Metadata and artwork from TMDB and TheTVDB. This product uses the TMDB API but is not endorsed or certified by TMDB.";
 
@@ -244,6 +250,12 @@
 "player.subtitles" = "Subtitles";
 "player.audio" = "Audio";
 "player.off" = "Off";
+"player.timing_later" = "Timing: %@s (later)";
+"player.timing_earlier" = "Timing: %@s (earlier)";
+"player.timing_zero" = "Timing: 0.0s";
+"player.timing_show_earlier" = "Show 0.5s Earlier";
+"player.timing_show_later" = "Show 0.5s Later";
+"player.timing_reset" = "Reset Subtitle Timing";
 "player.forced" = "Forced";
 "player.sdh" = "SDH";
 "player.mono" = "Mono";

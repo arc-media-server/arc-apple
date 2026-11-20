@@ -121,3 +121,30 @@ extension ArcAPI {
         return try decode(Item.self, data, route)
     }
 }
+
+/// Subtitle timing (arc-media-server#479), as the web's and Android's: half a second at a time,
+/// up to ten seconds either way, kept per file and track for this playback only (not saved).
+/// Positive shows the subtitles later.
+public enum SubtitleTiming {
+    public static let stepMs: Int64 = 500
+    public static let maxMs: Int64 = 10_000
+
+    /// Offsets are kept by file and track.
+    public static func key(fileId: Int64, trackId: String) -> String { "\(fileId):\(trackId)" }
+
+    /// The offset after a nudge of `deltaMs`, or 0 for Reset (`deltaMs` nil).
+    public static func shifted(_ currentMs: Int64, _ deltaMs: Int64?) -> Int64 {
+        guard let deltaMs else { return 0 }
+        return min(maxMs, max(-maxMs, currentMs + deltaMs))
+    }
+
+    /// The point in the subtitles to show at `positionMs`: a later offset shows earlier lines.
+    public static func cueTimeMs(_ positionMs: Int64, offsetMs: Int64) -> Int64 { positionMs - offsetMs }
+
+    /// "+1.5", "−0.5" (a true minus) or "0.0": the seconds, written as every Arc app writes them.
+    public static func seconds(_ ms: Int64) -> String {
+        let tenths = abs(ms) / 100
+        let body = "\(tenths / 10).\(tenths % 10)"
+        return ms > 0 ? "+" + body : ms < 0 ? "\u{2212}" + body : body
+    }
+}
