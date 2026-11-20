@@ -10,6 +10,8 @@ struct LoadedRow: Identifiable {
     var cards: [MediaCard]
     /// Continue Watching or Up Next: its cards offer Remove from Continue Watching, as the web's do.
     var continueRow = false
+    /// Home's Queue row: its cards are the queue's entries (their ids), and play on from there.
+    var queueRow = false
 }
 
 /// Home's rows for the profile, arranged as on the web (Edit Home, Arrange libraries): the
@@ -111,7 +113,7 @@ struct HomeView: View {
             } else if model.rows.isEmpty {
                 RowsMessage(title: L("home.empty_title"), message: L("home.empty_body"), retry: nil)
             } else {
-                HeroRows(rows: model.rows, top: browse.together.rooms.isEmpty ? nil : { focus in AnyView(WatchTogetherRow(focus: focus)) })
+                HeroRows(rows: model.rows + queueRow, top: browse.together.rooms.isEmpty ? nil : { focus in AnyView(WatchTogetherRow(focus: focus)) })
             }
         }
         // Read again after playing or a change of watch state, so Continue Watching is current.
@@ -126,8 +128,17 @@ struct HomeView: View {
         }
     }
 
+    /// The play queue, after everything else (as on Android): the title playing and what follows.
+    private var queueRow: [LoadedRow] {
+        let entries = browse.queue?.upcoming() ?? []
+        guard !entries.isEmpty else { return [] }
+        let cards = entries.compactMap { e in e.item.map { MediaCard(item: $0, id: e.id) } }
+        return [LoadedRow(id: "queue", title: L("home.queue"), style: .poster, cards: cards, queueRow: true)]
+    }
+
     private func reload() async {
         guard let api = app.api else { return }
+        await browse.refreshQueue(api)
         // The rooms first: a Watch Together row arriving just after the rows took the focus
         // away from the first card (tvOS gave it to the sidebar).
         await browse.together.refreshRooms(api)

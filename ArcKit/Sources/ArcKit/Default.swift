@@ -46,6 +46,7 @@ public enum Defaults {
     public enum ZeroDouble: DefaultValue { public static var defaultValue: Double { 0 } }
     public enum Empty: DefaultValue { public static var defaultValue: String { "" } }
     public enum List<T: Codable & Sendable>: DefaultValue { public static var defaultValue: [T] { [] } }
+    public enum Dictionary<T: Codable & Sendable>: DefaultValue { public static var defaultValue: [String: T] { [:] } }
 }
 
 /// Any JSON value, for the parts of an answer the app passes on as they are (a custom row's filter).
