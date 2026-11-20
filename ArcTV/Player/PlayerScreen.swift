@@ -478,7 +478,7 @@ private struct UpNextCard: View {
             ArtworkImage(path: next.images?.primary).frame(width: 320, height: 180).clipShape(RoundedRectangle(cornerRadius: 12))
             VStack(alignment: .leading, spacing: 10) {
                 Text(L("player.up_next")).font(.caption).foregroundStyle(ArcColor.muted)
-                Text(next.hasEpisodeCode ? L("card.episode", next.seasonNumber ?? 0, next.episodeNumber ?? 0, next.title) : next.title)
+                Text(next.episodeLine)
                     .font(.headline).lineLimit(2)
                 HStack(spacing: 20) {
                     Button(action: play) {
