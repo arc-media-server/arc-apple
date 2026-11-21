@@ -29,7 +29,8 @@ when the server is checked out beside this one, otherwise from GitHub. The essen
   where Arc has them.
 - **Text:** every user-facing string in `ArcTV/Resources/en.lproj/Localizable.strings`, via `L()`.
 - **Logging:** `ArcLog` (os.Logger, subsystem org.arcmediaserver.apple, category Arc).
-- **Licence:** AGPL-3.0-only until the App Store exception (arc-media-server#477) is decided.
+- **Licence:** AGPL-3.0-only with an App Store exception for Arc's own code (`LICENSE-EXCEPTION.md`,
+  decided in arc-media-server#477); third-party code keeps its own licence.
 - **Layout:** `ArcKit/` (Swift package, Foundation only, with tests), `ArcTV/App/` (entry,
   AppModel, Keychain, Theme, `L()`), `ArcTV/Screens/`, `ArcTV/Player/`, `ArcTV/Components/`;
   `project.yml` is the XcodeGen project (`Arc.xcodeproj` is generated, not kept).
