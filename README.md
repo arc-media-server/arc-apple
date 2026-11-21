@@ -11,4 +11,6 @@ so a different playback engine can be added later without rebuilding the app (se
 
 ## Licence
 
-AGPL-3.0-only, copyright "The Arc Media Server Authors". See [LICENSE](LICENSE).
+AGPL-3.0-only, copyright "The Arc Media Server Authors". See [LICENSE](LICENSE), with an App Store
+exception for Arc's own code ([LICENSE-EXCEPTION.md](LICENSE-EXCEPTION.md), decision
+arc-media-server#477). Third-party code keeps its own licence.
