@@ -215,6 +215,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         # them out from its cached artwork: one colour for each quarter of the backdrop).
         if method == "GET" and len(parts) == 4 and parts[0] == "items" and parts[2:] == ["artwork", "palette"]:
             return self.json(200, palette(parts[1]))
+        # The walk-through's last step: no rooms, so Home opens on Continue Watching (the README's picture).
+        if method == "POST" and path == "standin/no-rooms":
+            with wt_lock: wt_rooms.clear()
+            return self.json(200, {})
         if path.startswith("watch-together"):
             return self.watch_together(method, parts, query, body)
         # Sign-in with a code: the code is "approved" on the third check, so its screen can be seen.
