@@ -129,15 +129,15 @@ final class WalkThrough: XCTestCase {
         shot("11-back-from-player")
 
         // A show: down the rows until a show's card (Recently Added in TV) has the focus.
-        // Dexter: Resurrection, the show in the owner's photos of the reference, for comparison.
-        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Mushoku' OR label BEGINSWITH 'Dexter'"))
-        let dexter = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Dexter'"))
+        // Breaking Bad, the shared screenshot library's featured show.
+        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Breaking Bad' OR label BEGINSWITH 'Severance' OR label BEGINSWITH 'Stranger Things'"))
+        let featuredShow = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Breaking Bad'"))
         for _ in 0..<6 {
             press(.down)
             pause(1.5)
             if shows.allElementsBoundByIndex.contains(where: { $0.hasFocus }) { break }
         }
-        for _ in 0..<8 where !dexter.allElementsBoundByIndex.contains(where: { $0.hasFocus }) {
+        for _ in 0..<8 where !featuredShow.allElementsBoundByIndex.contains(where: { $0.hasFocus }) {
             press(.right)
             pause(1)
         }
@@ -157,7 +157,7 @@ final class WalkThrough: XCTestCase {
         press(.up)
         pause(1)
         shot("13c-season-tabs")
-        // The show opens on Season 2 (its episode to watch next); Left is Season 1.
+        // Left along the season tabs (the shared library's shows have one season, so it may stay).
         press(.left)
         pause(2)
         shot("13d-next-season")
@@ -249,11 +249,11 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(2)
         shot("20-search")
-        // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "al"…
-        // "alien" and "f"… "firefly"); typing into the field directly is used when it's exposed.
+        // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "ar"…
+        // "arrival" and "d"… "dune"); typing into the field directly is used when it's exposed.
         let field = app.searchFields.firstMatch
         if field.exists && field.hasFocus {
-            field.typeText("alien")
+            field.typeText("dune")
         } else {
             remote.press(.select)
         }
@@ -309,6 +309,21 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(1)
         shot("26-invite-chosen")
+
+        // Home without Watch Together rooms, as most people see it (the README's picture): the
+        // stand-in drops its rooms, then a fresh start, the first profile, and Home on Continue
+        // Watching.
+        var request = URLRequest(url: URL(string: server + "/api/v1/standin/no-rooms")!)
+        request.httpMethod = "POST"
+        let done = expectation(description: "rooms dropped")
+        URLSession.shared.dataTask(with: request) { _, _, _ in done.fulfill() }.resume()
+        wait(for: [done], timeout: 10)
+        app.terminate()
+        app.launch()
+        pause(4)
+        remote.press(.select)
+        pause(8)
+        shot("27-home-continue-watching")
     }
 
     private func press(_ button: XCUIRemote.Button, _ times: Int = 1) {
