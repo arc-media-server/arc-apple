@@ -49,6 +49,21 @@ struct SettingsView: View {
                     Button(L("together.join_with_code")) { browse.together.enteringCode = true }
                 }
                 Section(L("settings.account")) {
+                    if let profile = app.profile {
+                        Toggle(isOn: Binding(
+                            get: { !profile.hasPin && app.automaticProfileID == profile.id },
+                            set: { app.setAutomaticSignIn($0) }
+                        )) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(L("settings.automatic_sign_in"))
+                                Text(profile.hasPin ? L("settings.automatic_sign_in_pin")
+                                    : L("settings.automatic_sign_in_hint", profile.name))
+                                    .font(.callout)
+                                    .foregroundStyle(ArcColor.muted)
+                            }
+                        }
+                        .disabled(profile.hasPin)
+                    }
                     Button(L("settings.switch_profile")) { app.switchProfile() }
                     Button(L("profiles.sign_out")) { confirmSignOut = true }
                     Button(L("signin.change_server")) { app.changeServer() }
@@ -60,6 +75,7 @@ struct SettingsView: View {
                 }
             }
         }
+        .task { await app.refreshProfile() }
         .task { await load() }
         // Every screen keeps unwatched episodes' stills and descriptions back at once.
         .onChange(of: prefs?.hideSpoilers) { _, on in if let on { app.hideSpoilers = on } }
