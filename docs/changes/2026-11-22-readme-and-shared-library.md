@@ -14,6 +14,8 @@
   profile's (it used to record them before any profile was chosen); tolerates rows that come as
   an object with `items`; records searches for "arrival" and "dune".
 - **Walk-through:** opens Breaking Bad for the show steps and types "dune" in Search.
+- **Workflow:** the copies on the `ci-screenshots` branch are 1280 wide (they were 960), the size
+  the READMEs use, because the full-size artifact is out of reach from some agent sessions.
 
 ## Decisions
 - Installing says to build with Xcode onto the Apple TV, with a free Apple Account (7 days) or a
