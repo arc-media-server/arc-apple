@@ -17,9 +17,11 @@ when the server is checked out beside this one, otherwise from GitHub. The essen
 
 ## This app
 
-- **Checks before a PR:** `swift test --package-path ArcKit` (runs on Linux too). The macOS build
-  (`.github/workflows/build.yml`, or a push whose commit message contains `[build]`) costs ten
-  times the minutes: don't trigger it unless the owner asks.
+- **Checks before a PR:** `swift test --package-path ArcKit` (runs on Linux too). For changes to
+  screens, also run the macOS build (`.github/workflows/build.yml`, a push whose commit message
+  contains `[build]`): it builds the app, walks it in the tvOS simulator and puts the screenshots on
+  the `ci-screenshots` branch. The repository is public, so its runs cost nothing; still push
+  `[build]` only once a change is ready to look at, not on every commit.
 - **Playback engine:** screens talk only to `PlaybackEngine` (`ArcTV/Player`); Apple's player
   (`AVPlayerEngine`) is behind it for now. Never use AVPlayerViewController or engine types in
   screens.

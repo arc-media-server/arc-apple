@@ -1,8 +1,8 @@
 # Builds ArcKit (with its tests) and the tvOS app on macOS, then walks the app in the tvOS
 # simulator against a stand-in Arc (UITests/) and keeps a screenshot of each screen as the
-# "screenshots" artifact. To save Actions minutes (macOS minutes count ten times on a private
-# repository) it runs only when asked: from the Actions tab, or for a push to an agent's branch
-# whose commit message contains [build]. Pushes that only change Markdown never run it, and a
+# "screenshots" artifact. It runs only when asked (the repository is public, so runs are free, but
+# a run takes a while): from the Actions tab, or for a push to an agent's branch whose commit
+# message contains [build]. Pushes that only change Markdown never run it, and a
 # newer run on the same branch cancels an older one.
 name: Build
 
