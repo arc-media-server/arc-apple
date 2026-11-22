@@ -31,6 +31,11 @@ def call(method, path, query=None, body=None):
     saved[key(method, path, query)] = {"status": status, "body": doc}
     return doc
 
+# Home and the rest answer for a profile: choose the first (the one the walk-through picks) first.
+_first = call("GET", "auth/status")["profiles"][0]["id"]
+call("POST", "auth/profile", body={"id": _first})
+saved.pop(key("POST", "auth/profile"))
+
 for p in ["health", "auth/status", "identity", "libraries", "me/prefs", "home/next-up", "watchlist"]:
     call("GET", p)
 call("GET", "home/continue", {"with_up_next": "1"})
@@ -42,10 +47,16 @@ for prof in status["profiles"]:
     saved[key("POST", "auth/profile") + "#" + prof["id"]] = saved.pop(key("POST", "auth/profile"))
     if saved[key("POST", "auth/profile") + "#" + prof["id"]]["status"] != 200:
         saved[key("POST", "auth/profile") + "#" + prof["id"]] = {"status": 200, "body": prof}
+# Back to the first profile, so the answers below are its own.
+call("POST", "auth/profile", body={"id": _first})
+saved.pop(key("POST", "auth/profile"))
 
 ids, series = set(), set()
 def collect(items):
+    if isinstance(items, dict):
+        items = items.get("items") or items.get("entries") or []
     for it in items or []:
+        if not isinstance(it, dict): continue
         it = it.get("item", it)
         ids.add(it["id"])
         if it.get("kind") == "series": series.add(it["id"])
@@ -76,7 +87,7 @@ for lib in call("GET", "libraries"):
         walk("")
 for pl in call("GET", "playlists") or []:
     collect(call("GET", f"playlists/{pl['id']}").get("entries"))
-for word in ["firefly", "alien"]:
+for word in ["arrival", "dune"]:
     for n in range(1, len(word) + 1):
         found = call("GET", "search", {"q": word[:n]})
         for p in found.get("people") or []:
