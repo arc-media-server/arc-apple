@@ -78,7 +78,7 @@ jobs:
           # The app's crash reports from the simulator, if it crashed.
           find ~/Library/Logs/DiagnosticReports -name 'Arc*' -newer standin.log -exec cp {} screenshots/ \; 2>/dev/null || true
           ls screenshots
-      # Small JPEG copies on the ci-screenshots branch (runs/<run id>/), so agents whose network
+      # JPEG copies (1280 wide, the size READMEs use) on the ci-screenshots branch (runs/<run id>/), so agents whose network
       # can't reach artifact storage can read them with git. Only ever appended to, never rewritten.
       - name: Share the screenshots on the ci-screenshots branch
         if: always()
@@ -98,7 +98,7 @@ jobs:
                   elif ext == ".txt":
                       shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", f"{name}-{i}.txt"))
           PY
-          for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 70 -Z 960 "$f" --out "${f%.png}.jpg" >/dev/null || true; rm "$f"; done
+          for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 80 -Z 1280 "$f" --out "${f%.png}.jpg" >/dev/null || true; rm "$f"; done
           cp standin.log small/ 2>/dev/null || true
           cp screenshots/*.ips small/ 2>/dev/null || true
           cp app-size.txt small/ 2>/dev/null || true
