@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.jpg" alt="Arc's Home on Apple TV, with Severance's artwork filling the screen" width="900">
+  <img src="docs/screenshots/home.jpg" alt="Arc's Home on Apple TV: Continue Watching, with Severance's artwork filling the screen" width="900">
 </p>
 
 ## What is Arc for Apple TV?
