@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/home.jpg" alt="Arc's Home on Apple TV" width="900">
+  <img src="docs/screenshots/home.jpg" alt="Arc's Home on Apple TV, with Severance's artwork filling the screen" width="900">
 </p>
 
 ## What is Arc for Apple TV?
@@ -40,16 +40,16 @@ same repository, sharing ArcKit (the API client, models and playback logic).
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/screenshots/movie.jpg" alt="Dune: Part Two's page"></td>
-    <td width="50%"><img src="docs/screenshots/show-episodes.jpg" alt="Breaking Bad's page, with its seasons and episodes"></td>
+    <td width="50%"><img src="docs/screenshots/movie.jpg" alt="Interstellar's page"></td>
+    <td width="50%"><img src="docs/screenshots/show-episodes.jpg" alt="Severance's episodes, with the season tabs"></td>
   </tr>
   <tr>
     <td width="50%"><img src="docs/screenshots/library-recommended.jpg" alt="A library's Recommended rows"></td>
-    <td width="50%"><img src="docs/screenshots/library.jpg" alt="Browsing a library, with Sort, Filter and the A–Z bar"></td>
+    <td width="50%"><img src="docs/screenshots/library.jpg" alt="Browsing a library, with Sort and Filter"></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/screenshots/player.jpg" alt="The player's controls"></td>
-    <td width="50%"><img src="docs/screenshots/player-subtitles.jpg" alt="The player's Subtitles menu"></td>
+    <td width="50%"><img src="docs/screenshots/watch-together.jpg" alt="Home's Watch Together row"></td>
+    <td width="50%"><img src="docs/screenshots/collection.jpg" alt="The Dune Collection"></td>
   </tr>
 </table>
 
@@ -94,7 +94,7 @@ and appears in Arc's Settings → Devices, where it can be signed out.
   <tr>
     <td width="33%"><img src="docs/screenshots/sign-in.jpg" alt="Signing in with a code"></td>
     <td width="33%"><img src="docs/screenshots/profiles.jpg" alt="Who's watching?"></td>
-    <td width="33%"><img src="docs/screenshots/settings.jpg" alt="Settings, saved to your profile"></td>
+    <td width="33%"><img src="docs/screenshots/about.jpg" alt="Settings: About this Apple TV's connection"></td>
   </tr>
 </table>
 
@@ -141,6 +141,7 @@ screenshot library. Every screen's screenshot is attached to the run and copied 
 the `ci-screenshots` branch (`runs/<run id>/`).
 
 The pictures in this README come from that walk-through: simulator captures, not a real Apple TV.
+The player isn't pictured, because the stand-in plays a test clip rather than a film.
 
 ### Testing against a real Arc
 
