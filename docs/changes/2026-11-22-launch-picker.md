@@ -10,7 +10,7 @@ Returning from the background keeps the current profile because the launch
 decision runs only while the app model is launching. Plex offers automatic
 sign-in that can bypass the PIN. Arc keeps the PIN requirement and follows
 server #505.
-[Plex Apple TV settings](https://support.plex.tv/articles/settings-apple-tv/)
+[Plex Apple TV settings](https://support.plex.tv/articles/settings-plex-for-apple-tv/)
 
 ArcKit decision tests cover fresh launch, resume, automatic selection, deleted
 profiles and PIN restrictions. The Linux workspace has no Swift toolchain.
