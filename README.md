@@ -24,7 +24,7 @@
 ## What is Arc for Apple TV?
 
 The Apple TV app for [Arc Media Server](https://github.com/arc-media-server/arc-media-server). If
-you use Plex or Jellyfin, it's the same idea: your films and shows live on your own server at
+you've used other media servers, it's the same idea: your films and shows live on your own server at
 home, and this app shows them on the TV. It's a native app in Swift and SwiftUI. It feels at home
 on tvOS: the focus engine, Liquid Glass, Top Shelf, Control Center's Now Playing and Match
 Content all work as they do in Apple's own apps.

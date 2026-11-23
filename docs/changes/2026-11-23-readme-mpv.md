@@ -5,5 +5,7 @@
   plays everything Arc sends. The fallback code (`AVPlayerEngine`) is unchanged.
 - The README's Home picture is the one with the corrected Backdrops cards (run 45085650734). It
   missed #34, which was merged just before it was added.
+- The introduction says "If you've used other media servers" instead of naming Plex and
+  Jellyfin, so the README doesn't name other products (owner, 23 November); arc-tv's README too.
 
 Checks: docs only. Logging: none.
