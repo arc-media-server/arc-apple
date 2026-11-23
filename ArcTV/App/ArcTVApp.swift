@@ -1,3 +1,4 @@
+import ArcKit
 import SwiftUI
 
 @main
@@ -17,6 +18,7 @@ struct ArcTVApp: App {
 /// profile picker, then Home and the other tabs.
 struct RootView: View {
     @Environment(AppModel.self) private var app
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         ZStack {
@@ -30,6 +32,7 @@ struct RootView: View {
             }
         }
         .task { await app.launch() }
+        .onChange(of: scenePhase) { _, phase in if phase == .background { DeviceLogs.shared.flush() } }
         // The Top Shelf's Select (open the title) and Play.
         .onOpenURL { url in
             if let link = Shared.link(url) { app.pendingLink = link }

@@ -185,6 +185,12 @@ final class WalkThrough: XCTestCase {
         let automaticLabel = app.staticTexts["Sign in automatically"]
         for _ in 0..<10 where !automaticLabel.isHittable { press(.down) }
         shot("16a-automatic-sign-in")
+        let sendLogs = app.buttons["send-device-logs"]
+        for _ in 0..<12 where !sendLogs.hasFocus { press(.down) }
+        XCTAssertTrue(sendLogs.hasFocus)
+        remote.press(.select)
+        XCTAssertTrue(app.staticTexts["Logs sent."].waitForExistence(timeout: 10))
+        shot("16c-send-logs")
         let about = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'About'")).firstMatch
         for _ in 0..<12 where !about.hasFocus { press(.down) }
         remote.press(.select)

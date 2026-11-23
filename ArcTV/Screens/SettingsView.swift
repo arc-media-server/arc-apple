@@ -11,6 +11,9 @@ struct SettingsView: View {
     @State private var prefs: Prefs?
     @State private var problem: String?
     @State private var confirmSignOut = false
+    @State private var detailedLogs = DeviceLogs.shared.detailed
+    @State private var sendingLogs = false
+    @State private var logStatus: String?
 
     var body: some View {
         SettingsLayout {
@@ -69,6 +72,16 @@ struct SettingsView: View {
                     Button(L("signin.change_server")) { app.changeServer() }
                 }
                 Section {
+                    Toggle(L("diagnostics.detailed"), isOn: Binding(get: { detailedLogs }, set: { enabled in
+                        DeviceLogs.shared.setDetailed(enabled)
+                        detailedLogs = enabled
+                    }))
+                    Button(L("diagnostics.send")) { sendLogs() }
+                        .accessibilityIdentifier("send-device-logs")
+                        .disabled(sendingLogs)
+                    Text(logStatus ?? L("diagnostics.note")).font(.callout).foregroundStyle(ArcColor.muted)
+                }
+                Section {
                     NavigationLink { AboutView() } label: {
                         LabeledContent(L("settings.about"), value: AboutView.appVersion)
                     }
@@ -76,6 +89,12 @@ struct SettingsView: View {
             }
         }
         .task { await app.refreshProfile() }
+        .task {
+            while !Task.isCancelled {
+                detailedLogs = DeviceLogs.shared.detailed
+                do { try await Task.sleep(for: .seconds(30)) } catch { return }
+            }
+        }
         .task { await load() }
         // Every screen keeps unwatched episodes' stills and descriptions back at once.
         .onChange(of: prefs?.hideSpoilers) { _, on in if let on { app.hideSpoilers = on } }
@@ -84,6 +103,28 @@ struct SettingsView: View {
             Button(L("common.cancel"), role: .cancel) {}
         } message: {
             Text(L("settings.sign_out_body"))
+        }
+    }
+
+    private func sendLogs() {
+        guard let api = app.api, !sendingLogs else { return }
+        let entries = DeviceLogs.shared.snapshot()
+        guard !entries.isEmpty else {
+            logStatus = L("diagnostics.empty")
+            return
+        }
+        sendingLogs = true
+        logStatus = L("diagnostics.sending")
+        Task {
+            defer { sendingLogs = false }
+            do {
+                try await api.sendDeviceLogs(entries)
+                logStatus = L("diagnostics.sent")
+            } catch let error as APIError where error.status == 404 {
+                logStatus = L("diagnostics.unsupported")
+            } catch {
+                logStatus = L("diagnostics.failed")
+            }
         }
     }
 
