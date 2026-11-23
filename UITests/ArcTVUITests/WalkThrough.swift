@@ -182,6 +182,9 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(3)
         press(.right)
+        let automaticLabel = app.staticTexts["Sign in automatically"]
+        for _ in 0..<10 where !automaticLabel.isHittable { press(.down) }
+        shot("16a-automatic-sign-in")
         let about = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'About'")).firstMatch
         for _ in 0..<12 where !about.hasFocus { press(.down) }
         remote.press(.select)

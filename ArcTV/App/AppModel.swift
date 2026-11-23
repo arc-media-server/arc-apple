@@ -64,6 +64,25 @@ final class AppModel {
     private let log = ArcLog.shared
     private static let serverKey = "server"
     private static let serverNameKey = "server_name"
+    private static let automaticProfileKey = "automatic_profile_id"
+    private(set) var automaticProfileID = UserDefaults.standard.string(forKey: AppModel.automaticProfileKey)
+
+    func setAutomaticSignIn(_ enabled: Bool) {
+        guard let profile, !profile.hasPin else { return }
+        saveAutomaticProfile(enabled ? profile.id : nil)
+    }
+
+    private func saveAutomaticProfile(_ id: String?) {
+        automaticProfileID = id
+        UserDefaults.standard.set(id, forKey: Self.automaticProfileKey)
+    }
+
+    func refreshProfile() async {
+        guard let api, let id = profile?.id,
+              let current = try? await api.authStatus().profile, current.id == id,
+              profile?.id == id, self.api === api else { return }
+        profile = current
+    }
 
     private func liveChanged(_ topics: Set<String>) {
         log.debug("live updates: \(topics.sorted().joined(separator: ", "))")
@@ -87,12 +106,45 @@ final class AppModel {
             stage = .server
             return
         }
-        api = makeAPI(url)
+        let client = makeAPI(url)
+        api = client
         token.set(Keychain.read())
         // The Top Shelf reads both from the app group (installs from before it, too).
         Shared.setServer(url)
         Keychain.share()
-        stage = token.get() == nil ? .signIn : .profiles
+        guard token.get() != nil else {
+            saveAutomaticProfile(nil)
+            stage = .signIn
+            return
+        }
+        // Backgrounding leaves this model and its stage in place.
+        if let automaticProfileID {
+            do {
+                let status = try await client.authStatus()
+                if !status.signedIn {
+                    tokenRefused()
+                    return
+                }
+                if let selected = LaunchProfile.directProfile(status: status, automaticId: automaticProfileID, fresh: true) {
+                    let chosen = if selected.id == status.profile?.id {
+                        selected
+                    } else {
+                        try await client.chooseProfile(id: selected.id, pin: nil)
+                    }
+                    log.info("signing in automatically as the saved profile")
+                    chose(chosen)
+                    return
+                }
+            } catch is CancellationError {
+                return
+            } catch let error as APIError {
+                log.warn("automatic profile sign-in failed (HTTP \(error.status))")
+            } catch {
+                log.warn("automatic profile sign-in failed")
+            }
+        }
+        log.info("starting at Who's watching")
+        stage = .profiles
     }
 
     /// Checks the address is an Arc server and keeps it. Throws when it can't be reached or isn't Arc.
@@ -103,6 +155,7 @@ final class AppModel {
         if serverAddress != ServerAddress.display(url) {
             forgetServerName()
             Keychain.delete()
+            saveAutomaticProfile(nil)
             token.set(nil)
         }
         api = candidate
@@ -138,6 +191,7 @@ final class AppModel {
     func tokenRefused() {
         log.info("the server refused this device's sign-in; asking for a new code")
         Keychain.delete()
+        saveAutomaticProfile(nil)
         token.set(nil)
         profile = nil
         stage = .signIn
@@ -146,6 +200,7 @@ final class AppModel {
     func signOut() async {
         await api?.signOut()
         Keychain.delete()
+        saveAutomaticProfile(nil)
         token.set(nil)
         profile = nil
         stage = .signIn
@@ -153,6 +208,7 @@ final class AppModel {
 
     func changeServer() {
         Keychain.delete()
+        saveAutomaticProfile(nil)
         token.set(nil)
         profile = nil
         api = nil

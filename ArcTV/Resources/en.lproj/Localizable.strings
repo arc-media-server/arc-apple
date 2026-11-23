@@ -390,3 +390,7 @@
 "together.moved_by" = "%@ moved the room";
 "together.ended" = "Watch Together has ended. You're watching on your own.";
 "together.lost" = "You're no longer in the Watch Together room. You're watching on your own.";
+
+"settings.automatic_sign_in" = "Sign in automatically";
+"settings.automatic_sign_in_hint" = "Open as %@ on this device, without asking who's watching.";
+"settings.automatic_sign_in_pin" = "Not available for a profile with a PIN: it's asked for each time.";
