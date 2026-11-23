@@ -89,6 +89,22 @@ def real_picture(path):
                 pic = next((h.get("profile_path") for h in hits if h.get("profile_path")), None)
                 real[key] = fetch("w342", pic) if pic else None
             return real[key]
+        if len(parts) == 5 and parts[0] == "series" and parts[2] == "seasons" and parts[4] == "image":
+            series, season = parts[1], parts[3]
+            kind, tmdb_id, _ = titles.get(series, (None, None, None))
+            if kind != "series" or not tmdb_id or not season.isdecimal(): return None
+            key = ("season", tmdb_id, season)
+            if key not in real:
+                try:
+                    imgs = tmdb(f"tv/{tmdb_id}/season/{season}/images", include_image_language="en,null")
+                    posters = imgs.get("posters") or []
+                    pic = next((p["file_path"] for lang in ("en", None) for p in posters
+                                if p.get("iso_639_1") == lang and p.get("file_path")), None)
+                    real[key] = fetch("w500", pic) if pic else None
+                except (OSError, ValueError) as e:
+                    sys.stderr.write(f"standin: no TMDB season picture: {type(e).__name__}\n")
+                    real[key] = None
+            return real[key] or real_picture(f"items/{series}/images/primary")
         if parts[0] != "items" or len(parts) < 4: return None
         item, which = parts[1], parts[3]
         kind, tmdb_id, parent = titles.get(item, (None, None, None))
@@ -260,6 +276,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     {"id": "because", "type": "because_you_watched", "title": "Because you watched", "name": titles[0]["title"] if titles else "", "items": list(reversed(titles))},
                     {"id": "top", "type": "top_rated", "title": "Top Rated", "items": titles[1:] + titles[:1]}]
             return self.json(200, {"rows": [r for r in rows if r["items"]]})
+        if path == "search" and "q" in query:
+            query["q"] = query["q"].strip().casefold()
         k = key(method, path, query)
         if method == "POST" and path == "auth/profile" and body:
             k += "#" + str(body.get("id"))
@@ -403,6 +421,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return self.send(206, sample[start:end + 1], "video/mp4", {"Content-Range": f"bytes {start}-{end}/{size}", "Accept-Ranges": "bytes"})
         self.send(200, sample, "video/mp4", {"Accept-Ranges": "bytes"})
 
-port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
-print(f"stand-in Arc on http://127.0.0.1:{port}", flush=True)
-http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
+if __name__ == "__main__":
+    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    print(f"stand-in Arc on http://127.0.0.1:{port}", flush=True)
+    http.server.ThreadingHTTPServer(("127.0.0.1", port), Handler).serve_forever()
