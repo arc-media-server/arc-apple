@@ -13,7 +13,9 @@
 - **`record.py`:** chooses the first profile before recording, so Home's answers are that
   profile's (it used to record them before any profile was chosen); tolerates rows that come as
   an object with `items`; records searches for "arrival" and "dune".
-- **Walk-through:** opens Breaking Bad for the show steps and types "dune" in Search.
+- **Walk-through:** opens Breaking Bad for the show steps and types "dune" in Search. Its last step
+  asks the stand-in to drop its Watch Together rooms (`POST standin/no-rooms`), restarts the app
+  and photographs Home on Continue Watching, as most people see it: the README's main picture.
 - **Workflow:** the copies on the `ci-screenshots` branch are 1280 wide (they were 960), the size
   the READMEs use, because the full-size artifact is out of reach from some agent sessions.
 

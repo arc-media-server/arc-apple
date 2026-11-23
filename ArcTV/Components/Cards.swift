@@ -4,10 +4,11 @@ import SwiftUI
 extension CardStyle {
     var size: CGSize {
         switch self {
-        // Sized for a sofa: about four wide cards or six posters across the screen.
+        // Sized for a sofa: about four wide cards or six posters across the screen. Backdrops are
+        // the web's squarer 4:3 card, four and a bit across (owner, 22 November).
         case .poster: return CGSize(width: 236, height: 354)
         case .thumb: return CGSize(width: 512, height: 288)
-        case .backdrop: return CGSize(width: 512, height: 384)
+        case .backdrop: return CGSize(width: 360, height: 270)
         }
     }
 }
@@ -62,10 +63,17 @@ struct MediaCardView: View {
                         .frame(width: style.size.width, height: style.size.height)
                         .blur(radius: style != .poster && art.blurred ? 24 : 0)
                         .clipped()
+                    // As the web's (ArcArtwork.tsx): darker towards the bottom, the logo centred
+                    // low on it, above the resume strip when there is one.
                     if style == .backdrop, let logo = card.logo {
+                        LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .top, endPoint: .bottom)
+                            .frame(height: style.size.height / 2)
+                            .frame(maxHeight: .infinity, alignment: .bottom)
                         ArtworkImage(path: logo, contentMode: .fit, placeholder: .clear)
-                            .frame(width: style.size.width * 0.6, height: style.size.height * 0.3)
-                            .padding(20)
+                            .frame(maxWidth: style.size.width * 0.72, maxHeight: style.size.height * 0.26)
+                            .shadow(color: .black.opacity(0.6), radius: 10, y: 2)
+                            .padding(.bottom, card.progress == nil ? 22 : 46)
+                            .frame(width: style.size.width, height: style.size.height, alignment: .bottom)
                     }
                     // The show's own picture carries its logo, as Continue Watching's do.
                     if style == .thumb, card.showArt, card.progress == nil, let logo = card.logo {

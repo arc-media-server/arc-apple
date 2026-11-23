@@ -309,6 +309,21 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(1)
         shot("26-invite-chosen")
+
+        // Home without Watch Together rooms, as most people see it (the README's picture): the
+        // stand-in drops its rooms, then a fresh start, the first profile, and Home on Continue
+        // Watching.
+        var request = URLRequest(url: URL(string: server + "/api/v1/standin/no-rooms")!)
+        request.httpMethod = "POST"
+        let done = expectation(description: "rooms dropped")
+        URLSession.shared.dataTask(with: request) { _, _, _ in done.fulfill() }.resume()
+        wait(for: [done], timeout: 10)
+        app.terminate()
+        app.launch()
+        pause(4)
+        remote.press(.select)
+        pause(8)
+        shot("27-home-continue-watching")
     }
 
     private func press(_ button: XCUIRemote.Button, _ times: Int = 1) {
