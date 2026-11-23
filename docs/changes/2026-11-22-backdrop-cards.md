@@ -12,7 +12,8 @@ crowded the resume strip (Breaking Bad's broke over two lines next to the bar).
   `BackdropArt`. On a part-watched title it sits above the resume strip instead of beside it.
 
 ## Checks
-- The macOS build and simulator walk-through; Home's screenshot looked at.
+- The macOS build and simulator walk-through (run 45085650734) pass; Home's screenshot looked at
+  (`2026-11-22-backdrop-cards/home.jpg`): four cards and part of a fifth, logos centred.
 - Not checked on a real Apple TV.
 
 ## Logging
