@@ -14,7 +14,7 @@
   <img alt="Licence: AGPL-3.0" src="https://img.shields.io/badge/licence-AGPL--3.0-7fdccd">
   <img alt="tvOS 18 and newer" src="https://img.shields.io/badge/tvOS-18%2B-000000?logo=apple&logoColor=white">
   <img alt="Swift and SwiftUI" src="https://img.shields.io/badge/swift-SwiftUI-F05138?logo=swift&logoColor=white">
-  <img alt="Player: mpv, with Apple's player as the fallback" src="https://img.shields.io/badge/player-mpv%20%2B%20AVPlayer-555555">
+  <img alt="Player: mpv" src="https://img.shields.io/badge/player-mpv-555555">
 </p>
 
 <p align="center">
@@ -71,8 +71,7 @@ Collections and folders for home videos, playlists, and pages for people and col
 finds titles, people and collections.
 
 **▶️ A full player.** mpv plays almost every file as it is (MKV, HEVC, AV1, TrueHD, DTS, Dolby
-Vision, HDR10+), so Arc converts only for bandwidth away from home or the truly unusual; Apple's
-own player takes over if mpv can't play a file. The controls match Arc's other players: the
+Vision, HDR10+), so Arc converts only for bandwidth away from home or the truly unusual. The controls match Arc's other players: the
 timeline with thumbnails and chapters, Skip Intro, Recap and Credits, Up Next, audio and subtitle
 tracks with Subtitle Timing, quality and versions, and Info, Chapters, Cast and Episodes cards.
 Control Center and an iPhone's remote work as with Apple's apps.
