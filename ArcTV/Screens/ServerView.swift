@@ -13,36 +13,54 @@ struct ServerView: View {
     @FocusState private var focus: String?
 
     var body: some View {
-        VStack(spacing: 32) {
+        // As Android's server screen: one column, left-aligned, in the middle of the screen over
+        // Arc's soft glow: the logo, the heading and a line, the address with Connect beside it,
+        // a line under them (connecting, what went wrong, or the port note), then the servers
+        // found on the network.
+        VStack(alignment: .leading, spacing: 0) {
             ArcWordmark()
-            Text(L("server.title")).font(.title2.weight(.semibold))
-            Text(L("server.body")).foregroundStyle(ArcColor.muted)
-            TextField(L("server.hint"), text: $address)
-                .keyboardType(.URL)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .frame(width: 900)
-                .focused($focus, equals: "address")
-                .onSubmit(connect)
-            Text(L("server.port_note")).font(.caption).foregroundStyle(ArcColor.subtle)
-            if let problem {
-                Text(problem).foregroundStyle(ArcColor.error).multilineTextAlignment(.center).frame(maxWidth: 900)
+            Text(L("server.title")).font(.title.weight(.semibold)).padding(.top, 40)
+            Text(L("server.body")).font(.callout).foregroundStyle(ArcColor.muted).padding(.top, 16)
+            HStack(spacing: 32) {
+                TextField(L("server.hint"), text: $address)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .focused($focus, equals: "address")
+                    .onSubmit(connect)
+                Button(action: connect) {
+                    Text(checking ? L("server.checking") : L("server.connect")).frame(minWidth: 200)
+                }
+                .arcGlassButton(prominent: true)
+                .disabled(checking)
             }
-            Button(action: connect) {
-                Text(checking ? L("server.checking") : L("server.connect")).frame(minWidth: 320)
+            .padding(.top, 56)
+            Group {
+                if checking {
+                    HStack(spacing: 20) {
+                        ProgressView()
+                        Text(L("server.checking")).foregroundStyle(ArcColor.muted)
+                    }
+                } else if let problem {
+                    Text(problem).foregroundStyle(ArcColor.error)
+                } else {
+                    Text(L("server.port_note")).foregroundStyle(ArcColor.subtle)
+                }
             }
-            .arcGlassButton(prominent: true)
-            .disabled(checking)
-            if let found { onNetwork(found) }
+            .font(.callout)
+            .padding(.top, 28)
+            if let found { onNetwork(found).padding(.top, 56) }
         }
-        .padding(80)
+        .frame(width: 1120, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AuthGlow())
         .task { await search() }
     }
 
     /// On your network: each Arc that answered, then Search Again when none did.
     @ViewBuilder private func onNetwork(_ servers: [FoundServer]) -> some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 24) {
                 Text(L("server.on_network")).font(.headline)
                 if searching { ProgressView() }
             }
@@ -53,7 +71,7 @@ struct ServerView: View {
                         Text(L("server.found_detail", server.address.host ?? ServerAddress.display(server.address), server.version))
                             .font(.caption).foregroundStyle(ArcColor.muted)
                     }
-                    .frame(width: 600, alignment: .leading)
+                    .frame(width: 1040, alignment: .leading)
                 }
                 .arcGlassButton()
                 .focused($focus, equals: server.id)
@@ -122,6 +140,19 @@ struct ServerView: View {
                 problem = L("server.unreachable")
             }
         }
+    }
+}
+
+/// The soft light behind the server, sign-in and profile screens, as the web's and Android's:
+/// a large white glow above the middle of the screen, fading to the page colour.
+struct AuthGlow: View {
+    var body: some View {
+        ZStack {
+            ArcColor.background
+            RadialGradient(colors: [ArcColor.foreground.opacity(0.18), ArcColor.foreground.opacity(0.06), .clear],
+                           center: UnitPoint(x: 0.5, y: -0.11), startRadius: 0, endRadius: 1100)
+        }
+        .ignoresSafeArea()
     }
 }
 

@@ -42,10 +42,13 @@ protocol PlaybackEngine: AnyObject {
     /// Zoom Mode: false shows the whole picture (bars where the shapes differ), true fills the
     /// screen and cuts the edges.
     func setZoom(_ on: Bool)
+    /// What it's really doing, for Playback Info: read about once a second while that's showing.
+    var stats: EngineStats { get }
 }
 
 extension PlaybackEngine {
     func prepareDisplay(_ hint: DisplayHint?) {}
+    var stats: EngineStats { EngineStats() }
 }
 
 /// A stream's picture as the TV's Match Content needs it: its dynamic range and frame rate.

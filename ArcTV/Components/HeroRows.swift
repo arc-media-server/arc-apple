@@ -12,9 +12,10 @@ struct HeroRows<Header: View>: View {
     let rows: [LoadedRow]
     /// Room left at the top of the hero for the floating header.
     var headerHeight: CGFloat = 0
-    /// A row of its own above the titles' rows (Home's Watch Together row). It gets the page's
-    /// focus binding and should mark its first card with `HeroRowsTopFocus`, which takes the focus
-    /// when the page opens.
+    /// A row of its own among the titles' rows (Home's Watch Together row), under Continue
+    /// Watching, or under the first row when there's none. The first titles' row keeps the top and
+    /// the focus, so the hero describes them (owner, 27 November). It gets the page's focus binding;
+    /// its cards' focus keys start with "top|".
     var top: ((FocusState<String?>.Binding) -> AnyView)? = nil
     @ViewBuilder var header: () -> Header
     /// The title the hero shows: the focused card, or the one last focused.
@@ -23,22 +24,27 @@ struct HeroRows<Header: View>: View {
     /// The header floats over the top of the page (the library's pill bar) while the hero or the
     /// first row has the focus, and fades away further down so it doesn't cover a row.
     @State private var headerShown = true
+    /// The row the focus is in, so the page moves only when the focus changes rows.
+    @State private var focusedRow: String?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             backdrop
+            ScrollViewReader { proxy in
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading, spacing: 44) {
-                    if let hero { heroDetails(hero) }
-                    if let top { top($focused) }
+                // The gap between rows is each row's foot (below), which is what lines up with the
+                // bottom of the screen.
+                LazyVStack(alignment: .leading, spacing: 44 - Self.foot) {
+                    if let hero { heroDetails(hero).id(Self.heroKey) }
                     ForEach(rows) { row in
+                        VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 16) {
                             Text(row.title).font(.title3.weight(.semibold)).padding(.horizontal, 80)
                             ScrollView(.horizontal) {
                                 LazyHStack(alignment: .top, spacing: 36) {
                                     ForEach(row.cards) { card in
                                         MediaCardView(card: card, style: row.style, seasonPosters: row.seasonPosters,
-                                                      continueRow: row.continueRow, queueEntry: row.queueRow ? card.id : nil, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
+                                                      continueRow: row.continueRow, queueEntry: row.queueRow ? card.id : nil, showsLength: false, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
                                     }
                                 }
                                 .padding(.horizontal, 80)
@@ -46,10 +52,40 @@ struct HeroRows<Header: View>: View {
                             }
                             .scrollClipDisabled()
                         }
+                            Color.clear.frame(height: Self.foot).id(row.id)
+                        }
+                        if let top, row.id == topAfter {
+                            // Its foot, as the rows' above, is where it lands.
+                            VStack(alignment: .leading, spacing: 0) {
+                                top($focused)
+                                Color.clear.frame(height: Self.foot).id("top")
+                            }
+                        }
                     }
                 }
                 .padding(.top, headerHeight)
                 .padding(.bottom, 60)
+            }
+            // The row the focus moves into lands at the foot of the screen, moving down or back
+            // up, with the rows above it in view, the hero above the first (as Android's and Kodi's
+            // rows, and Plex's). tvOS would otherwise scroll only as far as needed, which
+            // going up leaves the row at the top.
+            .onChange(of: focused) { old, key in
+                guard let key, !key.hasPrefix("hero|") else { return }
+                let row = String(key.split(separator: "|", maxSplits: 1).first ?? "")
+                guard row != focusedRow else { return }
+                focusedRow = row
+                // Every row lands at the foot, the first too: under the hero, with its names in
+                // full (owner, 27 November). On opening, a moment later as well, once the rows
+                // have been laid out.
+                withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(row, anchor: .bottom) }
+                if old == nil {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(150))
+                        proxy.scrollTo(row, anchor: .bottom)
+                    }
+                }
+            }
             }
             header()
                 .opacity(headerShown ? 1 : 0)
@@ -69,12 +105,17 @@ struct HeroRows<Header: View>: View {
         }
     }
 
+    /// What stays under the focused row at the foot of the screen.
+    static var foot: CGFloat { 36 }
+    static var heroKey: String { "hero|details" }
+
+    /// The row the `top` row sits under: Continue Watching, or else the first row.
+    private var topAfter: String? { (rows.first(where: \.continueRow) ?? rows.first)?.id }
+
     private func focusFirst() {
         guard focused == nil, let row = rows.first, let card = row.cards.first else { return }
         if hero == nil { hero = card }
-        // A top row starts with the focus: the first titles' row may be below the screen, not
-        // yet built, and focusing it then leaves the focus to tvOS (which picks the sidebar).
-        let key = top == nil ? row.id + "|" + card.id : HeroRowsTopFocus
+        let key = row.id + "|" + card.id
         Task { @MainActor in focused = key }
     }
 
@@ -110,7 +151,7 @@ struct HeroRows<Header: View>: View {
 
     private func genreLine(_ item: Item) -> String? {
         var parts: [String] = []
-        if !item.isEpisode, let year = item.year { parts.append(String(year)) }
+        if !item.isEpisode, let yearAndEdition = item.yearAndEdition { parts.append(yearAndEdition) }
         parts += item.genres.prefix(3)
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
@@ -165,6 +206,3 @@ extension HeroRows where Header == EmptyView {
         self.init(rows: rows, top: top) { EmptyView() }
     }
 }
-
-/// The focus key of a top row's first card (see `HeroRows.top`).
-let HeroRowsTopFocus = "top|first"

@@ -86,10 +86,24 @@ struct PlayerScreen: View {
                               restart: { model.restart(); sendSeek(); leaveOSD() },
                               invite: { if let room { inviteMore(room) } },
                               leave: { close() },
-                              end: { Task { await together.end() } })
+                              end: { Task { await together.end() } },
+                              down: {
+                                  // After tvOS's own move, in case it found something below.
+                                  Task { @MainActor in
+                                      if case .control = focus { leaveOSD() }
+                                  }
+                              })
                         .opacity(controls ? 1 : 0)
                         .animation(.easeInOut(duration: 0.25), value: controls)
                     corner(model)
+                    if model.showsInfo {
+                        PlaybackInfoPanel(model: model)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                            .padding(.top, 60)
+                            .padding(.trailing, 80)
+                            .ignoresSafeArea()
+                            .transition(.opacity)
+                    }
                     if let room, lobby {
                         LobbyPanel(room: room, code: together.lobbyCode, focus: $focus,
                                    start: { Task { await together.play() } },
@@ -124,7 +138,7 @@ struct PlayerScreen: View {
         }
         .onAppear {
             guard model == nil, let api = app.api else { return }
-            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: EngineChoice.make()) { app.tokenRefused() }
+            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, fileId: request.fileId, engine: EngineChoice.make()) { app.tokenRefused() }
             model = m
             m.start()
             Task { await syncQueue(m) }

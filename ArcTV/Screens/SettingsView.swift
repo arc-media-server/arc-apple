@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Environment(Browse.self) private var browse
     @State private var prefs: Prefs?
     @State private var problem: String?
+    @State private var savingMissingEpisodes = false
     @State private var confirmSignOut = false
     @State private var detailedLogs = DeviceLogs.shared.detailed
     @State private var sendingLogs = false
@@ -33,6 +34,8 @@ struct SettingsView: View {
                         Toggle(L("settings.auto_skip"), isOn: binding(prefs.autoSkip, "auto_skip") { $0.autoSkip = $1 })
                         Toggle(L("settings.theme_music"), isOn: binding(prefs.themeMusic, "theme_music") { $0.themeMusic = $1 })
                         Toggle(L("settings.hide_spoilers"), isOn: binding(prefs.hideSpoilers, "hide_spoilers") { $0.hideSpoilers = $1 })
+                        Toggle(L("settings.show_missing_episodes"), isOn: binding(prefs.showMissingEpisodes, "show_missing_episodes") { $0.showMissingEpisodes = $1 })
+                            .disabled(savingMissingEpisodes)
                         Picker(L("settings.subtitles"), selection: Binding(get: { prefs.subtitleMode }, set: { mode in save("subtitle_mode", .string(mode)) { $0.subtitleMode = mode } })) {
                             Text(L("settings.subtitles_last")).tag("")
                             Text(L("settings.subtitles_foreign")).tag("foreign")
@@ -135,13 +138,23 @@ struct SettingsView: View {
     /// Shows the change at once and sends just that preference; puts it back if Arc refuses it.
     private func save(_ key: String, _ value: JSONValue, _ apply: (inout Prefs) -> Void) {
         guard var changed = prefs, let api = app.api else { return }
+        let changesMissingEpisodes = key == "show_missing_episodes"
+        if changesMissingEpisodes {
+            guard !savingMissingEpisodes else { return }
+            savingMissingEpisodes = true
+        }
         let before = prefs
+        let profileId = app.profile?.id
         apply(&changed)
         prefs = changed
         problem = nil
         Task {
+            defer { if changesMissingEpisodes { savingMissingEpisodes = false } }
             do {
-                prefs = try await api.updatePrefs([key: value])
+                let saved = try await api.updatePrefs([key: value])
+                guard app.api === api, app.profile?.id == profileId else { return }
+                prefs = saved
+                if changesMissingEpisodes { app.showMissingEpisodes = saved.showMissingEpisodes }
                 ArcLogApp.info("preference changed: \(key)")
             } catch let error as APIError where error.status == 401 {
                 app.tokenRefused()

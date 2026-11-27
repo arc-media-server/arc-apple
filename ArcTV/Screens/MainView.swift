@@ -1,12 +1,13 @@
 import ArcKit
 import SwiftUI
 
-/// A page the app can open from anywhere: a title, a collection, a playlist, a person or a folder.
+/// A page the app can open from anywhere.
 enum Route: Hashable {
     case item(Item)
     case collection(id: String, title: String)
     case playlist(id: String, title: String)
     case person(id: Int64, name: String)
+    case genre(GenreMatch)
     case folder(library: Library, path: String, name: String)
 }
 
@@ -149,10 +150,17 @@ struct RouteView: View {
 
     var body: some View {
         switch route {
-        case .item(let item): DetailsView(itemId: item.id, initial: item)
+        // An episode opens its show's page on that episode, as Plex and Arc's other apps do.
+        case .item(let item):
+            if let show = item.showOfEpisode {
+                DetailsView(itemId: show.id, initial: show, episodeId: item.id)
+            } else {
+                DetailsView(itemId: item.id, initial: item)
+            }
         case .collection(let id, let title): CollectionView(id: id, title: title)
         case .playlist(let id, let title): PlaylistView(id: id, title: title)
         case .person(let id, let name): PersonView(id: id, name: name)
+        case .genre(let match): GenreLibraryView(match: match)
         case .folder(let library, let path, let name): FolderView(library: library, path: path, name: name)
         }
     }
@@ -354,6 +362,22 @@ struct MainView: View {
     /// top (Select switches profile), and the focused place in white.
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Arc's logo at the top: the mark over the icons while shut, the whole logo (the mark
+            // and its name) while open, as Apple's own apps put theirs.
+            ZStack(alignment: .leading) {
+                Image("ArcMark").resizable().scaledToFit()
+                    .frame(width: 44, height: 44)
+                    .frame(width: Sidebar.icon)
+                    .opacity(sidebarOpen ? 0 : 1)
+                Image("ArcLogo").resizable().scaledToFit()
+                    .frame(height: 44)
+                    .padding(.leading, 10)
+                    .opacity(sidebarOpen ? 1 : 0)
+            }
+            .frame(height: Sidebar.icon, alignment: .leading)
+            .shadow(color: .black.opacity(sidebarOpen ? 0 : 0.5), radius: 6) // over bright artwork
+            .accessibilityHidden(true)
+            .padding(.bottom, 12)
             edge(Sidebar.above)
             if let profile = app.profile {
                 Button { app.switchProfile() } label: {
@@ -416,13 +440,16 @@ struct MainView: View {
 
     private func loadTabs() async {
         guard let api = app.api else { return }
+        let profileId = app.profile?.id
         do {
             async let prefsAnswer = api.prefs()
             async let librariesAnswer = api.libraries()
             let (prefs, all) = try await (prefsAnswer, librariesAnswer)
+            guard !Task.isCancelled, app.api === api, app.profile?.id == profileId else { return }
             libraries = orderedLibraries(all, order: prefs.libraryOrder)
             watchlistAt = prefs.watchlistPosition
             app.hideSpoilers = prefs.hideSpoilers
+            app.showMissingEpisodes = prefs.showMissingEpisodes
         } catch let error as APIError where error.status == 401 {
             app.tokenRefused()
         } catch is CancellationError {

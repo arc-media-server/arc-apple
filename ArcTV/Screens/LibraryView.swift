@@ -31,9 +31,12 @@ struct LibraryView: View {
     private static let page = 60
     private var isVideos: Bool { library.kind == "videos" }
 
-    init(library: Library) {
+    init(library: Library, genre: String? = nil) {
         self.library = library
-        _show = State(initialValue: library.kind == "videos" ? .titles : .recommended)
+        _show = State(initialValue: genre != nil || library.kind == "videos" ? .titles : .recommended)
+        var query = LibraryQuery()
+        query.genre = genre
+        _query = State(initialValue: query)
     }
 
     var body: some View {
@@ -51,23 +54,23 @@ struct LibraryView: View {
     /// Recommended: the hero and rows, as Home, with the pill bar above.
     @ViewBuilder private var recommendedPage: some View {
         if loading {
-            VStack(alignment: .leading) { header; Spacer() }.padding(.horizontal, 80).padding(.vertical, 40)
+            VStack(alignment: .leading) { header; Spacer() }.padding(.horizontal, 80).padding(.vertical, Self.headerTop)
                 .overlay { ProgressView() }
         } else if let problem {
             VStack(alignment: .leading) {
                 header
                 RowsMessage(title: problem, message: "") { Task { await reload() } }
             }
-            .padding(.horizontal, 80).padding(.vertical, 40)
+            .padding(.horizontal, 80).padding(.vertical, Self.headerTop)
         } else if recommended.isEmpty {
             VStack(alignment: .leading) {
                 header
                 RowsMessage(title: L("library.recommended_empty_title"), message: L("library.recommended_empty"), retry: nil)
             }
-            .padding(.horizontal, 80).padding(.vertical, 40)
+            .padding(.horizontal, 80).padding(.vertical, Self.headerTop)
         } else {
-            HeroRows(rows: recommended, headerHeight: 110) {
-                header.padding(.horizontal, 80).padding(.top, 40)
+            HeroRows(rows: recommended, headerHeight: 90 + Self.heroHeaderNudge) {
+                header.padding(.horizontal, 80).padding(.top, Self.headerTop + Self.heroHeaderNudge)
             }
         }
     }
@@ -81,12 +84,20 @@ struct LibraryView: View {
                 if showsLetterBar {
                     LetterBar(letters: letters) { letter in Task { await jump(to: letter, proxy) } }
                         // The grid keeps its width: 24 + the bar's 44 + 12 is the 80 it had at the right.
-                        .padding(.top, 140)
+                        .padding(.top, 116)
                         .padding(.trailing, 12)
                 }
             }
         }
     }
+
+    /// The pill bar's distance from the top: close, so two rows of posters fit under it with
+    /// their names and years (owner, 27 November).
+    static let headerTop: CGFloat = 0
+    /// Over Recommended's hero (which reaches up under tvOS's top margin) the same bar sat 15
+    /// points higher than over Browse's grid: measured from the simulator's screenshots, so the
+    /// tabs don't jump as you move between them (owner, 27 November).
+    static let heroHeaderNudge: CGFloat = 15
 
     private var showsLetterBar: Bool {
         show == .titles && !loading && problem == nil && query.showsLetters && letters.count > 1
@@ -94,8 +105,9 @@ struct LibraryView: View {
 
     private var browseScroll: some View {
         ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 40) {
-                header.padding(.bottom, 24)
+            // Room under the pill bar for a focused poster's lift, so it doesn't touch the bar.
+            VStack(alignment: .leading, spacing: 44) {
+                header
                 if loading {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 400)
                 } else if let problem {
@@ -110,7 +122,8 @@ struct LibraryView: View {
             }
             .padding(.leading, 80)
             .padding(.trailing, showsLetterBar ? 24 : 80)
-            .padding(.vertical, 40)
+            .padding(.top, Self.headerTop)
+            .padding(.bottom, 40)
         }
     }
 
@@ -133,24 +146,23 @@ struct LibraryView: View {
         .focusSection()
     }
 
-    /// Recommended, Browse, Collections and (Other videos) Folders as tabs in one glass capsule,
-    /// as the Android app's library header. The sidebar says which library it is.
+    /// Recommended, Browse, Collections and (Other videos) Folders, each its own glass pill as
+    /// Sort and Filter are, the one showing white with black text (owner, 27 November). The
+    /// sidebar says which library it is.
     private var showTabs: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 16) {
             if !isVideos { showTab(L("library.recommended"), .recommended) }
             showTab(L("library.browse"), .titles)
             showTab(L("library.collections"), .collections)
             if isVideos { showTab(L("library.folders"), .folders) }
         }
-        .padding(6)
-        .arcGlassPanel(cornerRadius: 40)
         .focusSection()
     }
 
     private func showTab(_ title: String, _ value: Show) -> some View {
-        // The season tabs' smaller style, so the bar is no taller than Sort and Filter beside it.
         Button(title) { show = value }
-            .buttonStyle(SeasonTabStyle(chosen: show == value))
+            .arcGlassButton(prominent: show == value)
+            .buttonBorderShape(.capsule)
             .accessibilityAddTraits(show == value ? .isSelected : [])
     }
 
@@ -267,7 +279,7 @@ struct LibraryView: View {
             if collections.isEmpty {
                 Text(L("library.no_collections")).foregroundStyle(ArcColor.muted).frame(maxWidth: .infinity, minHeight: 400)
             } else {
-                LazyVGrid(columns: TitleGrid.columns, alignment: .leading, spacing: 56) {
+                LazyVGrid(columns: TitleGrid.columns, alignment: .leading, spacing: TitleGrid.rowGap) {
                     ForEach(collections) { c in
                         TileButton(title: c.title, subtitle: L("browse.titles_count", c.count), art: c.images?.primary) {
                             openRoute(.collection(id: c.id, title: c.title))
@@ -403,6 +415,33 @@ struct LibraryView: View {
         case "720": return "720p"
         case "sd": return "SD"
         default: return value
+        }
+    }
+}
+
+/// Search identifies the library by ID; use its current kind to load the right titles.
+struct GenreLibraryView: View {
+    @Environment(AppModel.self) private var app
+    let match: GenreMatch
+    @State private var library: Library?
+    @State private var loading = true
+    @State private var problem: String?
+
+    var body: some View {
+        Group {
+            if let library {
+                LibraryView(library: library, genre: match.name)
+            } else {
+                PageScaffold(title: match.name, loading: loading, problem: problem, empty: L("search.genre_unavailable")) {
+                    EmptyView()
+                }
+            }
+        }
+        .task {
+            let (libraries, failed) = await loadPage(app, "genre library") { try await $0.libraries() }
+            library = libraries?.first { $0.id == match.libraryId }
+            problem = failed
+            loading = false
         }
     }
 }

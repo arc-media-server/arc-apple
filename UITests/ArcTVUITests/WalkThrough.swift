@@ -31,16 +31,19 @@ final class WalkThrough: XCTestCase {
         remote.press(.select)
         pause(6)
         shot("04-home")
-        // With rooms on the stand-in, Home opens on its Watch Together row: down to the titles.
-        if app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together:'")).firstMatch.hasFocus {
-            press(.down)
-            pause(2)
-        }
+        // Home opens on its first row of titles; Watch Together's row sits under Continue Watching.
         press(.right)
         pause(3)
         shot("05-home-focus-moved")
         press(.down)
-        pause(3)
+        pause(2)
+        // Past Watch Together's row (the stand-in has rooms) to the second row of titles.
+        let inRooms = app.buttons.matching(NSPredicate(format: "(label BEGINSWITH 'Watch Together' OR label == 'Join with a Code') AND hasFocus == true")).firstMatch
+        if inRooms.exists {
+            press(.down)
+            pause(2)
+        }
+        pause(1)
         shot("06-home-second-row")
 
         // The focused title's page, then play it.
@@ -128,18 +131,24 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("11-back-from-player")
 
-        // A show: down the rows until a show's card (Recently Added in TV) has the focus.
-        // Breaking Bad, the shared screenshot library's featured show.
-        let shows = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Breaking Bad' OR label BEGINSWITH 'Severance' OR label BEGINSWITH 'Stranger Things'"))
-        let featuredShow = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Breaking Bad'"))
-        for _ in 0..<6 {
-            press(.down)
-            pause(1.5)
-            if shows.allElementsBoundByIndex.contains(where: { $0.hasFocus }) { break }
+        // Vertical moves preserve the previous card's column. The TV row can be entered
+        // on either side of Breaking Bad, so move towards it before selecting.
+        let tvRow = app.staticTexts["Recently Added in TV Shows"]
+        let tvTitles = ["The Office", "Breaking Bad", "The Last of Us", "Stranger Things", "Severance"]
+        let shows = app.buttons.matching(NSPredicate(format: "label IN %@", argumentArray: [tvTitles]))
+        func focusedShow() -> XCUIElement? {
+            guard tvRow.exists, tvRow.frame.intersects(app.frame) else { return nil }
+            return shows.allElementsBoundByIndex.first { $0.hasFocus && $0.frame.minY >= tvRow.frame.maxY }
         }
-        for _ in 0..<8 where !featuredShow.allElementsBoundByIndex.contains(where: { $0.hasFocus }) {
-            press(.right)
-            pause(1)
+        for _ in 0..<6 where focusedShow() == nil { press(.down) }
+        for _ in tvTitles {
+            guard let focused = focusedShow(), let column = tvTitles.firstIndex(of: focused.label) else { break }
+            if focused.label == "Breaking Bad" { break }
+            press(column == 0 ? .right : .left)
+        }
+        guard focusedShow()?.label == "Breaking Bad" else {
+            XCTFail("Expected Breaking Bad to have focus in Recently Added in TV Shows")
+            return
         }
         shot("12-home-third-row")
         remote.press(.select)
@@ -249,24 +258,38 @@ final class WalkThrough: XCTestCase {
         remote.press(.menu)
         pause(2)
 
-        // Search, at the top of the sidebar (Back from the library opens it): type a few letters;
-        // results follow the typing.
+        // Open the named sidebar destination, then transfer focus from its invisible
+        // landing stop to the native Search keyboard before entering a query.
         remote.press(.menu)
         pause(1)
-        press(.up, 10) // to the profile at the top, then down one to Search
-        press(.down)
+        let searchPlace = app.buttons["Search"]
+        for _ in 0..<10 where !searchPlace.hasFocus { press(.up) }
+        guard searchPlace.hasFocus else {
+            XCTFail("Expected Search to have focus in the sidebar")
+            return
+        }
         remote.press(.select)
         pause(2)
         shot("20-search")
-        // Select on the keyboard's first key types "a" (the stand-in has answers for "a", "ar"…
-        // "arrival" and "d"… "dune"); typing into the field directly is used when it's exposed.
+
+        press(.down)
         let field = app.searchFields.firstMatch
         if field.exists && field.hasFocus {
             field.typeText("dune")
         } else {
+            let letter = app.descendants(matching: .any).matching(NSPredicate(format: "label ==[c] %@", "d"))
+            func letterHasFocus() -> Bool { letter.allElementsBoundByIndex.contains { $0.hasFocus } }
+            for _ in 0..<8 where !letterHasFocus() { press(.right) }
+            guard letterHasFocus() else {
+                XCTFail("Expected to focus the D key on the Search keyboard")
+                return
+            }
             remote.press(.select)
         }
-        pause(4)
+        guard app.buttons["Dune"].waitForExistence(timeout: 10) else {
+            XCTFail("Expected Search to return the recorded Dune result")
+            return
+        }
         shot("21-search-results")
 
         // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
@@ -274,7 +297,6 @@ final class WalkThrough: XCTestCase {
         // Search has the whole screen; Left from the keyboard's first key opens the sidebar on
         // Search (Back belongs to the keyboard there). Home is the next place down.
         let home = app.buttons["Home"]
-        let searchPlace = app.buttons["Search"]
         for _ in 0..<30 where !(searchPlace.hasFocus || home.hasFocus) { remote.press(.left) }
         pause(1)
         for _ in 0..<4 where !home.hasFocus { press(.down) }
@@ -286,10 +308,12 @@ final class WalkThrough: XCTestCase {
             remote.press(.menu)
             pause(1.5)
         }
-        // Home keeps its place from earlier steps: up its rows to the first, Watch Together.
+        // Home keeps its place from earlier steps: up its rows to Watch Together's, under
+        // Continue Watching (down again if the focus was already above it).
         let room = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Watch Together'")).firstMatch
         if !(room.exists && room.hasFocus) { press(.right) }
         for _ in 0..<10 where !(room.exists && room.hasFocus) { press(.up) }
+        for _ in 0..<3 where !(room.exists && room.hasFocus) { press(.down) }
         pause(2)
         shot("22-home-watch-together")
         remote.press(.select)

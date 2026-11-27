@@ -1,7 +1,7 @@
 import ArcKit
 import SwiftUI
 
-/// Search across every library the profile can see: titles, episodes, collections and people,
+/// Search across every library the profile can see: titles, episodes, collections, people and genres,
 /// as the web's search. Arc forgives accents and small typos. Results follow the typing after a
 /// short pause.
 struct SearchView: View {
@@ -25,6 +25,7 @@ struct SearchView: View {
                     episodes(results.episodes)
                     collections(results.collections)
                     people(results.people)
+                    genres(results.genres)
                 }
             }
             .padding(.vertical, 40)
@@ -74,6 +75,19 @@ struct SearchView: View {
             row(L("search.people")) {
                 ForEach(list) { p in
                     PersonButton(name: p.name, detail: p.knownFor, image: p.image) { openRoute(.person(id: p.id, name: p.name)) }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func genres(_ list: [GenreMatch]) -> some View {
+        if !list.isEmpty {
+            row(L("search.genres")) {
+                ForEach(list, id: \.self) { genre in
+                    TileButton(title: genre.name, subtitle: genre.libraryName, art: nil, wide: true) {
+                        openRoute(.genre(genre))
+                    }
                 }
             }
         }
@@ -143,11 +157,24 @@ struct PersonButton: View {
                 .frame(width: 180, height: 180)
                 .clipShape(Circle())
             }
-            .buttonStyle(.card)
-            .clipShape(Circle())
+            .buttonStyle(PersonCircleStyle())
     }
 
     private var initials: String {
         name.split(separator: " ").prefix(2).compactMap(\.first).map(String.init).joined()
+    }
+}
+
+/// A person's round picture: the whole circle grows and lifts on focus, as a card does (tvOS's
+/// card style lifts a square, which a circular clip turned into the photo zooming inside a
+/// circle that stayed still).
+struct PersonCircleStyle: ButtonStyle {
+    @Environment(\.isFocused) private var isFocused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(isFocused ? 1.12 : configuration.isPressed ? 0.96 : 1)
+            .shadow(color: .black.opacity(isFocused ? 0.5 : 0), radius: 18, y: 12)
+            .animation(.easeOut(duration: 0.18), value: isFocused)
     }
 }
