@@ -81,20 +81,19 @@ struct DetailsView: View {
                 .mask(LinearGradient(stops: [.init(color: .black.opacity(0.5), location: 0), .init(color: .black, location: 0.55)],
                                      startPoint: .leading, endPoint: .trailing))
                 .ignoresSafeArea()
-                // The episode browser: the artwork slides up and away, on the page's own clock.
-                .offset(y: receded ? -1200 : 0)
-                .opacity(receded ? 0 : 1)
+                // Below the hero (a show's episodes, the rows under it) the artwork dims behind
+                // the page, as Android's title page (owner, 27 November).
+                .opacity(receded ? 0.35 : 1)
                 .animation(Self.recede, value: receded)
             ScrollViewReader { proxy in
                 ScrollView(.vertical) {
                     VStack(alignment: .leading, spacing: 28) {
                         hero
-                            // Hidden while browsing a show's episodes, as the reference does: a
-                            // mask rather than opacity, so Up from the season tabs still reaches
-                            // its buttons (tvOS won't focus a fully transparent view).
-                            // Larger than the hero, so a focused button's lift and shadow aren't cut off.
-                            .mask(Rectangle().opacity(browsing || !entered ? 0 : 1).padding(-80))
-                            .animation(browsing ? .easeOut(duration: 0.3) : Self.recede, value: browsing)
+                            // The words fade in a moment after the artwork: a mask rather than
+                            // opacity, so Play can take the focus at once (tvOS won't focus a
+                            // fully transparent view). Larger than the hero, so a focused
+                            // button's lift and shadow aren't cut off.
+                            .mask(Rectangle().opacity(entered ? 1 : 0).padding(-80))
                             .id(Self.heroAnchor)
                         if !seasons.isEmpty {
                             episodes
@@ -162,7 +161,9 @@ struct DetailsView: View {
                     if nowBrowsing && !wasBrowsing {
                         withAnimation(Self.recede) {
                             receded = true
-                            proxy.scrollTo(Self.browserAnchor, anchor: Self.tabsAnchor)
+                            // The season tabs and episodes land at the foot of the screen, with
+                            // the page above them in view, as Android's.
+                            proxy.scrollTo(Self.browserAnchor, anchor: .bottom)
                         }
                     } else if !nowBrowsing && old?.hasPrefix("season|") == true && Self.isHero(new) {
                         // Up from the season tabs is the hero's buttons: back to the top.
@@ -172,19 +173,6 @@ struct DetailsView: View {
                         }
                     }
                 }
-            }
-            if !seasons.isEmpty {
-                TitleLogo(path: shown.images?.logo, title: shown.title)
-                    .frame(maxWidth: 560, maxHeight: 150)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .padding(.top, 50)
-                    // It trails in from a little lower, and leaves quicker than it came, so it's
-                    // gone before the hero is back.
-                    .offset(y: browsing ? 0 : 100)
-                    .opacity(browsing ? 1 : 0)
-                    .animation(browsing ? Self.recede : .easeInOut(duration: 0.35), value: browsing)
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
             }
         }
         .onAppear {
@@ -500,14 +488,12 @@ struct DetailsView: View {
     /// gentle 0.9 s, everything (the page, the artwork, the logo) together.
     static let recede = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.9)
     static let heroAnchor = "details|hero"
-    /// The page's left and right margin, inside tvOS's own: the words and rows start about 96
-    /// pixels from the edge, as Android's 48dp page start.
-    static let pageInset: CGFloat = 40
+    /// The page's left and right margin inside tvOS's own: none, so the words and rows start at
+    /// the safe area's edge, 80 pixels in (owner, 27 November: further left).
+    static let pageInset: CGFloat = 0
+    /// tvOS's own margin at the sides, which the episode row reaches past to the screen's edge.
+    static let safeSide: CGFloat = 80
     static let browserAnchor = "details|browser"
-    /// Where the season tabs sit while browsing episodes: a quarter of the way down the screen,
-    /// leaving the top for the show's logo (scrollTo lines this point of the tabs up with the
-    /// same point of the screen).
-    static let tabsAnchor = UnitPoint(x: 0.5, y: 0.25)
 
     static let restAnchor = "details|rest"
     /// Where the line under a film's hero sits once Down has moved on: near the top, so the
@@ -531,8 +517,6 @@ struct DetailsView: View {
         return key.hasPrefix("season|") || key.hasPrefix("ep|")
     }
 
-    /// Whether the season tabs or an episode has the focus (the episode browser is up).
-    private var browsing: Bool { Self.isBrowser(focused) }
 
     /// The season tabs over one row of a season's episodes, as the reference design has them:
     /// moving along the tabs shows that season, coming into them lands on the season showing,
@@ -578,29 +562,30 @@ struct DetailsView: View {
                 .padding(.vertical, 12)
             }
             .scrollClipDisabled()
+            // Down from Play lands here, on the season showing, as Android's page (owner,
+            // 27 November); the tabs peek in under the hero.
             .focusSection()
-            // Out of reach from the hero's buttons, so Down from Play goes straight into the
-            // episodes (as the reference does); Up from the episodes reaches them.
-            .disabled(Self.isHero(focused))
-            // The tabs peek in at the bottom of the screen under the hero, and the episodes wait
-            // below it, as Android's page (owner, 27 November); Down brings them up together.
-            .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
+                // The row runs to the screen's edge, so a sliver of the fifth episode shows past
+                // the fourth (a lazy row builds only what's inside its own frame).
                 ScrollView(.horizontal) {
                     LazyHStack(alignment: .top, spacing: EpisodeCard.spacing) {
                         ForEach(seasons[season].episodes) { ep in
                             EpisodeCard(episode: ep, focus: $focused, focusKey: "ep|" + ep.id,
-                                        showsOverview: focused == "ep|" + ep.id, unplaced: seasons[season].isUnplaced) {
+                                        unplaced: seasons[season].isUnplaced) {
                                 play(PlayRequest(item: ep, startMs: ep.resumeMs))
                             }
                         }
                     }
                     .padding(.vertical, 24)
+                    .padding(.horizontal, Self.pageInset + Self.safeSide)
                 }
                 .scrollClipDisabled()
+                .padding(.horizontal, -(Self.pageInset + Self.safeSide))
                 .id(season) // another season starts at its first episode
             }
         }
+        .id(Self.browserAnchor)
     }
 
     /// Marks every episode of a season watched or unwatched, then reads the page (and Home) again.
@@ -696,7 +681,6 @@ struct EpisodeCard: View {
     let episode: Item
     var focus: FocusState<String?>.Binding
     let focusKey: String
-    var showsOverview = false
     /// Outside the show's order ("Not in This Order"): the order gives it no number, so none shows.
     var unplaced = false
     let action: () -> Void
@@ -706,6 +690,14 @@ struct EpisodeCard: View {
     static let size = CGSize(width: 400, height: 225)
     static let spacing: CGFloat = 40
     private var size: CGSize { Self.size }
+
+    /// Its running time, or what's left of it part-way through.
+    private var length: String? {
+        let card = MediaCard(item: episode)
+        if card.progress != nil, let left = card.minutesLeft { return L("card.minutes_left", left) }
+        guard episode.available, let m = episode.runtimeMin, m > 0 else { return nil }
+        return runtimeText(m)
+    }
 
     var body: some View {
         let card = MediaCard(item: episode)
@@ -730,10 +722,6 @@ struct EpisodeCard: View {
                     }
                     if let progress = card.progress {
                         ResumeStrip(fraction: progress, minutesLeft: card.minutesLeft)
-                    } else if episode.available, let m = episode.runtimeMin, m > 0 {
-                        Text(runtimeText(m)).font(.callout.weight(.semibold))
-                            .shadow(color: .black.opacity(0.7), radius: 4)
-                            .padding(16)
                     }
                     WatchBadge(item: episode)
                 }
@@ -742,15 +730,22 @@ struct EpisodeCard: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
-            Text(unplaced ? episode.title : episode.episodeLine)
-                .font(.callout.weight(.semibold)).lineLimit(1).frame(width: size.width, alignment: .leading)
-                .belowLiftedCard(focus.wrappedValue == focusKey)
-            // Kept in the layout so the row doesn't jump as the focus moves.
-            Text(episode.overview(hidingSpoilers: app.hideSpoilers) ?? " ").font(.caption).foregroundStyle(.white.opacity(0.8))
-                .lineLimit(3, reservesSpace: true).frame(width: size.width, alignment: .leading)
-                .opacity(showsOverview ? 1 : 0)
-                .animation(.easeInOut(duration: 0.2), value: showsOverview)
-                .belowLiftedCard(focus.wrappedValue == focusKey)
+            // As Android's and the other Arc apps' episode cards: the number, the name, three
+            // lines of the description on every card, then its length (or what's left of it).
+            VStack(alignment: .leading, spacing: 4) {
+                if !unplaced, let code = episode.episodeCodeText {
+                    Text(code).font(.caption.weight(.semibold)).foregroundStyle(ArcColor.muted)
+                }
+                Text(episode.title).font(.callout.weight(.semibold)).lineLimit(1)
+                // Kept the same height on every card, so the names below line up.
+                Text(episode.overview(hidingSpoilers: app.hideSpoilers) ?? " ").font(.caption).foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(3, reservesSpace: true)
+                if let length {
+                    Text(length).font(.caption).foregroundStyle(ArcColor.muted)
+                }
+            }
+            .frame(width: size.width, alignment: .leading)
+            .belowLiftedCard(focus.wrappedValue == focusKey)
         }
     }
 }

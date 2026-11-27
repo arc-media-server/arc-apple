@@ -20,13 +20,30 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
 - **Films on Home and Recommended** show the year and edition ("2008 · IMAX") with no running
   time. Codex's commit from `codex/movie-edition-labels` is included, so this PR replaces that
   branch. The Library grid and the title page keep the running time.
-- **The title page** sits lower and further left, as Android's:
-  - The words start about 96 px from the left.
+- **The title page** sits lower and further left:
+  - The words start at tvOS's own margin, 80 px from the left. Before, they started at 160 px.
   - A film's buttons sit about 80 px above the bottom.
   - A show's buttons sit just above its season tabs, which now peek in at the bottom. Before,
-    the tops of the episodes peeked in. Down still goes straight to the episode to watch next.
-- **Episodes:** each card is 400 × 225 with 40 between them, so four and part of a fifth fit
-  across, as on Android. Before, three fitted. The watched tick is the same small one as on cards.
+    the tops of the episodes peeked in.
+- **A show's page flows as Android's:**
+  - Down from Play goes to the season tabs, on the season showing.
+  - The tabs and episodes land at the foot of the screen, with the page above them, and the
+    artwork dims behind them.
+  - Up from the tabs brings the whole page back.
+  - Before, the artwork and words slid away and the show's logo appeared in the middle at the
+    top, as Apple's TV app does.
+- **Episodes:**
+  - Each card is 400 × 225 with 40 between them.
+  - The row reaches the screen's edge, so four and a sliver of the fifth fit across, as on
+    Android. Before, three fitted.
+  - Every card shows its number, its name, three lines of its description, and its running time
+    (or what's left of it), as Android's cards. Before, only the focused card had its description,
+    and the running time sat on the picture.
+  - The watched tick is the same small one as on cards.
+- **Library header:** Recommended, Browse and Collections are each their own glass pill, as Sort
+  and Filter are, with the one showing in white. Before, they shared one big pill. The bar sits
+  closer to the top, and the rows of posters are closer together, so two whole rows show with
+  their names and years.
 - **An episode's card** on Home, in search and elsewhere now opens its show's page on that
   episode. The page shows its season and focuses it, as Plex does and as Android's linked
   episodes do. Before, it opened a page of the episode on its own.
@@ -47,14 +64,14 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
 
 ## Decisions
 
-- **Down from Play on a show** still goes to the episode to watch next, not to the season tabs as
-  on Android. Only what peeks in has changed. Plex also goes to the episodes. The alternative is
-  to go to the tabs first, as Android does.
+- **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request
+  (27 November). Plex goes straight to the episodes. Opening an episode from Home still lands on
+  that episode.
 - **The running time** is dropped only from Home and Recommended, which is what the list asked
   for. The Library grid keeps it as a way to tell films apart. A show's poster keeps its
   episodes' length.
-- **The page margins** were matched to Android's by measuring the last simulator screenshots.
-  The page uses a 40 pt inset inside tvOS's own margin.
+- **The page margins:** the title page uses tvOS's own 80 pt margin and nothing more. That is
+  as far left as Apple recommends, because some TVs cut off the edges of the picture.
 
 ## Checks
 
@@ -67,6 +84,9 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
 - The first walk-through caught a bug in the new Home scrolling. With the Watch Together row on
   top, entering the first row of titles sent the page back to the top, which left the focused card
   below the screen. It's fixed: only the topmost row brings the hero back.
+- The owner tried build 142 in a simulator and asked for the second round: the title page's
+  margin, the show page's flow, the episode cards, the fifth episode's sliver and the library
+  header.
 - The stand-in server has no profile with a PIN, so the walk-through doesn't reach the new PIN
   screen. It was checked by reading the code only.
 - Nothing was tried on a real Apple TV.
