@@ -35,8 +35,10 @@
 
 "profiles.title" = "Who's watching?";
 "profiles.locked" = "Has a PIN";
-"profiles.pin_title" = "Enter %@'s PIN";
-"profiles.pin_hint" = "PIN";
+"pin.enter" = "Enter your PIN";
+"pin.back" = "Profiles";
+"pin.wrong" = "Try again";
+"pin.delete" = "Delete";
 "profiles.wrong_pin" = "That PIN isn't right.";
 "profiles.needs_password" = "The admin profile needs its PIN or the household password. Pick it in Arc in a browser, or set a PIN for it.";
 "profiles.sign_out" = "Sign Out";
