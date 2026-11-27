@@ -36,7 +36,14 @@ final class WalkThrough: XCTestCase {
         pause(3)
         shot("05-home-focus-moved")
         press(.down)
-        pause(3)
+        pause(2)
+        // Past Watch Together's row (the stand-in has rooms) to the second row of titles.
+        let inRooms = app.buttons.matching(NSPredicate(format: "(label BEGINSWITH 'Watch Together' OR label == 'Join with a Code') AND hasFocus == true")).firstMatch
+        if inRooms.exists {
+            press(.down)
+            pause(2)
+        }
+        pause(1)
         shot("06-home-second-row")
 
         // The focused title's page, then play it.
