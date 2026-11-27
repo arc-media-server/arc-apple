@@ -354,6 +354,22 @@ struct MainView: View {
     /// top (Select switches profile), and the focused place in white.
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // Arc's logo at the top: the mark over the icons while shut, the whole logo (the mark
+            // and its name) while open, as Apple's own apps put theirs.
+            ZStack(alignment: .leading) {
+                Image("ArcMark").resizable().scaledToFit()
+                    .frame(width: 44, height: 44)
+                    .frame(width: Sidebar.icon)
+                    .opacity(sidebarOpen ? 0 : 1)
+                Image("ArcLogo").resizable().scaledToFit()
+                    .frame(height: 44)
+                    .padding(.leading, 10)
+                    .opacity(sidebarOpen ? 1 : 0)
+            }
+            .frame(height: Sidebar.icon, alignment: .leading)
+            .shadow(color: .black.opacity(sidebarOpen ? 0 : 0.5), radius: 6) // over bright artwork
+            .accessibilityHidden(true)
+            .padding(.bottom, 12)
             edge(Sidebar.above)
             if let profile = app.profile {
                 Button { app.switchProfile() } label: {
