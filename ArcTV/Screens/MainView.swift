@@ -440,13 +440,16 @@ struct MainView: View {
 
     private func loadTabs() async {
         guard let api = app.api else { return }
+        let profileId = app.profile?.id
         do {
             async let prefsAnswer = api.prefs()
             async let librariesAnswer = api.libraries()
             let (prefs, all) = try await (prefsAnswer, librariesAnswer)
+            guard !Task.isCancelled, app.api === api, app.profile?.id == profileId else { return }
             libraries = orderedLibraries(all, order: prefs.libraryOrder)
             watchlistAt = prefs.watchlistPosition
             app.hideSpoilers = prefs.hideSpoilers
+            app.showMissingEpisodes = prefs.showMissingEpisodes
         } catch let error as APIError where error.status == 401 {
             app.tokenRefused()
         } catch is CancellationError {
