@@ -376,6 +376,9 @@ struct PlayerOSD: View {
         .focusSection()
     }
 
+    /// The Episodes card's height: a 169-point picture, its name under it, and room around them.
+    static var episodesHeight: CGFloat { 240 }
+
     private var episodesCard: some View {
         ScrollViewReader { reader in
             ScrollView(.horizontal) {
@@ -402,6 +405,9 @@ struct PlayerOSD: View {
                 .padding(.vertical, 10)
             }
             .scrollClipDisabled()
+            // A sideways scroll view takes all the height it's offered, which stretched the glass
+            // panel down the screen: the picture, its name and the focus lift, no more.
+            .frame(height: Self.episodesHeight)
             .onAppear { reader.scrollTo(model.item.id, anchor: .center) }
         }
     }

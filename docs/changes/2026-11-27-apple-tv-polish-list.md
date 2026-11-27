@@ -91,6 +91,10 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
   - PIN screen: the number keys and the PIN boxes are Liquid Glass, as the Profiles and Sign Out
     buttons already were. The focused key stays white with black text.
 
+  - The player's Episodes card is only as tall as its row: the picture, the name and the focus
+    lift. Before, the glass panel stretched almost to the bottom of the screen. That was there
+    before this change.
+
 ## Decisions
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request
