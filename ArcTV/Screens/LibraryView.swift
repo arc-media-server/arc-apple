@@ -81,7 +81,7 @@ struct LibraryView: View {
                 if showsLetterBar {
                     LetterBar(letters: letters) { letter in Task { await jump(to: letter, proxy) } }
                         // The grid keeps its width: 24 + the bar's 44 + 12 is the 80 it had at the right.
-                        .padding(.top, 96)
+                        .padding(.top, 116)
                         .padding(.trailing, 12)
                 }
             }
@@ -102,7 +102,8 @@ struct LibraryView: View {
 
     private var browseScroll: some View {
         ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 24) {
+            // Room under the pill bar for a focused poster's lift, so it doesn't touch the bar.
+            VStack(alignment: .leading, spacing: 44) {
                 header
                 if loading {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 400)

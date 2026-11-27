@@ -185,7 +185,8 @@ struct PinEntry: View {
         let next = i == digits.count && !wrong
         let ring = wrong ? ArcColor.error : next ? ArcColor.foreground : ArcColor.foreground.opacity(0.08)
         return ZStack {
-            RoundedRectangle(cornerRadius: 32, style: .continuous).fill(ArcColor.surface2)
+            // Liquid Glass, as the pad's keys and Arc's other controls.
+            GlassFill(shape: RoundedRectangle(cornerRadius: 32, style: .continuous))
             RoundedRectangle(cornerRadius: 32, style: .continuous).stroke(ring, lineWidth: next ? 4 : 2)
             if i < digits.count { Text("•").font(.system(size: 52)) }
         }
@@ -247,7 +248,7 @@ struct ProfileCircleStyle: ButtonStyle {
     }
 }
 
-/// A key of the PIN pad: grey, white with black when it has the focus, as Android's.
+/// A key of the PIN pad: Liquid Glass, white with black when it has the focus, as Android's.
 struct PadKeyStyle: ButtonStyle {
     @Environment(\.isFocused) private var isFocused
 
@@ -255,7 +256,13 @@ struct PadKeyStyle: ButtonStyle {
         configuration.label
             .foregroundStyle(isFocused ? ArcColor.background : ArcColor.foreground)
             .frame(width: 120, height: 120)
-            .background(RoundedRectangle(cornerRadius: 32, style: .continuous).fill(isFocused ? ArcColor.foreground : ArcColor.surface2))
+            .background {
+                if isFocused {
+                    RoundedRectangle(cornerRadius: 32, style: .continuous).fill(ArcColor.foreground)
+                } else {
+                    GlassFill(shape: RoundedRectangle(cornerRadius: 32, style: .continuous))
+                }
+            }
             .scaleEffect(isFocused ? 1.08 : configuration.isPressed ? 0.96 : 1)
             .animation(.easeOut(duration: 0.15), value: isFocused)
     }

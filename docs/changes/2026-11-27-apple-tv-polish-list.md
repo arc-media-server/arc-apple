@@ -85,6 +85,12 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
   - On a film, Down to the cast brings up the cast and the row under it (More Like This, or
     extras) both in full, where Down to that row leaves them. Before, the second row was cut off.
 
+- **Fifth round, after build 145:**
+  - Library: more room under the pill bar, so a focused poster in the first row no longer
+    touches it. The rows are a little closer together, so the second row still fits.
+  - PIN screen: the number keys and the PIN boxes are Liquid Glass, as the Profiles and Sign Out
+    buttons already were. The focused key stays white with black text.
+
 ## Decisions
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request
