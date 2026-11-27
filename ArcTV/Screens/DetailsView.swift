@@ -11,7 +11,10 @@ struct PlayRequest: Identifiable, Hashable {
     var playingOn = false
     /// The play queue's entry this is (Home's Queue row, Shuffle, the queue moving on).
     var queueEntry: String?
-    var id: String { item.id + "@\(startMs)" + (together ? "|together" : "") + (playingOn ? "|on" : "") }
+    var fileId: Int64?
+    var id: String {
+        item.id + "@\(startMs)" + (together ? "|together" : "") + (playingOn ? "|on" : "") + (fileId.map { "|file=\($0)" } ?? "")
+    }
 
     /// A film started from the beginning plays the pre-roll videos first, as on the web: not when
     /// resuming, in Watch Together, or when the player moves on.
@@ -360,7 +363,7 @@ struct DetailsView: View {
                 }
             }
             // The page's other actions are round glass icons, as the Android app's title page.
-            TitleActions(item: shown, onPage: true).roundIconButton()
+            TitleActions(item: shown, onPage: true, versionItem: nextEpisode).roundIconButton()
         }
         .focusSection()
     }
@@ -742,6 +745,7 @@ struct EpisodeCard: View {
             }
             .buttonStyle(.card)
             .focused(focus, equals: focusKey)
+            .contextMenu { PlayVersionMenu(item: episode) }
             // As Android's and the other Arc apps' episode cards: the number, the name, three
             // lines of the description on every card, then its length (or what's left of it).
             VStack(alignment: .leading, spacing: 4) {

@@ -126,9 +126,10 @@ final class PlayerModel {
     private let log = ArcLog.shared
     private let onRefused: () -> Void
 
-    init(api: ArcAPI, item: Item, startMs: Int64, engine: PlaybackEngine, onRefused: @escaping () -> Void) {
+    init(api: ArcAPI, item: Item, startMs: Int64, fileId: Int64? = nil, engine: PlaybackEngine, onRefused: @escaping () -> Void) {
         self.api = api
         self.item = item
+        fileChoice = fileId
         self.engine = engine
         self.onRefused = onRefused
         caps = Self.caps(for: engine)
