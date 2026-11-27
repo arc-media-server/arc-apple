@@ -96,8 +96,8 @@ struct HeroRows<Header: View>: View {
     }
 
     /// What stays under the focused row at the foot of the screen.
-    static let foot: CGFloat = 36
-    static let heroKey = "hero|details"
+    static var foot: CGFloat { 36 }
+    static var heroKey: String { "hero|details" }
 
     private func focusFirst() {
         guard focused == nil, let row = rows.first, let card = row.cards.first else { return }
