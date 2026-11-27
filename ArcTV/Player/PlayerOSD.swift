@@ -244,7 +244,9 @@ struct PlayerOSD: View {
         case .info: panel { infoCard }
         case .chapters: chaptersCard.frame(height: 240)
         case .cast: castCard.frame(height: 260)
-        case .episodes: panel { episodesCard }
+        // The episodes scroll sideways under the panel's edge, not past it (the panel's 24-point
+        // border leaves room for a focused card's lift).
+        case .episodes: panel { episodesCard }.clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         case .together: panel { togetherCard }
         }
     }

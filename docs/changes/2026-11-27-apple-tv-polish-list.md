@@ -92,8 +92,8 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
     buttons already were. The focused key stays white with black text.
 
   - The player's Episodes card is only as tall as its row: the picture, the name and the focus
-    lift. Before, the glass panel stretched almost to the bottom of the screen. That was there
-    before this change.
+    lift, and its episodes scroll under the panel's rounded edge rather than past it. Before, the
+    glass panel stretched almost to the bottom of the screen. That was there before this change.
 
   - In the player, Down from the round Playback, Audio and Subtitles buttons goes back to the
     timeline, where Down again opens Info. Before, nothing below them could take the focus (the
