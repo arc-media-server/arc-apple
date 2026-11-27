@@ -1,17 +1,14 @@
 import ArcKit
 import SwiftUI
 
-/// A full-screen hero describing the focused title (its background, logo or name and details)
-/// with rows of titles beneath, the first one peeking up: Home, and a library's Recommended.
-/// The hero has no buttons: Select on a card plays it or opens its page, and holding
-/// Select gives its actions. `header` floats above the hero (a library's pill bar).
+/// Focusable rows of titles. Home shows the focused title above the rows, and
+/// a library's Recommended page starts at its rows beneath the library tabs.
 struct HeroRows<Header: View>: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
     @Environment(\.openRoute) private var openRoute
     let rows: [LoadedRow]
-    /// Room left at the top of the hero for the floating header.
-    var headerHeight: CGFloat = 0
+    var showsHero = true
     /// A row of its own above the titles' rows (Home's Watch Together row). It gets the page's
     /// focus binding and should mark its first card with `HeroRowsTopFocus`, which takes the focus
     /// when the page opens.
@@ -20,21 +17,24 @@ struct HeroRows<Header: View>: View {
     /// The title the hero shows: the focused card, or the one last focused.
     @State private var hero: MediaCard?
     @FocusState private var focused: String?
-    /// The header floats over the top of the page (the library's pill bar) while the hero or the
-    /// first row has the focus, and fades away further down so it doesn't cover a row.
-    @State private var headerShown = true
     /// The row the focus is in, so the page moves only when the focus changes rows.
     @State private var focusedRow: String?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            backdrop
+            if showsHero { backdrop }
             ScrollViewReader { proxy in
             ScrollView(.vertical) {
                 // The gap between rows is each row's foot (below), which is what lines up with the
                 // bottom of the screen.
                 LazyVStack(alignment: .leading, spacing: 44 - Self.foot) {
-                    if let hero { heroDetails(hero).id(Self.heroKey) }
+                    if showsHero {
+                        if let hero { heroDetails(hero) }
+                    } else {
+                        // The rows have their own bottom spacer. Give the tabs the same
+                        // separation as Browse, where a focused card can grow beneath them.
+                        header().padding(.bottom, Self.foot)
+                    }
                     if let top {
                         // Its foot, as the rows' below, is where it lands.
                         VStack(alignment: .leading, spacing: 0) {
@@ -62,7 +62,6 @@ struct HeroRows<Header: View>: View {
                         }
                     }
                 }
-                .padding(.top, headerHeight)
                 .padding(.bottom, 60)
             }
             // The row the focus moves into lands at the foot of the screen, moving down or back
@@ -70,7 +69,7 @@ struct HeroRows<Header: View>: View {
             // rows, and Plex's). tvOS would otherwise scroll only as far as needed, which
             // going up leaves the row at the top.
             .onChange(of: focused) { old, key in
-                guard let key, !key.hasPrefix("hero|") else { return }
+                guard let key else { return }
                 let row = String(key.split(separator: "|", maxSplits: 1).first ?? "")
                 guard row != focusedRow else { return }
                 focusedRow = row
@@ -86,31 +85,21 @@ struct HeroRows<Header: View>: View {
                 }
             }
             }
-            header()
-                .opacity(headerShown ? 1 : 0)
-                .animation(.easeInOut(duration: 0.25), value: headerShown)
         }
         // Focus starts on the first title, as Plex's Home and library pages.
         .onAppear { focusFirst() }
         .onChange(of: rows.first?.cards.first?.id) { _, _ in focusFirst() }
         .onChange(of: focused) { _, _ in
-            if let card = focusedCard { hero = card }
-            // Focus outside the cards and the hero's buttons is in the header itself.
-            if let key = focused, !key.hasPrefix("hero|") {
-                headerShown = key.hasPrefix((rows.first?.id ?? "") + "|")
-            } else {
-                headerShown = true
-            }
+            if showsHero, let card = focusedCard { hero = card }
         }
     }
 
     /// What stays under the focused row at the foot of the screen.
     static var foot: CGFloat { 36 }
-    static var heroKey: String { "hero|details" }
 
     private func focusFirst() {
         guard focused == nil, let row = rows.first, let card = row.cards.first else { return }
-        if hero == nil { hero = card }
+        if showsHero && hero == nil { hero = card }
         // A top row starts with the focus: the first titles' row may be below the screen, not
         // yet built, and focusing it then leaves the focus to tvOS (which picks the sidebar).
         let key = top == nil ? row.id + "|" + card.id : HeroRowsTopFocus
@@ -137,13 +126,11 @@ struct HeroRows<Header: View>: View {
             if let line = detailLine(item) {
                 Text(line).font(.callout).foregroundStyle(.white.opacity(0.85))
             }
-            // Under a header there's no room for the overview: the first row would push the
-            // title under the bar. The title's page has it.
-            if headerHeight == 0, let overview = item.overview(hidingSpoilers: app.hideSpoilers) {
+            if let overview = item.overview(hidingSpoilers: app.hideSpoilers) {
                 Text(overview).font(.callout).foregroundStyle(.white.opacity(0.75)).lineLimit(3).frame(maxWidth: 760, alignment: .leading)
             }
         }
-        .frame(height: 620 - headerHeight, alignment: .bottomLeading)
+        .frame(height: 620, alignment: .bottomLeading)
         .padding(.horizontal, 80)
     }
 
