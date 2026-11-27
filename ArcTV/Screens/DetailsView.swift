@@ -275,7 +275,7 @@ struct DetailsView: View {
     /// The year (or a show's first year) and the length.
     private var facts: String {
         var parts: [String] = []
-        if let year = shown.year { parts.append(String(year)) }
+        if let yearAndEdition = shown.yearAndEdition { parts.append(yearAndEdition) }
         if let minutes = shown.runtimeMin, minutes > 0 {
             parts.append(minutes >= 60 ? L("details.runtime", minutes / 60, minutes % 60) : L("card.minutes_short", minutes))
         }

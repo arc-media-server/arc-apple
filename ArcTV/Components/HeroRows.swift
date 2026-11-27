@@ -110,7 +110,7 @@ struct HeroRows<Header: View>: View {
 
     private func genreLine(_ item: Item) -> String? {
         var parts: [String] = []
-        if !item.isEpisode, let year = item.year { parts.append(String(year)) }
+        if !item.isEpisode, let yearAndEdition = item.yearAndEdition { parts.append(yearAndEdition) }
         parts += item.genres.prefix(3)
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
