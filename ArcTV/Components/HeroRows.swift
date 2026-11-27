@@ -23,22 +23,34 @@ struct HeroRows<Header: View>: View {
     /// The header floats over the top of the page (the library's pill bar) while the hero or the
     /// first row has the focus, and fades away further down so it doesn't cover a row.
     @State private var headerShown = true
+    /// The row the focus is in, so the page moves only when the focus changes rows.
+    @State private var focusedRow: String?
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             backdrop
+            ScrollViewReader { proxy in
             ScrollView(.vertical) {
-                LazyVStack(alignment: .leading, spacing: 44) {
-                    if let hero { heroDetails(hero) }
-                    if let top { top($focused) }
+                // The gap between rows is each row's foot (below), which is what lines up with the
+                // bottom of the screen.
+                LazyVStack(alignment: .leading, spacing: 44 - Self.foot) {
+                    if let hero { heroDetails(hero).id(Self.heroKey) }
+                    if let top {
+                        // Its foot, as the rows' below, is where it lands.
+                        VStack(alignment: .leading, spacing: 0) {
+                            top($focused)
+                            Color.clear.frame(height: Self.foot).id("top")
+                        }
+                    }
                     ForEach(rows) { row in
+                        VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 16) {
                             Text(row.title).font(.title3.weight(.semibold)).padding(.horizontal, 80)
                             ScrollView(.horizontal) {
                                 LazyHStack(alignment: .top, spacing: 36) {
                                     ForEach(row.cards) { card in
                                         MediaCardView(card: card, style: row.style, seasonPosters: row.seasonPosters,
-                                                      continueRow: row.continueRow, queueEntry: row.queueRow ? card.id : nil, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
+                                                      continueRow: row.continueRow, queueEntry: row.queueRow ? card.id : nil, showsLength: false, focus: $focused, focusKey: row.id + "|" + card.id) { open(card, in: row) }
                                     }
                                 }
                                 .padding(.horizontal, 80)
@@ -46,10 +58,33 @@ struct HeroRows<Header: View>: View {
                             }
                             .scrollClipDisabled()
                         }
+                            Color.clear.frame(height: Self.foot).id(row.id)
+                        }
                     }
                 }
                 .padding(.top, headerHeight)
                 .padding(.bottom, 60)
+            }
+            // The row the focus moves into lands at the foot of the screen, moving down or back
+            // up, with the rows above it in view, the hero above the first (as Android's and Kodi's
+            // rows, and Plex's). tvOS would otherwise scroll only as far as needed, which
+            // going up leaves the row at the top.
+            .onChange(of: focused) { old, key in
+                guard let key, !key.hasPrefix("hero|") else { return }
+                let row = String(key.split(separator: "|", maxSplits: 1).first ?? "")
+                guard row != focusedRow else { return }
+                focusedRow = row
+                // Every row lands at the foot, the first too: under the hero, with its names in
+                // full (owner, 27 November). On opening, a moment later as well, once the rows
+                // have been laid out.
+                withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(row, anchor: .bottom) }
+                if old == nil {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(150))
+                        proxy.scrollTo(row, anchor: .bottom)
+                    }
+                }
+            }
             }
             header()
                 .opacity(headerShown ? 1 : 0)
@@ -68,6 +103,10 @@ struct HeroRows<Header: View>: View {
             }
         }
     }
+
+    /// What stays under the focused row at the foot of the screen.
+    static var foot: CGFloat { 36 }
+    static var heroKey: String { "hero|details" }
 
     private func focusFirst() {
         guard focused == nil, let row = rows.first, let card = row.cards.first else { return }
@@ -110,7 +149,7 @@ struct HeroRows<Header: View>: View {
 
     private func genreLine(_ item: Item) -> String? {
         var parts: [String] = []
-        if !item.isEpisode, let year = item.year { parts.append(String(year)) }
+        if !item.isEpisode, let yearAndEdition = item.yearAndEdition { parts.append(yearAndEdition) }
         parts += item.genres.prefix(3)
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }

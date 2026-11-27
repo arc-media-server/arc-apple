@@ -49,13 +49,16 @@ struct MediaCardView: View {
     var continueRow = false
     /// The card is an entry (this id) of Home's Queue row: its menu can move or remove it.
     var queueEntry: String?
+    /// A film's length under its poster. Home and Recommended leave it out, so the year and
+    /// edition ("2008 · IMAX") tell its versions apart (owner, 27 November).
+    var showsLength = true
     /// Where the row keeps which card has the focus (Home's hero follows it).
     var focus: FocusState<String?>.Binding
     let focusKey: String
     let action: () -> Void
 
     var body: some View {
-        VStack(alignment: .center, spacing: 10) {
+        VStack(alignment: .leading, spacing: 10) {
             Button(action: action) {
                 ZStack(alignment: .bottomLeading) {
                     let art = card.spoilerSafe(app.hideSpoilers)
@@ -96,21 +99,8 @@ struct MediaCardView: View {
                             ResumeStrip(fraction: progress, minutesLeft: card.minutesLeft)
                         }
                     }
-                    // A show's episodes still to watch, in a tab at the poster's top right.
-                    if let left = card.item.unwatchedCount, left > 0, card.item.isSeries, style == .poster {
-                        Text(String(left))
-                            .font(.caption.weight(.bold)).monospacedDigit()
-                            .padding(.horizontal, 12).padding(.vertical, 6)
-                            .background(UnevenRoundedRectangle(bottomLeadingRadius: 12, style: .continuous).fill(.black.opacity(0.8)))
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    }
-                    if card.item.watched {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(.black, .white)
-                            .padding(10)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    }
+                    // A season's new episodes, a show's episodes still to watch, or a tick.
+                    WatchBadge(item: card.item, newEpisodes: card.seasonNumber != nil ? card.newEpisodes : nil)
                 }
                 .frame(width: style.size.width, height: style.size.height)
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))
@@ -120,13 +110,13 @@ struct MediaCardView: View {
             // VoiceOver (and the walk-through) know a card by its title.
             .accessibilityLabel(Text(name))
             .contextMenu { TitleActions(item: card.item, continueRow: continueRow, queueEntry: queueEntry) }
-            // Names centred under the art.
-            VStack(alignment: .center, spacing: 2) {
+            // Names under the art, lined up with its left edge, as the other Arc apps.
+            VStack(alignment: .leading, spacing: 2) {
                 Text(name)
                     .font(.callout.weight(.semibold)).lineLimit(1)
                 if let sub = subtitle { Text(sub).font(.caption).foregroundStyle(ArcColor.muted).lineLimit(1) }
             }
-            .frame(width: style.size.width, alignment: .center)
+            .frame(width: style.size.width, alignment: .leading)
             .belowLiftedCard(focus.wrappedValue == focusKey)
         }
     }
@@ -137,7 +127,12 @@ struct MediaCardView: View {
 
     private var subtitle: String? {
         let item = card.item
-        if let season = card.seasonNumber, card.newEpisodes > 0 { return L("card.new_episodes", season, card.newEpisodes) }
+        // Recently Added's day of new episodes: a season says which (its count is the corner
+        // badge), a whole show how many (arc-media-server, 12 and 13 November).
+        if let season = card.seasonNumber { return season == 0 ? L("card.specials") : L("details.season", season) }
+        if item.isSeries, card.newEpisodes > 0 {
+            return card.newEpisodes == 1 ? L("card.new_episode") : L("card.new_episodes", card.newEpisodes)
+        }
         var parts: [String] = []
         if let code = item.episodeCodeText {
             // Under the show's name, just the number ("S8 · E6"): the episode's name never shares it.
@@ -145,12 +140,42 @@ struct MediaCardView: View {
         } else if item.isEpisode {
             // Outside the show's order there's no "S0 · E0": the episode's name, on a wide card.
             if style != .poster && card.progress == nil { parts.append(item.title) }
-        } else if let year = item.year {
-            parts.append(String(year))
+        } else if let yearAndEdition = item.yearAndEdition {
+            parts.append(yearAndEdition)
         }
         // Posters say how long: a film's length, or a show's episodes' ("2011 · 25m").
-        if style == .poster, !item.isEpisode, let m = item.runtimeMin, m > 0 { parts.append(runtimeText(m)) }
+        if style == .poster, !item.isEpisode, showsLength || item.isSeries, let m = item.runtimeMin, m > 0 { parts.append(runtimeText(m)) }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+}
+
+/// The corner of a card's art, as every Arc app draws it: a show's (or a new season's) count of
+/// episodes in a small white tab, else a white tick for something watched. White with black, as
+/// Arc's chosen controls.
+struct WatchBadge: View {
+    let item: Item
+    /// A Recently Added season's new episodes, in place of the show's own count.
+    var newEpisodes: Int?
+
+    var body: some View {
+        Group {
+            if let count = newEpisodes ?? (item.isSeries ? item.unwatchedCount : nil), count > 0 {
+                Text(String(count))
+                    .font(.system(size: 22, weight: .bold)).monospacedDigit()
+                    .foregroundStyle(ArcColor.background)
+                    .padding(.horizontal, 10).padding(.vertical, 3)
+                    .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(ArcColor.foreground))
+            } else if item.watched {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 17, weight: .heavy))
+                    .foregroundStyle(ArcColor.background)
+                    .frame(width: 36, height: 36)
+                    .background(Circle().fill(ArcColor.foreground))
+                    .accessibilityLabel(Text(L("card.watched")))
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
     }
 }
 

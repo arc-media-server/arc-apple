@@ -11,10 +11,13 @@ struct TitleGrid: View {
     @Environment(\.openRoute) private var openRoute
     @FocusState private var focused: String?
 
+    /// Between rows of posters: with the pill bar close to the top, two whole rows (names and
+    /// years too) fit on the screen.
+    static let rowGap: CGFloat = 30
     static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 28, alignment: .top)]
 
     var body: some View {
-        LazyVGrid(columns: Self.columns, alignment: .leading, spacing: 56) {
+        LazyVGrid(columns: Self.columns, alignment: .leading, spacing: TitleGrid.rowGap) {
             ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
                 MediaCardView(card: MediaCard(item: item), style: .poster, focus: $focused, focusKey: item.id) { openRoute(.item(item)) }
                     .onAppear { if index >= items.count - 12 { more?() } }
