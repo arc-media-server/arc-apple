@@ -69,7 +69,9 @@ struct HeroRows<Header: View>: View {
                 guard row != focusedRow else { return }
                 focusedRow = row
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    if row == rows.first?.id || row == "top" {
+                    // Only the page's topmost row brings the hero back: with a top row (Home's
+                    // Watch Together), the first titles' row sits below the screen's foot then.
+                    if row == "top" || (top == nil && row == rows.first?.id) {
                         proxy.scrollTo(Self.heroKey, anchor: .top)
                     } else {
                         proxy.scrollTo(row, anchor: .bottom)
