@@ -26,6 +26,9 @@ struct DetailsView: View {
     @Environment(\.openRoute) private var openRoute
     let itemId: String
     let initial: Item
+    /// Opened from an episode's card: the show's page lands on this episode, in its season, with
+    /// the episodes showing (as Plex, and arc-android's linked episode).
+    var episodeId: String? = nil
 
     @State private var item: Item?
     @State private var similar: [Item] = []
@@ -51,6 +54,10 @@ struct DetailsView: View {
     /// The title's theme tune, played once per visit (not again on coming back from the player).
     @State private var theme = ThemeMusic()
     @State private var themePlayed = false
+    /// The episode the page is about to land on (`episodeId`), once its season is showing; and
+    /// whether it has, so reading the page again later doesn't move the focus.
+    @State private var landing: String?
+    @State private var landed = false
 
     private var shown: Item { item ?? initial }
     private var backdropPath: String? { shown.images?.backdrop ?? shown.images?.seriesBackdrop }
@@ -104,10 +111,22 @@ struct DetailsView: View {
                         if !shown.collections.isEmpty { collections }
                         infoCards
                     }
-                    .padding(.horizontal, 80)
+                    .padding(.horizontal, Self.pageInset)
                     .padding(.bottom, 60)
                 }
                 .defaultFocus($focused, Self.playKey)
+                // Opened from an episode's card: along to it in its row, then the focus onto it,
+                // which brings the episodes up as Down from Play does.
+                .onChange(of: landing) { _, id in
+                    guard let id else { return }
+                    proxy.scrollTo(id, anchor: .leading)
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(120))
+                        focused = "ep|" + id
+                        try? await Task.sleep(for: .milliseconds(400))
+                        landing = nil
+                    }
+                }
                 .onChange(of: focused) { old, new in
                     if let new, new.hasPrefix("season|"), let index = Int(new.dropFirst(7)), index != season {
                         if old?.hasPrefix("season|") == true {
@@ -122,7 +141,8 @@ struct DetailsView: View {
                     }
                     // Into the episodes from the hero: on to the one to watch next. (After tvOS's
                     // own move has settled: it ignores a change made while it's moving the focus.)
-                    if Self.isHero(old), let new, new.hasPrefix("ep|"), let next = seasonNextUp, new != "ep|" + next.id {
+                    if Self.isHero(old), let new, new.hasPrefix("ep|"), new != landing.map({ "ep|" + $0 }),
+                       let next = seasonNextUp, new != "ep|" + next.id {
                         Task { @MainActor in
                             try? await Task.sleep(for: .milliseconds(80))
                             focused = "ep|" + next.id
@@ -269,7 +289,9 @@ struct DetailsView: View {
             Spacer(minLength: 0)
             people
         }
-        .frame(minHeight: 860, alignment: .bottomLeading)
+        // Low on the screen, as Android's page: a film's buttons a margin above the bottom, a
+        // show's just above its season tabs, which peek in under them (owner, 27 November).
+        .frame(minHeight: seasons.isEmpty && !shown.isSeries ? 940 : 870, alignment: .bottomLeading)
     }
 
     /// The year (or a show's first year) and the length.
@@ -478,6 +500,9 @@ struct DetailsView: View {
     /// gentle 0.9 s, everything (the page, the artwork, the logo) together.
     static let recede = Animation.timingCurve(0.4, 0, 0.2, 1, duration: 0.9)
     static let heroAnchor = "details|hero"
+    /// The page's left and right margin, inside tvOS's own: the words and rows start about 96
+    /// pixels from the edge, as Android's 48dp page start.
+    static let pageInset: CGFloat = 40
     static let browserAnchor = "details|browser"
     /// Where the season tabs sit while browsing episodes: a quarter of the way down the screen,
     /// leaving the top for the show's logo (scrollTo lines this point of the tabs up with the
@@ -557,16 +582,12 @@ struct DetailsView: View {
             // Out of reach from the hero's buttons, so Down from Play goes straight into the
             // episodes (as the reference does); Up from the episodes reaches them.
             .disabled(Self.isHero(focused))
-            // On the hero the tabs are folded away, so the top of the episode row peeks in at the
-            // bottom of the screen (as the reference does); Down brings them back with the
-            // episodes. A mask rather than opacity, as for the hero.
-            .frame(maxHeight: browsing ? nil : 0, alignment: .top)
-            .mask(Rectangle().opacity(browsing ? 1 : 0).padding(-40))
-            .animation(Self.recede, value: browsing)
+            // The tabs peek in at the bottom of the screen under the hero, and the episodes wait
+            // below it, as Android's page (owner, 27 November); Down brings them up together.
             .id(Self.browserAnchor)
             if seasons.indices.contains(season) {
                 ScrollView(.horizontal) {
-                    LazyHStack(alignment: .top, spacing: 40) {
+                    LazyHStack(alignment: .top, spacing: EpisodeCard.spacing) {
                         ForEach(seasons[season].episodes) { ep in
                             EpisodeCard(episode: ep, focus: $focused, focusKey: "ep|" + ep.id,
                                         showsOverview: focused == "ep|" + ep.id, unplaced: seasons[season].isUnplaced) {
@@ -644,7 +665,12 @@ struct DetailsView: View {
             if shown.isSeries {
                 // The order's seasons, then "Not in This Order" for episodes the order doesn't place.
                 seasons = try await api.seasons(seriesId: itemId, missing: showMissing).tabs(unplacedName: L("details.not_in_order"))
-                if let kept = keepSeason, let at = seasons.firstIndex(where: { $0.seasonNumber == kept }) {
+                if !landed, let id = episodeId, let at = seasons.firstIndex(where: { $0.episodes.contains { $0.id == id } }) {
+                    // Opened from an episode: its season, then the episode itself.
+                    landed = true
+                    season = at
+                    landing = id
+                } else if let kept = keepSeason, let at = seasons.firstIndex(where: { $0.seasonNumber == kept }) {
                     // Read again after a season was marked: stay on it rather than move to the next episode's.
                     keepSeason = nil
                     season = at
@@ -675,7 +701,11 @@ struct EpisodeCard: View {
     var unplaced = false
     let action: () -> Void
 
-    private var size: CGSize { CardStyle.thumb.size }
+    /// Four episodes and a little of the fifth across the screen, as Android's (400 by 225 with
+    /// 40 between them, from the page's margin).
+    static let size = CGSize(width: 400, height: 225)
+    static let spacing: CGFloat = 40
+    private var size: CGSize { Self.size }
 
     var body: some View {
         let card = MediaCard(item: episode)
@@ -705,10 +735,7 @@ struct EpisodeCard: View {
                             .shadow(color: .black.opacity(0.7), radius: 4)
                             .padding(16)
                     }
-                    if episode.watched {
-                        Image(systemName: "checkmark.circle.fill").font(.title3).foregroundStyle(.black, .white)
-                            .padding(10).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    }
+                    WatchBadge(item: episode)
                 }
                 .frame(width: size.width, height: size.height)
                 .clipShape(RoundedRectangle(cornerRadius: cardCorner, style: .continuous))

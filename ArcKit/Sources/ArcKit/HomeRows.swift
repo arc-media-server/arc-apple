@@ -172,6 +172,9 @@ public struct MediaCard: Sendable, Hashable, Identifiable {
             seasonNumber = recent.seasonNumber
             newEpisodes = recent.episodes
             seasonPoster = recent.seasonPoster ?? poster
+        } else if recent.type == "series" {
+            // A whole show's new episodes: the count goes in its caption ("3 new episodes").
+            newEpisodes = recent.episodes
         }
     }
 

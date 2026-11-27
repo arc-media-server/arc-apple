@@ -28,6 +28,17 @@ final class HomeRowsTests: XCTestCase {
         XCTAssertNotEqual(cards[0].id, cards[1].id)
     }
 
+    func testRecentlyAddedCardsCarryTheirNewEpisodes() throws {
+        // A season's batch: its number and the count (the corner badge). A whole show's: the count
+        // (its caption). A single episode: neither.
+        let json = #"[{"type":"season","item":{"id":"s1","kind":"series","title":"Firefly"},"season_number":2,"episodes":3,"added_at":1},"#
+            + #"{"type":"series","item":{"id":"s2","kind":"series","title":"Severance"},"episodes":5,"added_at":2},"#
+            + #"{"type":"episode","item":{"id":"e1","kind":"episode","title":"Pilot"},"added_at":3}]"#
+        let cards = try ArcJSON.decoder.decode([RecentCard].self, from: Data(json.utf8)).map { MediaCard(recent: $0) }
+        XCTAssertEqual(cards.map(\.seasonNumber), [2, nil, nil])
+        XCTAssertEqual(cards.map(\.newEpisodes), [3, 5, 0])
+    }
+
     func testTheWatchlistCanComeLastAndSeasonsAddTheirRow() {
         let halloween = DateComponents(calendar: Calendar(identifier: .gregorian), year: 2026, month: 10, day: 31).date!
         let rows = resolveHomeRows(prefs: Prefs(watchlistPosition: 9), libraries: [movies], today: halloween)

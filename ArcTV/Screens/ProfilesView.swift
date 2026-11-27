@@ -9,12 +9,28 @@ struct ProfilesView: View {
     @State private var loading = true
     @State private var problem: String?
     @State private var pinFor: Profile?
-    @State private var pin = ""
+    /// The PIN was wrong: the boxes shake and say so, then take the next try.
+    @State private var wrongPin = false
+    @State private var checkingPin = false
     /// Focus starts on the first profile, as Plex's picker; otherwise tvOS can land on Sign Out,
     /// and the first press of Select would sign the Apple TV out.
     @FocusState private var focused: String?
 
     var body: some View {
+        ZStack {
+            if let profile = pinFor {
+                PinEntry(profile: profile, wrong: $wrongPin, checking: checkingPin,
+                         onEntered: { submit(profile, pin: $0) }, onBack: { pinFor = nil })
+            } else {
+                picker
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AuthGlow())
+        .task { await load() }
+    }
+
+    private var picker: some View {
         VStack(spacing: 48) {
             ArcWordmark()
             VStack(spacing: 8) {
@@ -46,19 +62,10 @@ struct ProfilesView: View {
             Button(L("profiles.sign_out")) { Task { await app.signOut() } }.arcGlassButton()
         }
         .padding(80)
-        .task { await load() }
         // Sign Out is the only thing on screen while the profiles load, so it takes the focus:
         // move it to the first profile once they appear.
         .onChange(of: loading) { _, now in
             if !now, focused == nil { Task { @MainActor in focused = profiles.first?.id } }
-        }
-        .alert(L("profiles.pin_title", pinFor?.name ?? ""), isPresented: Binding(get: { pinFor != nil }, set: { if !$0 { pinFor = nil } })) {
-            SecureField(L("profiles.pin_hint"), text: $pin).keyboardType(.numberPad)
-            Button(L("common.ok")) {
-                if let p = pinFor { submit(p, pin: pin) }
-                pin = ""
-            }
-            Button(L("common.cancel"), role: .cancel) { pin = "" }
         }
     }
 
@@ -82,7 +89,8 @@ struct ProfilesView: View {
 
     private func choose(_ profile: Profile) {
         if profile.hasPin {
-            pin = ""
+            problem = nil
+            wrongPin = false
             pinFor = profile
         } else {
             submit(profile, pin: nil)
@@ -92,19 +100,132 @@ struct ProfilesView: View {
     private func submit(_ profile: Profile, pin: String?) {
         guard let api = app.api else { return }
         problem = nil
+        if pin != nil { checkingPin = true }
         Task {
+            defer { checkingPin = false }
             do {
                 let chosen = try await api.chooseProfile(id: profile.id, pin: pin)
                 ArcLogApp.info("profile chosen")
                 app.chose(chosen)
             } catch let error as APIError where error.status == 401 && error.needs == nil {
                 app.tokenRefused()
+            } catch let error as APIError where error.needs == "pin" && pinFor != nil {
+                // A wrong PIN: the boxes shake and empty for another try, as Plex's.
+                ArcLogApp.debug("profile PIN refused")
+                wrongPin = true
             } catch let error as APIError {
+                pinFor = nil
                 problem = error.needs == "password" ? L("profiles.needs_password") : error.needs == "pin" ? L("profiles.wrong_pin") : error.message
             } catch {
+                pinFor = nil
                 problem = L("common.unreachable")
             }
         }
+    }
+}
+
+/// Arc's PIN step, as the web's and Android's: the profile's picture and name, "Enter your PIN"
+/// and four boxes (the next one ringed in white), with a number pad beside them, since the remote
+/// has no number keys. The fourth digit checks it at once, as Plex does; a wrong PIN shakes the
+/// boxes and empties them. Back (or Profiles) returns to the profiles.
+struct PinEntry: View {
+    let profile: Profile
+    @Binding var wrong: Bool
+    let checking: Bool
+    let onEntered: (String) -> Void
+    let onBack: () -> Void
+    @State private var digits = ""
+    @State private var shake: CGFloat = 0
+    @FocusState private var key: String?
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 192) {
+            VStack(spacing: 0) {
+                Avatar(profile: profile, size: 192)
+                Text(profile.name).font(.title2.weight(.semibold)).padding(.top, 32)
+                Text(L("pin.enter")).font(.callout).foregroundStyle(ArcColor.muted).padding(.top, 8)
+                HStack(spacing: 24) {
+                    ForEach(0..<4, id: \.self) { i in box(i) }
+                }
+                .offset(x: shake)
+                .padding(.top, 48)
+                Text(wrong ? L("pin.wrong") : " ").font(.callout).foregroundStyle(ArcColor.error).padding(.top, 24)
+                Button(action: onBack) { Label(L("pin.back"), systemImage: "chevron.left") }
+                    .arcGlassButton()
+                    .padding(.top, 32)
+            }
+            VStack(spacing: 20) {
+                ForEach(["123", "456", "789", " 0<"], id: \.self) { row in
+                    HStack(spacing: 20) {
+                        ForEach(Array(row), id: \.self) { k in pad(k) }
+                    }
+                }
+            }
+            .focusSection()
+        }
+        .defaultFocus($key, "5")
+        .onAppear { key = "5" }
+        .onExitCommand(perform: onBack)
+        .onChange(of: wrong) { _, now in
+            guard now else { return }
+            digits = ""
+            Task { @MainActor in
+                for x: CGFloat in [-20, 20, -12, 12, 0] {
+                    withAnimation(.linear(duration: 0.06)) { shake = x }
+                    try? await Task.sleep(for: .milliseconds(60))
+                }
+            }
+        }
+    }
+
+    private func box(_ i: Int) -> some View {
+        let next = i == digits.count && !wrong
+        let ring = wrong ? ArcColor.error : next ? ArcColor.foreground : ArcColor.foreground.opacity(0.08)
+        return ZStack {
+            RoundedRectangle(cornerRadius: 32, style: .continuous).fill(ArcColor.surface2)
+            RoundedRectangle(cornerRadius: 32, style: .continuous).stroke(ring, lineWidth: next ? 4 : 2)
+            if i < digits.count { Text("•").font(.system(size: 52)) }
+        }
+        .frame(width: 112, height: 112)
+    }
+
+    @ViewBuilder private func pad(_ k: Character) -> some View {
+        switch k {
+        case " ":
+            Color.clear.frame(width: 120, height: 120)
+        case "<":
+            Button { if !digits.isEmpty { digits.removeLast() } } label: {
+                Image(systemName: "delete.left").font(.system(size: 40, weight: .medium))
+                    .accessibilityLabel(Text(L("pin.delete")))
+            }
+            .buttonStyle(PadKeyStyle())
+            .focused($key, equals: "<")
+        default:
+            Button { type(k) } label: { Text(String(k)).font(.system(size: 48, weight: .semibold)) }
+                .buttonStyle(PadKeyStyle())
+                .focused($key, equals: String(k))
+        }
+    }
+
+    private func type(_ k: Character) {
+        guard !checking, digits.count < 4 else { return }
+        if wrong { wrong = false }
+        digits.append(k)
+        if digits.count == 4 { onEntered(digits) }
+    }
+}
+
+/// A key of the PIN pad: grey, white with black when it has the focus, as Android's.
+struct PadKeyStyle: ButtonStyle {
+    @Environment(\.isFocused) private var isFocused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(isFocused ? ArcColor.background : ArcColor.foreground)
+            .frame(width: 120, height: 120)
+            .background(RoundedRectangle(cornerRadius: 32, style: .continuous).fill(isFocused ? ArcColor.foreground : ArcColor.surface2))
+            .scaleEffect(isFocused ? 1.08 : configuration.isPressed ? 0.96 : 1)
+            .animation(.easeOut(duration: 0.15), value: isFocused)
     }
 }
 

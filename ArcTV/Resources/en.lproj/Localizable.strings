@@ -35,8 +35,10 @@
 
 "profiles.title" = "Who's watching?";
 "profiles.locked" = "Has a PIN";
-"profiles.pin_title" = "Enter %@'s PIN";
-"profiles.pin_hint" = "PIN";
+"pin.enter" = "Enter your PIN";
+"pin.back" = "Profiles";
+"pin.wrong" = "Try again";
+"pin.delete" = "Delete";
 "profiles.wrong_pin" = "That PIN isn't right.";
 "profiles.needs_password" = "The admin profile needs its PIN or the household password. Pick it in Arc in a browser, or set a PIN for it.";
 "profiles.sign_out" = "Sign Out";
@@ -55,7 +57,10 @@
 "row.collection" = "Collection";
 "row.playlist" = "Playlist";
 
-"card.new_episodes" = "Season %1$d · %2$d new";
+"card.new_episodes" = "%d new episodes";
+"card.new_episode" = "1 new episode";
+"card.specials" = "Specials";
+"card.watched" = "Watched";
 /* Episode numbers, the same in every Arc app: "S1 · E4", a special "Special 3", and where the
    episode is the subject its name after ("S1 · E4 · Pilot"). */
 "episode.code" = "S%1$d · E%2$d";

@@ -149,7 +149,13 @@ struct RouteView: View {
 
     var body: some View {
         switch route {
-        case .item(let item): DetailsView(itemId: item.id, initial: item)
+        // An episode opens its show's page on that episode, as Plex and Arc's other apps do.
+        case .item(let item):
+            if let show = item.showOfEpisode {
+                DetailsView(itemId: show.id, initial: show, episodeId: item.id)
+            } else {
+                DetailsView(itemId: item.id, initial: item)
+            }
         case .collection(let id, let title): CollectionView(id: id, title: title)
         case .playlist(let id, let title): PlaylistView(id: id, title: title)
         case .person(let id, let name): PersonView(id: id, name: name)
