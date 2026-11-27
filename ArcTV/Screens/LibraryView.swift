@@ -31,9 +31,12 @@ struct LibraryView: View {
     private static let page = 60
     private var isVideos: Bool { library.kind == "videos" }
 
-    init(library: Library) {
+    init(library: Library, genre: String? = nil) {
         self.library = library
-        _show = State(initialValue: library.kind == "videos" ? .titles : .recommended)
+        _show = State(initialValue: genre != nil || library.kind == "videos" ? .titles : .recommended)
+        var query = LibraryQuery()
+        query.genre = genre
+        _query = State(initialValue: query)
     }
 
     var body: some View {
@@ -412,6 +415,33 @@ struct LibraryView: View {
         case "720": return "720p"
         case "sd": return "SD"
         default: return value
+        }
+    }
+}
+
+/// Search identifies the library by ID; use its current kind to load the right titles.
+struct GenreLibraryView: View {
+    @Environment(AppModel.self) private var app
+    let match: GenreMatch
+    @State private var library: Library?
+    @State private var loading = true
+    @State private var problem: String?
+
+    var body: some View {
+        Group {
+            if let library {
+                LibraryView(library: library, genre: match.name)
+            } else {
+                PageScaffold(title: match.name, loading: loading, problem: problem, empty: L("search.genre_unavailable")) {
+                    EmptyView()
+                }
+            }
+        }
+        .task {
+            let (libraries, failed) = await loadPage(app, "genre library") { try await $0.libraries() }
+            library = libraries?.first { $0.id == match.libraryId }
+            problem = failed
+            loading = false
         }
     }
 }

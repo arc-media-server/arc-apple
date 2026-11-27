@@ -1,7 +1,7 @@
 import ArcKit
 import SwiftUI
 
-/// Search across every library the profile can see: titles, episodes, collections and people,
+/// Search across every library the profile can see: titles, episodes, collections, people and genres,
 /// as the web's search. Arc forgives accents and small typos. Results follow the typing after a
 /// short pause.
 struct SearchView: View {
@@ -25,6 +25,7 @@ struct SearchView: View {
                     episodes(results.episodes)
                     collections(results.collections)
                     people(results.people)
+                    genres(results.genres)
                 }
             }
             .padding(.vertical, 40)
@@ -74,6 +75,19 @@ struct SearchView: View {
             row(L("search.people")) {
                 ForEach(list) { p in
                     PersonButton(name: p.name, detail: p.knownFor, image: p.image) { openRoute(.person(id: p.id, name: p.name)) }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func genres(_ list: [GenreMatch]) -> some View {
+        if !list.isEmpty {
+            row(L("search.genres")) {
+                ForEach(list, id: \.self) { genre in
+                    TileButton(title: genre.name, subtitle: genre.libraryName, art: nil, wide: true) {
+                        openRoute(.genre(genre))
+                    }
                 }
             }
         }

@@ -1,12 +1,13 @@
 import ArcKit
 import SwiftUI
 
-/// A page the app can open from anywhere: a title, a collection, a playlist, a person or a folder.
+/// A page the app can open from anywhere.
 enum Route: Hashable {
     case item(Item)
     case collection(id: String, title: String)
     case playlist(id: String, title: String)
     case person(id: Int64, name: String)
+    case genre(GenreMatch)
     case folder(library: Library, path: String, name: String)
 }
 
@@ -153,6 +154,7 @@ struct RouteView: View {
         case .collection(let id, let title): CollectionView(id: id, title: title)
         case .playlist(let id, let title): PlaylistView(id: id, title: title)
         case .person(let id, let name): PersonView(id: id, name: name)
+        case .genre(let match): GenreLibraryView(match: match)
         case .folder(let library, let path, let name): FolderView(library: library, path: path, name: name)
         }
     }
