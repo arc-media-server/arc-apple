@@ -42,6 +42,7 @@ final class AppModel {
     var pendingLink: Shared.Link?
     /// The profile's Hide Spoilers, for every screen (from its prefs, kept up to date by Settings).
     var hideSpoilers = false
+    var showMissingEpisodes = false
 
     /// Arc's live updates (GET /api/v1/events) while a profile's pages are on screen: each count
     /// goes up when Arc says something those pages show changed, and they reload in place.
@@ -90,7 +91,12 @@ final class AppModel {
         if LiveTopics.touches(topics, LiveTopics.title) { liveTitle += 1 }
         if LiveTopics.touches(topics, LiveTopics.together) { liveTogether += 1 }
         if LiveTopics.touches(topics, LiveTopics.prefs), let api {
-            Task { if let prefs = try? await api.prefs() { hideSpoilers = prefs.hideSpoilers } }
+            let profileId = profile?.id
+            Task {
+                guard let prefs = try? await api.prefs(), self.api === api, profile?.id == profileId else { return }
+                hideSpoilers = prefs.hideSpoilers
+                showMissingEpisodes = prefs.showMissingEpisodes
+            }
         }
     }
 
@@ -174,6 +180,7 @@ final class AppModel {
 
     func chose(_ profile: Profile) {
         self.profile = profile
+        showMissingEpisodes = false
         stage = .home
         // This profile's own stream, from the start (MainView opens it while on screen).
         relay.api = api

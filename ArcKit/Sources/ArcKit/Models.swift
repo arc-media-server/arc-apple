@@ -300,6 +300,7 @@ public struct Prefs: Codable, Sendable {
     @Default<Defaults.True> public var themeMusic: Bool
     /// Hide Spoilers: unwatched episodes' stills and descriptions stay back.
     @Default<Defaults.False> public var hideSpoilers: Bool
+    @Default<Defaults.False> public var showMissingEpisodes: Bool
     public var subtitleStyle: SubtitleStyle?
 
     public init(home: [HomeRowPref] = [], splitUpNext: Bool = false, libraryOrder: [Int64] = [], watchlistPosition: Int = 0) {

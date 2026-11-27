@@ -99,8 +99,6 @@
 "actions.remove_from_continue" = "Remove from Continue Watching";
 "actions.season_watched" = "Mark Season as Watched";
 "actions.season_unwatched" = "Mark Season as Unwatched";
-"actions.show_missing" = "Show Missing Episodes";
-"actions.hide_missing" = "Hide Missing Episodes";
 "actions.add_to_playlist" = "Add to Playlist…";
 "actions.rate" = "Rate…";
 "actions.more" = "More";
@@ -229,6 +227,7 @@
 "settings.auto_skip" = "Skip Intros Automatically";
 "settings.theme_music" = "Theme Music";
 "settings.hide_spoilers" = "Hide Spoilers";
+"settings.show_missing_episodes" = "Show Missing Episodes";
 "spoiler.hidden_description" = "Description hidden until you watch it.";
 "settings.subtitles" = "Subtitles";
 "settings.subtitles_last" = "In the language I last chose";
