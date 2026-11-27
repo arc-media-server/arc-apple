@@ -100,6 +100,13 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
     tabs sit far to the left), so the controls had to be closed and opened again. That was there
     before this change.
 
+  - In the player, Up from a card (Episodes, Chapters, Cast, Info) goes back to its tab. Before,
+    tvOS often found nothing above a card, since the tabs sit at the left, and the focus stuck.
+  - The open Playback, Audio or Subtitles menu no longer flashes its focused choice. The player
+    redrew the menu with every tick of the clock; the round buttons are now a view of their own.
+  - The sidebar has Arc's white logo at the top: the mark while it's shut, the whole logo while
+    it's open. Android's sidebar has none; Apple's own apps show theirs there.
+
 ## Decisions
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request
