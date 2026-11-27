@@ -40,20 +40,23 @@ struct ProfilesView: View {
             if loading {
                 ProgressView()
             } else {
-                HStack(spacing: 56) {
+                // Round avatars with no card, as Android's and the web's picker: a white ring and
+                // a little growth on focus, a lock badge on the rim for a profile with a PIN, and
+                // the name under it, white when focused.
+                HStack(alignment: .top, spacing: 64) {
                     ForEach(profiles) { profile in
-                        Button { choose(profile) } label: {
-                            VStack(spacing: 20) {
-                                Avatar(profile: profile, size: 200)
-                                Text(profile.name).font(.headline)
-                                if profile.hasPin {
-                                    Label(L("profiles.locked"), systemImage: "lock.fill").font(.caption).foregroundStyle(ArcColor.muted)
-                                }
+                        VStack(spacing: 28) {
+                            Button { choose(profile) } label: {
+                                Avatar(profile: profile, size: 224)
                             }
-                            .padding(24)
+                            .buttonStyle(ProfileCircleStyle(locked: profile.hasPin))
+                            .focused($focused, equals: profile.id)
+                            .accessibilityLabel(Text(profile.hasPin ? "\(profile.name), \(L("profiles.locked"))" : profile.name))
+                            Text(profile.name).font(.headline).lineLimit(1)
+                                .foregroundStyle(focused == profile.id ? ArcColor.foreground : ArcColor.muted)
+                                .animation(.easeOut(duration: 0.15), value: focused)
                         }
-                        .buttonStyle(.card)
-                        .focused($focused, equals: profile.id)
+                        .frame(width: 256)
                     }
                 }
                 .defaultFocus($focused, profiles.first?.id)
@@ -212,6 +215,35 @@ struct PinEntry: View {
         if wrong { wrong = false }
         digits.append(k)
         if digits.count == 4 { onEntered(digits) }
+    }
+}
+
+/// A profile's avatar on the picker, as Android's: on focus a white ring and a 1.06 grow; a
+/// PIN's lock sits on the rim, moving out with the grow so it stays on the edge.
+struct ProfileCircleStyle: ButtonStyle {
+    let locked: Bool
+    @Environment(\.isFocused) private var isFocused
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(8)
+            .overlay(Circle().stroke(ArcColor.foreground, lineWidth: 8).opacity(isFocused ? 1 : 0))
+            .overlay(alignment: .bottomTrailing) {
+                if locked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(ArcColor.muted)
+                        .frame(width: 60, height: 60)
+                        .background(Circle().fill(ArcColor.surface3))
+                        .padding(8)
+                        .background(Circle().fill(ArcColor.background))
+                        .offset(x: isFocused ? 6 : 0, y: isFocused ? 6 : 0)
+                        .accessibilityHidden(true)
+                }
+            }
+            .scaleEffect(isFocused ? 1.06 : configuration.isPressed ? 0.96 : 1)
+            .shadow(color: .black.opacity(isFocused ? 0.4 : 0), radius: 16, y: 10)
+            .animation(.easeOut(duration: 0.15), value: isFocused)
     }
 }
 

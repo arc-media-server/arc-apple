@@ -106,10 +106,10 @@ struct DetailsView: View {
                             Color.clear.frame(height: 50).accessibilityHidden(true)
                         }
                         // The cast first, above every other row (owner, 7 November).
-                        if !actors.isEmpty { cast }
-                        if !shown.extras.isEmpty { extras }
-                        if !similar.isEmpty { related }
-                        if !shown.collections.isEmpty { collections }
+                        if !actors.isEmpty { cast.id(Self.rowKey("cast")) }
+                        if !shown.extras.isEmpty { extras.id(Self.rowKey("extras")) }
+                        if !similar.isEmpty { related.id(Self.rowKey("related")) }
+                        if !shown.collections.isEmpty { collections.id(Self.rowKey("collections")) }
                         infoCards
                     }
                     .padding(.horizontal, Self.pageInset)
@@ -154,7 +154,17 @@ struct DetailsView: View {
                     // (The first row's cards carry focus keys, so the hero is Play's key or nil.)
                     if seasons.isEmpty {
                         if Self.isFirstRow(new), Self.isHero(old) {
-                            withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.restAnchor, anchor: Self.restPoint) }
+                            if let second = secondRow {
+                                // The first row and the one under it both in full, the second at
+                                // the foot, as Down to the second row leaves them (owner,
+                                // 27 November); after tvOS's own scroll for the focus.
+                                Task { @MainActor in
+                                    try? await Task.sleep(for: .milliseconds(60))
+                                    withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.rowKey(second), anchor: .bottom) }
+                                }
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.restAnchor, anchor: Self.restPoint) }
+                            }
                         } else if Self.isFirstRow(old), Self.isHero(new) {
                             withAnimation(.easeInOut(duration: 0.4)) { proxy.scrollTo(Self.heroAnchor, anchor: .top) }
                         }
@@ -503,6 +513,16 @@ struct DetailsView: View {
     static let browserAnchor = "details|browser"
 
     static let restAnchor = "details|rest"
+    static func rowKey(_ name: String) -> String { "details|row|" + name }
+
+    /// A film's second row of cards under the hero (the row under the cast), which Down from the
+    /// hero brings up in full with the first. Nil when there's no such row (the About cards come
+    /// next, taller than the screen's room).
+    private var secondRow: String? {
+        let rows = [(!actors.isEmpty, "cast"), (!shown.extras.isEmpty, "extras"), (!similar.isEmpty, "related"),
+                    (!shown.collections.isEmpty, "collections")].filter(\.0).map(\.1)
+        return rows.count > 1 ? rows[1] : nil
+    }
     /// Where the line under a film's hero sits once Down has moved on: near the top, so the
     /// hero's buttons stay in view above the first row.
     static let restPoint = UnitPoint(x: 0.5, y: 0.14)

@@ -73,6 +73,18 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
   - Library: the pill bar sits at the top of the safe area and the gaps are smaller, so the
     second row's names and years show in full.
 
+- **Fourth round, after build 144:**
+  - The profile picker matches Android's:
+    - round avatars with no card behind them;
+    - a white ring and a slight grow on focus;
+    - a lock badge on the rim for a profile with a PIN;
+    - the name underneath, grey until focused.
+    Before, each profile sat on a grey card with a "Locked" line under its name.
+  - The library's pill bar sits in the same place on Recommended as on Browse and Collections.
+    Over Recommended's hero it sat 15 points higher.
+  - On a film, Down to the cast brings up the cast and the row under it (More Like This, or
+    extras) both in full, where Down to that row leaves them. Before, the second row was cut off.
+
 ## Decisions
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request

@@ -66,8 +66,8 @@ struct LibraryView: View {
             }
             .padding(.horizontal, 80).padding(.vertical, Self.headerTop)
         } else {
-            HeroRows(rows: recommended, headerHeight: 90) {
-                header.padding(.horizontal, 80).padding(.top, Self.headerTop)
+            HeroRows(rows: recommended, headerHeight: 90 + Self.heroHeaderNudge) {
+                header.padding(.horizontal, 80).padding(.top, Self.headerTop + Self.heroHeaderNudge)
             }
         }
     }
@@ -91,6 +91,10 @@ struct LibraryView: View {
     /// The pill bar's distance from the top: close, so two rows of posters fit under it with
     /// their names and years (owner, 27 November).
     static let headerTop: CGFloat = 0
+    /// Over Recommended's hero (which reaches up under tvOS's top margin) the same bar sat 15
+    /// points higher than over Browse's grid: measured from the simulator's screenshots, so the
+    /// tabs don't jump as you move between them (owner, 27 November).
+    static let heroHeaderNudge: CGFloat = 15
 
     private var showsLetterBar: Bool {
         show == .titles && !loading && problem == nil && query.showsLetters && letters.count > 1
