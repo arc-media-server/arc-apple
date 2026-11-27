@@ -1,3 +1,4 @@
+import ArcKit
 import AVFoundation
 import Libmpv
 import UIKit
@@ -27,6 +28,8 @@ final class MPVEngine: PlaybackEngine {
     private(set) var availableSeconds: Double = 0
     private var hint: DisplayHint?
     private var modeTask: Task<Void, Never>?
+    /// Times it stopped to wait for data, for Playback Info.
+    private var waits = 0
 
     func prepareDisplay(_ hint: DisplayHint?) { self.hint = hint }
 
@@ -151,6 +154,7 @@ final class MPVEngine: PlaybackEngine {
         paused = true
         currentSeconds = 0
         availableSeconds = 0
+        waits = 0
         surface.displayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true, completionHandler: nil)
     }
 
@@ -193,6 +197,7 @@ final class MPVEngine: PlaybackEngine {
                 paused = on
             case "paused-for-cache" where started && on != waiting:
                 waiting = on
+                if on { waits += 1 }
                 onEvent?(.waiting(on))
             case "eof-reached" where on && !ended:
                 ended = true
@@ -203,6 +208,45 @@ final class MPVEngine: PlaybackEngine {
         default:
             break
         }
+    }
+
+    var stats: EngineStats {
+        var s = EngineStats()
+        guard mpv != nil else { return s }
+        s.videoCodec = string("video-format")
+        s.width = int("video-params/w") ?? 0
+        s.height = int("video-params/h") ?? 0
+        s.frameRate = double("container-fps")
+        s.transfer = string("video-params/gamma")
+        s.dolbyVisionProfile = int("current-tracks/video/dolby-vision-profile")
+        if let hwdec = string("hwdec-current") { s.hardwareDecoding = hwdec != "no" }
+        s.audioCodec = string("audio-codec-name")
+        s.audioChannels = int("audio-params/channel-count")
+        if let format = string("audio-out-params/format") { s.audioToAppleDecoder = format.hasPrefix("spdif") }
+        s.droppedFrames = (int("frame-drop-count") ?? 0) + (int("decoder-frame-drop-count") ?? 0)
+        s.bufferedSeconds = double("demuxer-cache-duration")
+        if let speed = double("cache-speed"), speed > 0 { s.downloadKbps = Int(speed * 8 / 1000) }
+        s.waits = waits
+        return s
+    }
+
+    private func string(_ name: String) -> String? {
+        guard let mpv, let value = mpv_get_property_string(mpv, name) else { return nil }
+        defer { mpv_free(value) }
+        let text = String(cString: value)
+        return text.isEmpty ? nil : text
+    }
+
+    private func int(_ name: String) -> Int? {
+        guard let mpv else { return nil }
+        var value: Int64 = 0
+        return mpv_get_property(mpv, name, MPV_FORMAT_INT64, &value) >= 0 ? Int(value) : nil
+    }
+
+    private func double(_ name: String) -> Double? {
+        guard let mpv else { return nil }
+        var value: Double = 0
+        return mpv_get_property(mpv, name, MPV_FORMAT_DOUBLE, &value) >= 0 && value.isFinite ? value : nil
     }
 
     private func set(_ name: String, _ value: String, runtime: Bool = false) {

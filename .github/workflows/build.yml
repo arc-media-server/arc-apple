@@ -47,6 +47,21 @@ jobs:
           # What the app weighs (a Debug build, so larger than a release), kept with the screenshots.
           du -sh ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-appletvos/Arc.app | tee app-size.txt
           du -sh ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-appletvos/Arc.app/Frameworks 2>/dev/null | tee -a app-size.txt || true
+      - name: Package the Apple TV simulator app
+        run: |
+          set -euo pipefail
+          BUILD_DIR="$RUNNER_TEMP/arc-tvos-simulator"
+          xcodebuild -project Arc.xcodeproj -scheme ArcTV -configuration Debug \
+            -destination 'generic/platform=tvOS Simulator' -derivedDataPath "$BUILD_DIR" \
+            ARCHS=arm64 CODE_SIGNING_ALLOWED=NO -quiet build
+          APP="$BUILD_DIR/Build/Products/Debug-appletvsimulator/Arc.app"
+          xcrun lipo "$APP/Arc" -verify_arch arm64
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/Arc-tvos-simulator.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arc-tvos-simulator
+          path: ${{ runner.temp }}/Arc-tvos-simulator.zip
+          if-no-files-found: error
       - name: Start the stand-in Arc
         env:
           # Optional: real posters, backgrounds, logos and cast photos from TMDB for the screenshots.

@@ -64,6 +64,9 @@ struct PlayerOSD: View {
     let invite: () -> Void
     let leave: () -> Void
     let end: () -> Void
+    /// Down from the round buttons: back to the timeline (the picture taking the remote again),
+    /// from where Down opens Info. Nothing focusable sits under the buttons for tvOS to find.
+    var down: () -> Void = {}
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -81,7 +84,7 @@ struct PlayerOSD: View {
                         HStack(alignment: .bottom, spacing: 32) {
                             title
                             Spacer(minLength: 0)
-                            trackButtons
+                            OSDTrackButtons(model: model, room: room, active: active, tab: tab, focus: focus, down: down)
                         }
                         timeline
                     }
@@ -90,6 +93,15 @@ struct PlayerOSD: View {
                 tabRow
                 if let tab {
                     card(tab)
+                        // Up from a card goes back to its tab, as tvOS often finds nothing above
+                        // a card (the tabs sit at the left) and the focus stuck in it.
+                        .onMoveCommand { direction in
+                            guard direction == .up else { return }
+                            let before = focus.wrappedValue
+                            Task { @MainActor in
+                                if focus.wrappedValue == before, before != .tab(tab) { focus.wrappedValue = .tab(tab) }
+                            }
+                        }
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
@@ -116,24 +128,6 @@ struct PlayerOSD: View {
                 .font(.system(size: 52, weight: .bold)).lineLimit(1).minimumScaleFactor(0.7)
         }
         .shadow(color: .black.opacity(0.4), radius: 4, y: 1)
-    }
-
-    private var trackButtons: some View {
-        HStack(spacing: 16) {
-            // tvOS's own menus, as the system player's buttons open: they pop up above the
-            // button with the choices ticked, and Back closes them.
-            ForEach(OSDMenu.allCases, id: \.self) { m in
-                Menu {
-                    menuContent(m)
-                } label: {
-                    Image(systemName: m.icon).accessibilityLabel(m.title)
-                }
-                .menuStyle(.button)
-                .buttonStyle(OSDIconStyle())
-                .focused(focus, equals: .control(m))
-                .disabled(!active || tab != nil)
-            }
-        }
     }
 
     /// Where the marker is: the scrubbed-to point while swiping, else where it's playing.
@@ -240,7 +234,9 @@ struct PlayerOSD: View {
         case .info: panel { infoCard }
         case .chapters: chaptersCard.frame(height: 240)
         case .cast: castCard.frame(height: 260)
-        case .episodes: panel { episodesCard }
+        // The episodes scroll sideways under the panel's edge, not past it (the panel's 24-point
+        // border leaves room for a focused card's lift).
+        case .episodes: panel { episodesCard }.clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         case .together: panel { togetherCard }
         }
     }
@@ -376,6 +372,9 @@ struct PlayerOSD: View {
         .focusSection()
     }
 
+    /// The Episodes card's height: a 169-point picture, its name under it, and room around them.
+    static var episodesHeight: CGFloat { 240 }
+
     private var episodesCard: some View {
         ScrollViewReader { reader in
             ScrollView(.horizontal) {
@@ -402,6 +401,9 @@ struct PlayerOSD: View {
                 .padding(.vertical, 10)
             }
             .scrollClipDisabled()
+            // A sideways scroll view takes all the height it's offered, which stretched the glass
+            // panel down the screen: the picture, its name and the focus lift, no more.
+            .frame(height: Self.episodesHeight)
             .onAppear { reader.scrollTo(model.item.id, anchor: .center) }
         }
     }
@@ -423,64 +425,7 @@ struct PlayerOSD: View {
         }
     }
 
-    // MARK: Menus
-
     static let speeds: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 2]
-
-    /// A menu's choices, as tvOS's own menu draws them (ticks, sections, submenus).
-    @ViewBuilder private func menuContent(_ menu: OSDMenu) -> some View {
-        switch menu {
-        case .playback:
-            Picker(L("player.zoom_mode"), selection: Binding(get: { model.zoomed }, set: { model.chooseZoom($0) })) {
-                Text(L("player.zoom_normal")).tag(false)
-                Text(L("player.zoom_fill")).tag(true)
-            }
-            .pickerStyle(.menu)
-            // In a room the room sets the pace.
-            if room == nil {
-                Picker(L("player.speed"), selection: Binding(get: { model.speed }, set: { model.chooseSpeed($0) })) {
-                    ForEach(PlayerOSD.speeds, id: \.self) { Text(L("player.speed_value", PlayerOSD.speedName($0))).tag($0) }
-                }
-                .pickerStyle(.menu)
-            }
-            Picker(L("player.quality"), selection: Binding(get: { model.maxKbps ?? 0 }, set: { model.chooseQuality($0 == 0 ? nil : $0) })) {
-                Text(L("player.original")).tag(0)
-                ForEach(model.qualities, id: \.self) { Text(qualityName($0)).tag($0) }
-            }
-            .pickerStyle(.menu)
-            if model.versions.count > 1 {
-                Picker(L("player.version"), selection: Binding(get: { model.fileId }, set: { model.chooseVersion($0) })) {
-                    ForEach(model.versions) { Text($0.label).tag($0.fileId) }
-                }
-                .pickerStyle(.menu)
-            }
-        case .audio:
-            Picker(L("player.audio"), selection: Binding(get: { model.audioStream }, set: { model.chooseAudio($0) })) {
-                ForEach(model.audioTracks) { Text(PlayerOSD.audioName($0)).tag($0.index) }
-            }
-            .pickerStyle(.inline)
-        case .subtitles:
-            Picker(L("player.subtitles"), selection: Binding(get: { model.subtitle?.id ?? "" }, set: { id in
-                model.chooseSubtitle(model.subtitleTracks.first { $0.id == id })
-            })) {
-                Text(L("player.off")).tag("")
-                ForEach(model.subtitleTracks) { Text(PlayerOSD.trackName($0)).tag($0.id) }
-            }
-            .pickerStyle(.inline)
-            // Timing (arc-media-server#479): the menu's heading already says Subtitles.
-            if model.subtitleTimingAdjustable {
-                let offset = model.subtitleOffsetMs
-                Section(PlayerOSD.timingName(offset)) {
-                    Button(L("player.timing_show_earlier")) { model.shiftSubtitles(-SubtitleTiming.stepMs) }
-                        .disabled(offset <= -SubtitleTiming.maxMs)
-                    Button(L("player.timing_show_later")) { model.shiftSubtitles(SubtitleTiming.stepMs) }
-                        .disabled(offset >= SubtitleTiming.maxMs)
-                    Button(L("player.timing_reset")) { model.shiftSubtitles(nil) }
-                        .disabled(offset == 0)
-                }
-            }
-        }
-    }
 
     // MARK: Words
 
@@ -598,5 +543,126 @@ struct OSDTabStyle: ButtonStyle {
             }
             .scaleEffect(focused ? 1.06 : 1)
             .animation(.easeOut(duration: 0.15), value: focused)
+    }
+}
+
+/// The round Playback, Audio and Subtitles buttons and their menus. A view of their own so the
+/// player's every tick of the clock doesn't rebuild an open menu, which made its focused choice
+/// flash.
+struct OSDTrackButtons: View {
+    let model: PlayerModel
+    let room: WatchRoom?
+    let active: Bool
+    let tab: OSDTab?
+    var focus: FocusState<PlayerScreen.PlayerFocus?>.Binding
+    let down: () -> Void
+
+    var body: some View {
+        HStack(spacing: 16) {
+            // tvOS's own menus, as the system player's buttons open: they pop up above the
+            // button with the choices ticked, and Back closes them.
+            ForEach(OSDMenu.allCases, id: \.self) { m in
+                Menu {
+                    menuContent(m)
+                } label: {
+                    Image(systemName: m.icon).accessibilityLabel(m.title)
+                }
+                .menuStyle(.button)
+                .buttonStyle(OSDIconStyle())
+                .focused(focus, equals: .control(m))
+                .disabled(!active || tab != nil)
+                .onMoveCommand { if $0 == .down { down() } }
+            }
+        }
+    }
+
+    // MARK: Menus
+
+    /// A menu's choices, as tvOS's own menu draws them (ticks, sections, submenus).
+    @ViewBuilder private func menuContent(_ menu: OSDMenu) -> some View {
+        switch menu {
+        case .playback:
+            Picker(L("player.zoom_mode"), selection: Binding(get: { model.zoomed }, set: { model.chooseZoom($0) })) {
+                Text(L("player.zoom_normal")).tag(false)
+                Text(L("player.zoom_fill")).tag(true)
+            }
+            .pickerStyle(.menu)
+            // In a room the room sets the pace.
+            if room == nil {
+                Picker(L("player.speed"), selection: Binding(get: { model.speed }, set: { model.chooseSpeed($0) })) {
+                    ForEach(PlayerOSD.speeds, id: \.self) { Text(L("player.speed_value", PlayerOSD.speedName($0))).tag($0) }
+                }
+                .pickerStyle(.menu)
+            }
+            Picker(L("player.quality"), selection: Binding(get: { model.maxKbps ?? 0 }, set: { model.chooseQuality($0 == 0 ? nil : $0) })) {
+                Text(L("player.original")).tag(0)
+                ForEach(model.qualities, id: \.self) { Text(qualityName($0)).tag($0) }
+            }
+            .pickerStyle(.menu)
+            if model.versions.count > 1 {
+                Picker(L("player.version"), selection: Binding(get: { model.fileId }, set: { model.chooseVersion($0) })) {
+                    ForEach(model.versions) { Text($0.label).tag($0.fileId) }
+                }
+                .pickerStyle(.menu)
+            }
+            // Stats for nerds, as Android's Playback menu has: stays up over the picture until
+            // turned off here.
+            Toggle(L("player.playback_info"), isOn: Binding(get: { model.showsInfo }, set: { model.showsInfo = $0 }))
+        case .audio:
+            Picker(L("player.audio"), selection: Binding(get: { model.audioStream }, set: { model.chooseAudio($0) })) {
+                ForEach(model.audioTracks) { Text(PlayerOSD.audioName($0)).tag($0.index) }
+            }
+            .pickerStyle(.inline)
+        case .subtitles:
+            Picker(L("player.subtitles"), selection: Binding(get: { model.subtitle?.id ?? "" }, set: { id in
+                model.chooseSubtitle(model.subtitleTracks.first { $0.id == id })
+            })) {
+                Text(L("player.off")).tag("")
+                ForEach(model.subtitleTracks) { Text(PlayerOSD.trackName($0)).tag($0.id) }
+            }
+            .pickerStyle(.inline)
+            // Timing (arc-media-server#479): the menu's heading already says Subtitles.
+            if model.subtitleTimingAdjustable {
+                let offset = model.subtitleOffsetMs
+                Section(PlayerOSD.timingName(offset)) {
+                    Button(L("player.timing_show_earlier")) { model.shiftSubtitles(-SubtitleTiming.stepMs) }
+                        .disabled(offset <= -SubtitleTiming.maxMs)
+                    Button(L("player.timing_show_later")) { model.shiftSubtitles(SubtitleTiming.stepMs) }
+                        .disabled(offset >= SubtitleTiming.maxMs)
+                    Button(L("player.timing_reset")) { model.shiftSubtitles(nil) }
+                        .disabled(offset == 0)
+                }
+            }
+        }
+    }
+}
+
+/// Playback Info ("stats for nerds"): a glass panel at the top right over the picture, read
+/// again every second, until it's turned off in the Playback menu. It takes no focus.
+struct PlaybackInfoPanel: View {
+    let model: PlayerModel
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let rows = model.infoRows()
+            VStack(alignment: .leading, spacing: 14) {
+                Text(L("player.playback_info")).font(.callout.weight(.bold))
+                Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 6) {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        GridRow {
+                            Text(row.label).foregroundStyle(.white.opacity(0.6))
+                            Text(row.value).lineLimit(2)
+                        }
+                    }
+                }
+                .font(.caption2.weight(.medium).monospacedDigit())
+            }
+            .foregroundStyle(.white)
+            .padding(28)
+            .frame(width: 760, alignment: .leading)
+            .arcGlassPanel(cornerRadius: 32)
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
     }
 }

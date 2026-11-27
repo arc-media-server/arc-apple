@@ -60,6 +60,15 @@ enum DeviceCaps {
         return channels
     }
 
+    /// This Apple TV as Playback Info shows it: "2160p · HDR · 5.1" (the picture and sound
+    /// it's sending to the TV now).
+    @MainActor
+    static var summary: String {
+        let channels = AVAudioSession.sharedInstance().maximumOutputNumberOfChannels
+        return ["\(screenHeight)p", AVPlayer.eligibleForHDRPlayback ? "HDR" : "SDR",
+                channels > 0 ? StatsFormat.channelLayout(channels) : nil].compactMap { $0 }.joined(separator: " · ")
+    }
+
     @MainActor
     private static var screenHeight: Int {
         let bounds = UIScreen.main.nativeBounds
