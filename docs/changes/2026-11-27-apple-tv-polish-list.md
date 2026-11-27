@@ -95,6 +95,11 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
     lift. Before, the glass panel stretched almost to the bottom of the screen. That was there
     before this change.
 
+  - In the player, Down from the round Playback, Audio and Subtitles buttons goes back to the
+    timeline, where Down again opens Info. Before, nothing below them could take the focus (the
+    tabs sit far to the left), so the controls had to be closed and opened again. That was there
+    before this change.
+
 ## Decisions
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request

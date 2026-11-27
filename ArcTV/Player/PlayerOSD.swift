@@ -64,6 +64,9 @@ struct PlayerOSD: View {
     let invite: () -> Void
     let leave: () -> Void
     let end: () -> Void
+    /// Down from the round buttons: back to the timeline (the picture taking the remote again),
+    /// from where Down opens Info. Nothing focusable sits under the buttons for tvOS to find.
+    var down: () -> Void = {}
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -132,6 +135,7 @@ struct PlayerOSD: View {
                 .buttonStyle(OSDIconStyle())
                 .focused(focus, equals: .control(m))
                 .disabled(!active || tab != nil)
+                .onMoveCommand { if $0 == .down { down() } }
             }
         }
     }

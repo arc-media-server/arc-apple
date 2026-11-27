@@ -86,7 +86,13 @@ struct PlayerScreen: View {
                               restart: { model.restart(); sendSeek(); leaveOSD() },
                               invite: { if let room { inviteMore(room) } },
                               leave: { close() },
-                              end: { Task { await together.end() } })
+                              end: { Task { await together.end() } },
+                              down: {
+                                  // After tvOS's own move, in case it found something below.
+                                  Task { @MainActor in
+                                      if case .control = focus { leaveOSD() }
+                                  }
+                              })
                         .opacity(controls ? 1 : 0)
                         .animation(.easeInOut(duration: 0.25), value: controls)
                     corner(model)
