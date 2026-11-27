@@ -35,7 +35,13 @@ struct HeroRows<Header: View>: View {
                 // bottom of the screen.
                 LazyVStack(alignment: .leading, spacing: 44 - Self.foot) {
                     if let hero { heroDetails(hero).id(Self.heroKey) }
-                    if let top { top($focused) }
+                    if let top {
+                        // Its foot, as the rows' below, is where it lands.
+                        VStack(alignment: .leading, spacing: 0) {
+                            top($focused)
+                            Color.clear.frame(height: Self.foot).id("top")
+                        }
+                    }
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 16) {
@@ -60,20 +66,21 @@ struct HeroRows<Header: View>: View {
                 .padding(.bottom, 60)
             }
             // The row the focus moves into lands at the foot of the screen, moving down or back
-            // up, with the rows above it in view; the first row brings the hero back (as Android's
-            // and Kodi's rows, and Plex's). tvOS would otherwise scroll only as far as needed, which
+            // up, with the rows above it in view, the hero above the first (as Android's and Kodi's
+            // rows, and Plex's). tvOS would otherwise scroll only as far as needed, which
             // going up leaves the row at the top.
-            .onChange(of: focused) { _, key in
+            .onChange(of: focused) { old, key in
                 guard let key, !key.hasPrefix("hero|") else { return }
                 let row = String(key.split(separator: "|", maxSplits: 1).first ?? "")
                 guard row != focusedRow else { return }
                 focusedRow = row
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    // Only the page's topmost row brings the hero back: with a top row (Home's
-                    // Watch Together), the first titles' row sits below the screen's foot then.
-                    if row == "top" || (top == nil && row == rows.first?.id) {
-                        proxy.scrollTo(Self.heroKey, anchor: .top)
-                    } else {
+                // Every row lands at the foot, the first too: under the hero, with its names in
+                // full (owner, 27 November). On opening, a moment later as well, once the rows
+                // have been laid out.
+                withAnimation(.easeInOut(duration: 0.3)) { proxy.scrollTo(row, anchor: .bottom) }
+                if old == nil {
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(150))
                         proxy.scrollTo(row, anchor: .bottom)
                     }
                 }

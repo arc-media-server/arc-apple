@@ -62,6 +62,17 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
   - a wrong PIN shakes the boxes, empties them and says "Try again";
   - Back or Profiles returns to the profiles.
 
+- **Third round, after build 143:**
+  - Down to the episodes now lands the tabs and episodes at the foot every time, with the
+    descriptions in full. tvOS's own scroll for the focus used to win over Arc's and cut them off.
+  - Home's first row lands at the foot as the others do, from the moment Home opens, so its names
+    show in full under the hero. Before, they were cut off until the focus moved.
+  - An actor's whole circle grows when focused. Before, the photo zoomed inside a circle that
+    stayed still.
+  - On a film's page the cast comes up closer under the buttons.
+  - Library: the pill bar sits at the top of the safe area and the gaps are smaller, so the
+    second row's names and years show in full.
+
 ## Decisions
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request

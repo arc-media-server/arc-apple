@@ -81,7 +81,7 @@ struct LibraryView: View {
                 if showsLetterBar {
                     LetterBar(letters: letters) { letter in Task { await jump(to: letter, proxy) } }
                         // The grid keeps its width: 24 + the bar's 44 + 12 is the 80 it had at the right.
-                        .padding(.top, 120)
+                        .padding(.top, 96)
                         .padding(.trailing, 12)
                 }
             }
@@ -90,7 +90,7 @@ struct LibraryView: View {
 
     /// The pill bar's distance from the top: close, so two rows of posters fit under it with
     /// their names and years (owner, 27 November).
-    static let headerTop: CGFloat = 20
+    static let headerTop: CGFloat = 0
 
     private var showsLetterBar: Bool {
         show == .titles && !loading && problem == nil && query.showsLetters && letters.count > 1
@@ -98,7 +98,7 @@ struct LibraryView: View {
 
     private var browseScroll: some View {
         ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: 40) {
+            VStack(alignment: .leading, spacing: 24) {
                 header
                 if loading {
                     ProgressView().frame(maxWidth: .infinity, minHeight: 400)

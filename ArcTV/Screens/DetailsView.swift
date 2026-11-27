@@ -101,7 +101,9 @@ struct DetailsView: View {
                             // A film's hero has nothing peeking under it, as the reference: the
                             // next row starts just below the screen, and Down scrolls to it.
                             Color.clear.frame(height: 1).id(Self.restAnchor)
-                            Color.clear.frame(height: 150).accessibilityHidden(true)
+                            // Enough to keep the cast just below the screen at first, and
+                            // close under the buttons once Down brings it up (owner, 27 November).
+                            Color.clear.frame(height: 50).accessibilityHidden(true)
                         }
                         // The cast first, above every other row (owner, 7 November).
                         if !actors.isEmpty { cast }
@@ -159,11 +161,16 @@ struct DetailsView: View {
                     }
                     let wasBrowsing = Self.isBrowser(old), nowBrowsing = Self.isBrowser(new)
                     if nowBrowsing && !wasBrowsing {
-                        withAnimation(Self.recede) {
-                            receded = true
-                            // The season tabs and episodes land at the foot of the screen, with
-                            // the page above them in view, as Android's.
-                            proxy.scrollTo(Self.browserAnchor, anchor: .bottom)
+                        withAnimation(Self.recede) { receded = true }
+                    }
+                    // The season tabs and episodes land at the foot of the screen, with the page
+                    // above them in view, as Android's: on the way in, and from the tabs down to
+                    // the episodes. A moment later, so tvOS's own scroll for the focus (which
+                    // shows only as much as the focused tab or card) doesn't override it.
+                    if nowBrowsing, !(old?.hasPrefix("ep|") == true && new?.hasPrefix("ep|") == true) {
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(60))
+                            withAnimation(.easeInOut(duration: 0.35)) { proxy.scrollTo(Self.browserAnchor, anchor: .bottom) }
                         }
                     } else if !nowBrowsing && old?.hasPrefix("season|") == true && Self.isHero(new) {
                         // Up from the season tabs is the hero's buttons: back to the top.

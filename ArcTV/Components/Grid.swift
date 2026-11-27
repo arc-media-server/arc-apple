@@ -13,7 +13,7 @@ struct TitleGrid: View {
 
     /// Between rows of posters: with the pill bar close to the top, two whole rows (names and
     /// years too) fit on the screen.
-    static let rowGap: CGFloat = 44
+    static let rowGap: CGFloat = 36
     static let columns = [GridItem(.adaptive(minimum: CardStyle.poster.size.width, maximum: CardStyle.poster.size.width), spacing: 28, alignment: .top)]
 
     var body: some View {
