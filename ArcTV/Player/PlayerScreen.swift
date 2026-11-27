@@ -138,7 +138,7 @@ struct PlayerScreen: View {
         }
         .onAppear {
             guard model == nil, let api = app.api else { return }
-            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, engine: EngineChoice.make()) { app.tokenRefused() }
+            let m = PlayerModel(api: api, item: request.item, startMs: request.startMs, fileId: request.fileId, engine: EngineChoice.make()) { app.tokenRefused() }
             model = m
             m.start()
             Task { await syncQueue(m) }

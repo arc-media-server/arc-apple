@@ -71,6 +71,7 @@
 "home.more_info" = "More Info";
 
 "details.play" = "Play";
+"details.play_version" = "Play Version…";
 "details.resume" = "Resume";
 "details.from_beginning" = "Play from Beginning";
 "details.play_episode" = "Play %@";
@@ -351,6 +352,7 @@
 "details.bitrate" = "Bitrate";
 "details.mbps" = "%.1f Mbps";
 "details.file" = "File";
+"details.file_number" = "File %@";
 "details.releases" = "Releases %@";
 "details.server" = "Server";
 "details.profile" = "Profile";

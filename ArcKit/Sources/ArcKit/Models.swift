@@ -89,6 +89,7 @@ public struct MediaFile: Codable, Sendable, Hashable, Identifiable {
     public let id: Int64
     @Default<Defaults.Zero64> public var durationMs: Int64
     @Default<Defaults.False> public var missing: Bool
+    @Default<Defaults.Zero> public var part: Int
     public var edition: String?
     public var container: String?
     public var size: Int64?
