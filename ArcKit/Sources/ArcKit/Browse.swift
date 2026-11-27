@@ -103,7 +103,14 @@ public struct PersonPage: Codable, Sendable {
     @Default<Defaults.List<PersonCredit>> public var credits: [PersonCredit]
 }
 
-/// GET /search: titles, episodes, collections and people that match.
+/// A genre match within one of the profile's libraries.
+public struct GenreMatch: Codable, Hashable, Sendable {
+    public let name: String
+    public let libraryId: Int64
+    public let libraryName: String?
+}
+
+/// GET /search: titles, episodes, collections, people and genres that match.
 public struct SearchResults: Codable, Sendable {
     @Default<Defaults.List<Item>> public var movies: [Item]
     @Default<Defaults.List<Item>> public var shows: [Item]
@@ -111,7 +118,11 @@ public struct SearchResults: Codable, Sendable {
     @Default<Defaults.List<CollectionSummary>> public var collections: [CollectionSummary]
     @Default<Defaults.List<Person>> public var people: [Person]
 
-    public var isEmpty: Bool { movies.isEmpty && shows.isEmpty && episodes.isEmpty && collections.isEmpty && people.isEmpty }
+    @Default<Defaults.List<GenreMatch>> public var genres: [GenreMatch]
+
+    public var isEmpty: Bool {
+        movies.isEmpty && shows.isEmpty && episodes.isEmpty && collections.isEmpty && people.isEmpty && genres.isEmpty
+    }
 }
 
 /// How a library's grid is sorted, as the web's library page offers (the value /items takes).

@@ -14,4 +14,16 @@ final class EpisodeCodeTests: XCTestCase {
         XCTAssertNil(unplaced.episodeCode)
         XCTAssertNil(film.episodeCode)
     }
+
+    func testAnEpisodeOpensItsShow() throws {
+        let json = #"{"id":"e4","kind":"episode","title":"Pilot","series_title":"Firefly","parent_id":"s1","images":{"primary":"/still","series_backdrop":"/bg","series_logo":"/logo"}}"#
+        let episode = try ArcJSON.decoder.decode(Item.self, from: Data(json.utf8))
+        let show = try XCTUnwrap(episode.showOfEpisode)
+        XCTAssertEqual(show.id, "s1")
+        XCTAssertEqual(show.kind, "series")
+        XCTAssertEqual(show.title, "Firefly")
+        XCTAssertEqual(show.images?.backdrop, "/bg")
+        XCTAssertEqual(show.images?.logo, "/logo")
+        XCTAssertNil(show.showOfEpisode)
+    }
 }
