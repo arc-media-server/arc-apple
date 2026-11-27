@@ -1,3 +1,4 @@
+import ArcKit
 import AVFoundation
 import AVKit
 import UIKit
@@ -124,6 +125,29 @@ final class AVPlayerEngine: PlaybackEngine {
     }
 
     var isPlaying: Bool { player.timeControlStatus != .paused }
+
+    /// Apple's player tells its picture size, frame rate and access log (speed, waits, dropped
+    /// frames); the codec and range come from the file (Playback Info falls back to them).
+    var stats: EngineStats {
+        var s = EngineStats()
+        guard let item = player.currentItem else { return s }
+        s.width = Int(item.presentationSize.width)
+        s.height = Int(item.presentationSize.height)
+        if let video = item.tracks.first(where: { $0.assetTrack?.mediaType == .video }), video.currentVideoFrameRate > 0 {
+            s.frameRate = Double(video.currentVideoFrameRate)
+        }
+        if let event = item.accessLog()?.events.last {
+            if event.observedBitrate > 0 { s.downloadKbps = Int(event.observedBitrate / 1000) }
+            s.droppedFrames = max(0, event.numberOfDroppedVideoFrames)
+            s.waits = max(0, event.numberOfStalls)
+        }
+        let now = player.currentTime()
+        if let range = item.loadedTimeRanges.map(\.timeRangeValue).first(where: { $0.containsTime(now) }) {
+            let ahead = CMTimeRangeGetEnd(range).seconds - now.seconds
+            if ahead.isFinite { s.bufferedSeconds = max(0, ahead) }
+        }
+        return s
+    }
 
     func stop() {
         reset()

@@ -93,6 +93,8 @@ final class PlayerModel {
     /// Playback Speed and Zoom Mode (the Playback menu), kept when the stream or engine changes.
     private(set) var speed: Float = 1
     private(set) var zoomed = false
+    /// Playback Info ("stats for nerds") is showing, from the Playback menu.
+    var showsInfo = false
     var qualities: [Int] {
         let offered = offeredQualities(sourceKbps: plan?.sourceKbps ?? 0)
         guard let limit = plan?.serverLimitKbps, limit > 0 else { return offered }
@@ -479,6 +481,51 @@ final class PlayerModel {
         if speed != 1 { apple.setRate(speed) }
         if zoomed { apple.setZoom(true) }
         retried = false
+    }
+
+    /// Playback Info's rows, as Android's: how it's playing and why, the picture and sound as
+    /// played (the engine's own reading, else the file's), and how the stream is arriving.
+    func infoRows() -> [(label: String, value: String)] {
+        var rows: [(label: String, value: String)] = []
+        let stats = engine.stats
+        let p = plan
+        rows.append((L("stats.playing"), [methodName, engineName].compactMap { $0 }.joined(separator: " · ")))
+        if let reasons = p?.reasons, !reasons.isEmpty { rows.append((L("stats.reason"), reasons.joined(separator: ", "))) }
+        let file = p.flatMap { plan in item.files.first { $0.id == plan.fileId } } ?? Quality.file(of: item)
+        let source = file?.streams.first { $0.kind == "video" }
+        let converted = p?.method == "transcode"
+        let codec = stats.videoCodec ?? (converted ? nil : source?.codec)
+        let width = stats.width > 0 ? stats.width : converted ? 0 : source?.width ?? 0
+        let height = stats.height > 0 ? stats.height : converted ? 0 : source?.height ?? 0
+        if let video = StatsFormat.video(codec: codec, width: width, height: height, frameRate: stats.frameRate ?? source?.frameRate) {
+            rows.append((L("stats.video"), video))
+        }
+        let range = stats.transfer != nil || stats.dolbyVisionProfile != nil
+            ? StatsFormat.dynamicRange(transfer: stats.transfer, dolbyVisionProfile: stats.dolbyVisionProfile)
+            : converted ? "SDR" : StatsFormat.dynamicRange(transfer: source?.colorTransfer ?? (source == nil ? nil : "sdr"),
+                                                           dolbyVisionProfile: source?.dolbyVisionProfile, dolbyVision: source?.dolbyVision ?? false)
+        if let range { rows.append((L("stats.dynamic_range"), range)) }
+        if let hardware = stats.hardwareDecoding { rows.append((L("stats.video_decoder"), L(hardware ? "stats.hardware" : "stats.software"))) }
+        if let track = audioTracks.first(where: { $0.index == p?.audioStream }),
+           let audio = StatsFormat.audio(codec: track.codec, channels: track.channels) {
+            // What the engine is fed, when Arc converted the sound on the way.
+            let fed = StatsFormat.audio(codec: stats.audioCodec, channels: stats.audioChannels)
+            rows.append((L("stats.audio"), fed.map { $0.lowercased() != audio.lowercased() ? audio + " → " + $0 : audio } ?? audio))
+        }
+        if let apple = stats.audioToAppleDecoder {
+            rows.append((L("stats.audio_output"), apple ? L("stats.audio_apple")
+                                                        : L("stats.audio_pcm", StatsFormat.channelLayout(stats.audioChannels ?? 2))))
+        }
+        if let burned = p?.subtitleTracks.first(where: { $0.id == burn }) {
+            rows.append((L("stats.subtitles"), L("stats.burned_in", burned.codec.uppercased())))
+        }
+        if let kbps = p?.sourceKbps, kbps > 0 { rows.append((L("stats.bitrate"), StatsFormat.mbps(kbps))) }
+        if let kbps = stats.downloadKbps { rows.append((L("stats.download"), StatsFormat.mbps(kbps))) }
+        if let buffered = stats.bufferedSeconds { rows.append((L("stats.buffer"), StatsFormat.seconds(buffered))) }
+        if let waits = stats.waits { rows.append((L("stats.waits"), String(waits))) }
+        if let dropped = stats.droppedFrames { rows.append((L("stats.dropped"), String(dropped))) }
+        rows.append((L("stats.this_tv"), DeviceCaps.summary))
+        return rows
     }
 
     /// What the TV should switch to for the stream being played: the file's own picture when it's
