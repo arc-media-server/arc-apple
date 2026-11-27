@@ -96,6 +96,14 @@ struct PlayerScreen: View {
                         .opacity(controls ? 1 : 0)
                         .animation(.easeInOut(duration: 0.25), value: controls)
                     corner(model)
+                    if model.showsInfo {
+                        PlaybackInfoPanel(model: model)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                            .padding(.top, 60)
+                            .padding(.trailing, 80)
+                            .ignoresSafeArea()
+                            .transition(.opacity)
+                    }
                     if let room, lobby {
                         LobbyPanel(room: room, code: together.lobbyCode, focus: $focus,
                                    start: { Task { await together.play() } },

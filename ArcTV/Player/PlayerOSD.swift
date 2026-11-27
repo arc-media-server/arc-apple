@@ -605,6 +605,9 @@ struct OSDTrackButtons: View {
                 }
                 .pickerStyle(.menu)
             }
+            // Stats for nerds, as Android's Playback menu has: stays up over the picture until
+            // turned off here.
+            Toggle(L("player.playback_info"), isOn: Binding(get: { model.showsInfo }, set: { model.showsInfo = $0 }))
         case .audio:
             Picker(L("player.audio"), selection: Binding(get: { model.audioStream }, set: { model.chooseAudio($0) })) {
                 ForEach(model.audioTracks) { Text(PlayerOSD.audioName($0)).tag($0.index) }
@@ -631,5 +634,35 @@ struct OSDTrackButtons: View {
                 }
             }
         }
+    }
+}
+
+/// Playback Info ("stats for nerds"): a glass panel at the top right over the picture, read
+/// again every second, until it's turned off in the Playback menu. It takes no focus.
+struct PlaybackInfoPanel: View {
+    let model: PlayerModel
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            let rows = model.infoRows()
+            VStack(alignment: .leading, spacing: 14) {
+                Text(L("player.playback_info")).font(.callout.weight(.bold))
+                Grid(alignment: .leading, horizontalSpacing: 24, verticalSpacing: 6) {
+                    ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                        GridRow {
+                            Text(row.label).foregroundStyle(.white.opacity(0.6))
+                            Text(row.value).lineLimit(2)
+                        }
+                    }
+                }
+                .font(.caption2.weight(.medium).monospacedDigit())
+            }
+            .foregroundStyle(.white)
+            .padding(28)
+            .frame(width: 760, alignment: .leading)
+            .arcGlassPanel(cornerRadius: 32)
+        }
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .combine)
     }
 }

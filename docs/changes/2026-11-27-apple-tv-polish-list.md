@@ -106,8 +106,27 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
     redrew the menu with every tick of the clock; the round buttons are now a view of their own.
   - The sidebar has Arc's white logo at the top: the mark while it's shut, the whole logo while
     it's open. Android's sidebar has none; Apple's own apps show theirs there.
+  - **Playback Info** ("stats for nerds"), as Android's, at the owner's request. Turn it on in
+    the player's Playback menu, and a glass panel stays at the top right over the picture, read
+    again every second, until it's turned off there. It shows:
+    - how it's playing (direct, repackaged or converted, mpv or Apple's player) and Arc's reasons;
+    - the video as played (codec, size, frame rate), its dynamic range and whether it decodes in
+      hardware;
+    - the audio track (and what the engine is fed, if Arc converted it) and where the sound goes
+      (Apple's Dolby decoder with Atmos kept, or PCM);
+    - a picture subtitle Arc burns in;
+    - the file's bitrate, the download speed, how much is buffered, waits and dropped frames;
+    - this Apple TV's picture and sound output.
+    mpv reports everything. Apple's player reports its size, frame rate and access log; the
+    codec and range then come from the file. The formatting is in ArcKit (`StatsFormat`) with
+    tests.
 
 ## Decisions
+
+- **Playback Info stays up while watching** rather than as a menu that closes. Android's is a
+  panel that takes the focus and closes with Back. On Apple TV it's more use watching the numbers
+  change while the film plays, so it takes no focus. A tick in the Playback menu turns it on and
+  off. Plex shows its own as a panel in its settings while playing.
 
 - **Down from Play on a show** goes to the season tabs, as Android's, at the owner's request
   (27 November). Plex goes straight to the episodes. Opening an episode from Home still lands on
@@ -120,8 +139,9 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
 
 ## Checks
 
-- `swift test --package-path ArcKit`: 95 tests passed, 1 skipped, 0 failures. They include new
-  tests for Recently Added counts, for an episode opening its show, and Codex's edition test.
+- `swift test --package-path ArcKit`: 97 tests passed, 1 skipped, 0 failures. They include new
+  tests for Recently Added counts, for an episode opening its show, Playback Info's values, and
+  Codex's edition test.
 - `swiftc -parse` passed on every changed screen. Every `L()` key exists; `extra.` is the known
   prefix match. `git diff --check` is clean.
 - The macOS build and simulator walk-through are on this PR's `[build]` run, with screenshots on
@@ -138,5 +158,6 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
 
 ## Logging
 
-A refused PIN logs at debug ("profile PIN refused"), with no PIN or profile in it. There are no
-other new logs: the rest is layout and focus.
+A refused PIN logs at debug ("profile PIN refused"), with no PIN or profile in it. Playback Info
+logs nothing: it reads the engines' state on screen only. There are no other new logs: the rest is
+layout and focus.
