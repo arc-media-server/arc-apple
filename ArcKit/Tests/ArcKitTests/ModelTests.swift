@@ -2,6 +2,18 @@ import XCTest
 @testable import ArcKit
 
 final class ModelTests: XCTestCase {
+    func testMovieEditionCaptionDecodesAndSupportsOlderServers() throws {
+        let json = #"{"id":"m1","kind":"movie","title":"Film","year":2008,"edition":"IMAX"}"#
+        var item = try ArcJSON.decoder.decode(Item.self, from: Data(json.utf8))
+        XCTAssertEqual(item.yearAndEdition, "2008 · IMAX")
+        item.year = nil
+        XCTAssertEqual(item.yearAndEdition, "IMAX")
+
+        let legacy = #"{"id":"m1","kind":"movie","title":"Film","year":2008}"#
+        item = try ArcJSON.decoder.decode(Item.self, from: Data(legacy.utf8))
+        XCTAssertEqual(item.yearAndEdition, "2008")
+    }
+
     func testMissingAndNullFieldsTakeTheirUsualValues() throws {
         let json = #"{"id":"m1","kind":"movie","title":"Heat","genres":null,"new_field":{"x":1},"user_data":{"position_ms":60000},"files":[{"id":3,"duration_ms":600000}]}"#
         let item = try ArcJSON.decoder.decode(Item.self, from: Data(json.utf8))

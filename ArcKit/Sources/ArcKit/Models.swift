@@ -138,6 +138,7 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
     public let kind: String
     public let title: String
     public var year: Int?
+    public var edition: String?
     public var overview: String?
     public var tagline: String?
     /// The title's theme tune (`items/{id}/theme`), for films and shows that have one.
@@ -172,6 +173,12 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
         self.kind = kind
         self.title = title
         self.images = images
+    }
+
+    public var yearAndEdition: String? {
+        var parts = year.map { [String($0)] } ?? []
+        if kind == "movie", let edition, !edition.isEmpty { parts.append(edition) }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     public var isEpisode: Bool { kind == "episode" }

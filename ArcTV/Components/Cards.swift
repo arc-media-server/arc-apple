@@ -145,8 +145,8 @@ struct MediaCardView: View {
         } else if item.isEpisode {
             // Outside the show's order there's no "S0 · E0": the episode's name, on a wide card.
             if style != .poster && card.progress == nil { parts.append(item.title) }
-        } else if let year = item.year {
-            parts.append(String(year))
+        } else if let yearAndEdition = item.yearAndEdition {
+            parts.append(yearAndEdition)
         }
         // Posters say how long: a film's length, or a show's episodes' ("2011 · 25m").
         if style == .poster, !item.isEpisode, let m = item.runtimeMin, m > 0 { parts.append(runtimeText(m)) }
