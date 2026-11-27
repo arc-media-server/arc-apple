@@ -12,37 +12,69 @@ struct SignInView: View {
     @State private var attempt = 0
 
     var body: some View {
-        VStack(spacing: 28) {
-            ArcWordmark()
-            Text(L("signin.title")).font(.title2.weight(.semibold))
-            VStack(alignment: .leading, spacing: 16) {
-                Text(L("signin.step_open"))
-                Text(L("signin.step_link", (app.serverAddress ?? "").replacingOccurrences(of: "http://", with: "").replacingOccurrences(of: "https://", with: "") + "/link"))
-                Text(L("signin.step_code"))
-            }
-            .foregroundStyle(ArcColor.muted)
-            if let code {
-                HStack(spacing: 16) {
-                    ForEach(Array(code.enumerated()), id: \.offset) { _, c in
-                        Text(String(c))
-                            .font(.system(size: 64, weight: .semibold, design: .monospaced))
-                            .frame(width: 96, height: 120)
-                            .arcGlassPanel(cornerRadius: 20)
-                    }
+        // As Android's sign-in screen: the steps on the left, the code large on the right.
+        HStack(alignment: .center, spacing: 128) {
+            VStack(alignment: .leading, spacing: 0) {
+                ArcWordmark()
+                Text(L("signin.title")).font(.title.weight(.semibold)).padding(.top, 40)
+                VStack(alignment: .leading, spacing: 28) {
+                    step(1, L("signin.step_open"))
+                    step(2, L("signin.step_link", address + "/link"))
+                    step(3, L("signin.step_code"))
                 }
-                Text(renewed ? L("signin.expired") : L("signin.waiting")).foregroundStyle(ArcColor.subtle)
-            } else if problem == nil {
-                ProgressView()
+                .padding(.top, 56)
+                if let problem { Text(problem).font(.callout).foregroundStyle(ArcColor.error).padding(.top, 40) }
+                HStack(spacing: 28) {
+                    Button(L("signin.new_code")) { renewed = false; attempt += 1 }.arcGlassButton()
+                    Button(L("signin.change_server")) { app.changeServer() }.arcGlassButton()
+                }
+                .padding(.top, 72)
             }
-            if let problem { Text(problem).foregroundStyle(ArcColor.error) }
-            HStack(spacing: 40) {
-                Button(L("signin.new_code")) { renewed = false; attempt += 1 }.arcGlassButton()
-                Button(L("signin.change_server")) { app.changeServer() }.arcGlassButton()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(spacing: 0) {
+                if let code {
+                    HStack(spacing: 24) {
+                        ForEach(Array(code.enumerated()), id: \.offset) { _, c in
+                            Text(String(c))
+                                .font(.system(size: 112, weight: .semibold))
+                                .frame(width: 168, height: 216)
+                                .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(ArcColor.surface))
+                                .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(ArcColor.surface3, lineWidth: 4))
+                        }
+                    }
+                    HStack(spacing: 20) {
+                        ProgressView()
+                        Text(renewed ? L("signin.expired") : L("signin.waiting")).foregroundStyle(ArcColor.muted)
+                    }
+                    .font(.callout)
+                    .padding(.top, 56)
+                } else if problem == nil {
+                    ProgressView()
+                }
+                Text(L("signin.server", address)).font(.caption).foregroundStyle(ArcColor.subtle).padding(.top, 24)
             }
-            Text(L("signin.server", app.serverAddress ?? "")).font(.caption).foregroundStyle(ArcColor.subtle)
+            .frame(maxWidth: .infinity)
         }
-        .padding(80)
+        .padding(.horizontal, 112)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(AuthGlow())
         .task(id: attempt) { await signIn() }
+    }
+
+    /// The server's address as typed, without http:// or https://.
+    private var address: String {
+        (app.serverAddress ?? "").replacingOccurrences(of: "http://", with: "").replacingOccurrences(of: "https://", with: "")
+    }
+
+    /// A numbered step: its number in a small grey circle, then what to do.
+    private func step(_ number: Int, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 28) {
+            Text(String(number))
+                .font(.callout.weight(.semibold))
+                .frame(width: 56, height: 56)
+                .background(Circle().fill(ArcColor.surface3))
+            Text(text).font(.callout).fixedSize(horizontal: false, vertical: true).padding(.top, 8)
+        }
     }
 
     private func signIn() async {
