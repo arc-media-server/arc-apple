@@ -214,13 +214,15 @@
 "browse.watchlist_empty" = "Your Watchlist is empty. Hold Select on a movie or show and choose Add to Watchlist.";
 "browse.playlists_empty" = "No playlists yet. Make one in Arc in a browser.";
 
-"search.prompt" = "Movies, shows, people and collections";
+"search.prompt" = "Movies, shows, genres and more";
 "search.nothing" = "Nothing matches “%@”.";
 "search.movies" = "Movies";
 "search.shows" = "Shows";
 "search.episodes" = "Episodes";
 "search.collections" = "Collections";
 "search.people" = "People";
+"search.genres" = "Genres";
+"search.genre_unavailable" = "This library is no longer available.";
 
 "settings.playback" = "Playback";
 "settings.auto_play" = "Auto-Play Next Episode";

@@ -175,6 +175,16 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
         self.images = images
     }
 
+    /// An episode's show, as far as the episode knows it (its id, name and the show's artwork):
+    /// what an episode's card opens, so the show's page can show something before it has read
+    /// the show. Nil for anything else, or an episode that doesn't name its show.
+    public var showOfEpisode: Item? {
+        guard isEpisode, let parentId, !parentId.isEmpty else { return nil }
+        let img = images
+        return Item(id: parentId, kind: "series", title: seriesTitle ?? "",
+                    images: Images(primary: img?.seriesPrimary, backdrop: img?.seriesBackdrop, logo: img?.seriesLogo))
+    }
+
     public var yearAndEdition: String? {
         var parts = year.map { [String($0)] } ?? []
         if kind == "movie", let edition, !edition.isEmpty { parts.append(edition) }

@@ -9,7 +9,7 @@ import SwiftUI
 struct WatchTogetherRow: View {
     @Environment(AppModel.self) private var app
     @Environment(Browse.self) private var browse
-    /// The page's focus: the first card takes it when Home opens.
+    /// The page's focus (Home's rows).
     var focus: FocusState<String?>.Binding
 
     var body: some View {
@@ -18,9 +18,9 @@ struct WatchTogetherRow: View {
             Text(L("together.title")).font(.title3.weight(.semibold)).padding(.horizontal, 80)
             ScrollView(.horizontal) {
                 LazyHStack(alignment: .top, spacing: 36) {
-                    ForEach(Array(together.rooms.enumerated()), id: \.element.id) { index, room in
+                    ForEach(together.rooms, id: \.id) { room in
                         RoomCard(room: room, item: together.titles[room.item.id], focus: focus,
-                                 focusKey: index == 0 ? HeroRowsTopFocus : "top|" + room.id)
+                                 focusKey: "top|" + room.id)
                     }
                     JoinCodeCard { together.enteringCode = true }
                 }
