@@ -55,7 +55,7 @@ jobs:
             -destination 'generic/platform=tvOS Simulator' -derivedDataPath "$BUILD_DIR" \
             ARCHS=arm64 CODE_SIGNING_ALLOWED=NO -quiet build
           APP="$BUILD_DIR/Build/Products/Debug-appletvsimulator/Arc.app"
-          xcrun lipo -verify_arch arm64 "$APP/Arc"
+          xcrun lipo "$APP/Arc" -verify_arch arm64
           ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/Arc-tvos-simulator.zip"
       - uses: actions/upload-artifact@v4
         with:
