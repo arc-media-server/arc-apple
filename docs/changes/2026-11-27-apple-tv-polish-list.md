@@ -64,6 +64,11 @@ The owner's list after trying the Apple TV app, with arc-android as the referenc
   prefix match. `git diff --check` is clean.
 - The macOS build and simulator walk-through are on this PR's `[build]` run, with screenshots on
   the `ci-screenshots` branch.
+- The first walk-through caught a bug in the new Home scrolling. With the Watch Together row on
+  top, entering the first row of titles sent the page back to the top, which left the focused card
+  below the screen. It's fixed: only the topmost row brings the hero back.
+- The stand-in server has no profile with a PIN, so the walk-through doesn't reach the new PIN
+  screen. It was checked by reading the code only.
 - Nothing was tried on a real Apple TV.
 
 ## Logging
