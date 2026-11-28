@@ -9,9 +9,10 @@ struct HeroRows<Header: View>: View {
     @Environment(\.openRoute) private var openRoute
     let rows: [LoadedRow]
     var showsHero = true
-    /// A row of its own above the titles' rows (Home's Watch Together row). It gets the page's
-    /// focus binding and should mark its first card with `HeroRowsTopFocus`, which takes the focus
-    /// when the page opens.
+    /// A row of its own among the titles' rows (Home's Watch Together row), under Continue
+    /// Watching, or under the first row when there's none. The first titles' row keeps the top and
+    /// the focus, so the hero describes them (owner, 27 November). It gets the page's focus binding;
+    /// its cards' focus keys start with "top|".
     var top: ((FocusState<String?>.Binding) -> AnyView)? = nil
     @ViewBuilder var header: () -> Header
     /// The title the hero shows: the focused card, or the one last focused.
@@ -35,13 +36,6 @@ struct HeroRows<Header: View>: View {
                         // separation as Browse, where a focused card can grow beneath them.
                         header().padding(.bottom, Self.foot)
                     }
-                    if let top {
-                        // Its foot, as the rows' below, is where it lands.
-                        VStack(alignment: .leading, spacing: 0) {
-                            top($focused)
-                            Color.clear.frame(height: Self.foot).id("top")
-                        }
-                    }
                     ForEach(rows) { row in
                         VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 16) {
@@ -59,6 +53,13 @@ struct HeroRows<Header: View>: View {
                             .scrollClipDisabled()
                         }
                             Color.clear.frame(height: Self.foot).id(row.id)
+                        }
+                        if let top, row.id == topAfter {
+                            // Its foot, as the rows' above, is where it lands.
+                            VStack(alignment: .leading, spacing: 0) {
+                                top($focused)
+                                Color.clear.frame(height: Self.foot).id("top")
+                            }
                         }
                     }
                 }
@@ -97,12 +98,13 @@ struct HeroRows<Header: View>: View {
     /// What stays under the focused row at the foot of the screen.
     static var foot: CGFloat { 36 }
 
+    /// The row the `top` row sits under: Continue Watching, or else the first row.
+    private var topAfter: String? { (rows.first(where: \.continueRow) ?? rows.first)?.id }
+
     private func focusFirst() {
         guard focused == nil, let row = rows.first, let card = row.cards.first else { return }
         if showsHero && hero == nil { hero = card }
-        // A top row starts with the focus: the first titles' row may be below the screen, not
-        // yet built, and focusing it then leaves the focus to tvOS (which picks the sidebar).
-        let key = top == nil ? row.id + "|" + card.id : HeroRowsTopFocus
+        let key = row.id + "|" + card.id
         Task { @MainActor in focused = key }
     }
 
@@ -191,6 +193,3 @@ extension HeroRows where Header == EmptyView {
         self.init(rows: rows, top: top) { EmptyView() }
     }
 }
-
-/// The focus key of a top row's first card (see `HeroRows.top`).
-let HeroRowsTopFocus = "top|first"

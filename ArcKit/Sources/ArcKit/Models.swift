@@ -89,6 +89,7 @@ public struct MediaFile: Codable, Sendable, Hashable, Identifiable {
     public let id: Int64
     @Default<Defaults.Zero64> public var durationMs: Int64
     @Default<Defaults.False> public var missing: Bool
+    @Default<Defaults.Zero> public var part: Int
     public var edition: String?
     public var container: String?
     public var size: Int64?
@@ -173,6 +174,16 @@ public struct Item: Codable, Sendable, Hashable, Identifiable {
         self.kind = kind
         self.title = title
         self.images = images
+    }
+
+    /// An episode's show, as far as the episode knows it (its id, name and the show's artwork):
+    /// what an episode's card opens, so the show's page can show something before it has read
+    /// the show. Nil for anything else, or an episode that doesn't name its show.
+    public var showOfEpisode: Item? {
+        guard isEpisode, let parentId, !parentId.isEmpty else { return nil }
+        let img = images
+        return Item(id: parentId, kind: "series", title: seriesTitle ?? "",
+                    images: Images(primary: img?.seriesPrimary, backdrop: img?.seriesBackdrop, logo: img?.seriesLogo))
     }
 
     public var yearAndEdition: String? {
@@ -300,6 +311,7 @@ public struct Prefs: Codable, Sendable {
     @Default<Defaults.True> public var themeMusic: Bool
     /// Hide Spoilers: unwatched episodes' stills and descriptions stay back.
     @Default<Defaults.False> public var hideSpoilers: Bool
+    @Default<Defaults.False> public var showMissingEpisodes: Bool
     public var subtitleStyle: SubtitleStyle?
 
     public init(home: [HomeRowPref] = [], splitUpNext: Bool = false, libraryOrder: [Int64] = [], watchlistPosition: Int = 0) {

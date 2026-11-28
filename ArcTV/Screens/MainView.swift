@@ -1,12 +1,13 @@
 import ArcKit
 import SwiftUI
 
-/// A page the app can open from anywhere: a title, a collection, a playlist, a person or a folder.
+/// A page the app can open from anywhere.
 enum Route: Hashable {
     case item(Item)
     case collection(id: String, title: String)
     case playlist(id: String, title: String)
     case person(id: Int64, name: String)
+    case genre(GenreMatch)
     case folder(library: Library, path: String, name: String)
 }
 
@@ -149,10 +150,17 @@ struct RouteView: View {
 
     var body: some View {
         switch route {
-        case .item(let item): DetailsView(itemId: item.id, initial: item)
+        // An episode opens its show's page on that episode, as Plex and Arc's other apps do.
+        case .item(let item):
+            if let show = item.showOfEpisode {
+                DetailsView(itemId: show.id, initial: show, episodeId: item.id)
+            } else {
+                DetailsView(itemId: item.id, initial: item)
+            }
         case .collection(let id, let title): CollectionView(id: id, title: title)
         case .playlist(let id, let title): PlaylistView(id: id, title: title)
         case .person(let id, let name): PersonView(id: id, name: name)
+        case .genre(let match): GenreLibraryView(match: match)
         case .folder(let library, let path, let name): FolderView(library: library, path: path, name: name)
         }
     }
@@ -432,13 +440,16 @@ struct MainView: View {
 
     private func loadTabs() async {
         guard let api = app.api else { return }
+        let profileId = app.profile?.id
         do {
             async let prefsAnswer = api.prefs()
             async let librariesAnswer = api.libraries()
             let (prefs, all) = try await (prefsAnswer, librariesAnswer)
+            guard !Task.isCancelled, app.api === api, app.profile?.id == profileId else { return }
             libraries = orderedLibraries(all, order: prefs.libraryOrder)
             watchlistAt = prefs.watchlistPosition
             app.hideSpoilers = prefs.hideSpoilers
+            app.showMissingEpisodes = prefs.showMissingEpisodes
         } catch let error as APIError where error.status == 401 {
             app.tokenRefused()
         } catch is CancellationError {

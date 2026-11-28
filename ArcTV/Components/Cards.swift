@@ -303,6 +303,8 @@ struct TitleActions: View {
     @Environment(\.openRoute) private var openRoute
     let item: Item
     var onPage = false
+    /// The episode the series page's Play button would start.
+    var versionItem: Item?
     /// Opened from a card in Continue Watching or Up Next.
     var continueRow = false
     /// Opened from this entry's card in Home's Queue row.
@@ -358,9 +360,11 @@ struct TitleActions: View {
         }
         // A card's menu lists them all; the page keeps them in its ⋯ menu, as Plex's and Android's.
         if !onPage {
+            PlayVersionMenu(item: item, queueEntry: queueEntry)
             queueAndPlaylist
         } else if queueable {
             Menu {
+                PlayVersionMenu(item: versionItem ?? item)
                 queueAndPlaylist
                 // The profile's own stars, on the title's page (as the web's StarRating).
                 rate
@@ -467,5 +471,44 @@ extension Item {
     func overview(hidingSpoilers hide: Bool) -> String? {
         if spoilerHidden(hide) { return L("spoiler.hidden_description") }
         return overview.flatMap { $0.isEmpty ? nil : $0 }
+    }
+}
+
+/// Play one of several on-disk versions from the title's current resume point.
+struct PlayVersionMenu: View {
+    @Environment(Browse.self) private var browse
+    let item: Item
+    var queueEntry: String?
+
+    var body: some View {
+        if item.playable && item.available {
+            let files = item.files.filter { !$0.missing && $0.part <= 1 }
+            if files.count > 1 {
+                let labels = Dictionary(grouping: files, by: versionLabel)
+                Menu {
+                    ForEach(files) { file in
+                        let label = versionLabel(file)
+                        let title = label.isEmpty || (labels[label]?.count ?? 0) > 1 ? fileLabel(file, version: label) : label
+                        Button(title) {
+                            browse.play(PlayRequest(item: item, startMs: item.resumeMs, queueEntry: queueEntry, fileId: file.id))
+                        }
+                    }
+                } label: {
+                    Label(L("details.play_version"), systemImage: "film")
+                }
+            }
+        }
+    }
+
+    private func versionLabel(_ file: MediaFile) -> String {
+        let video = file.streams.first { $0.kind == "video" }
+        return Version(fileId: file.id, edition: file.edition, width: video?.width, height: video?.height,
+                       videoCodec: video?.codec, hdr: video.flatMap { Quality.hdr($0) }, size: file.size ?? 0).label
+    }
+
+    private func fileLabel(_ file: MediaFile, version: String) -> String {
+        let filename = file.path?.split(whereSeparator: { $0 == "/" || $0 == "\\" }).last.map(String.init)
+        let name = filename ?? L("details.file_number", String(file.id))
+        return version.isEmpty ? name : "\(version) · \(name)"
     }
 }

@@ -71,6 +71,7 @@
 "home.more_info" = "More Info";
 
 "details.play" = "Play";
+"details.play_version" = "Play Version…";
 "details.resume" = "Resume";
 "details.from_beginning" = "Play from Beginning";
 "details.play_episode" = "Play %@";
@@ -99,8 +100,6 @@
 "actions.remove_from_continue" = "Remove from Continue Watching";
 "actions.season_watched" = "Mark Season as Watched";
 "actions.season_unwatched" = "Mark Season as Unwatched";
-"actions.show_missing" = "Show Missing Episodes";
-"actions.hide_missing" = "Hide Missing Episodes";
 "actions.add_to_playlist" = "Add to Playlist…";
 "actions.rate" = "Rate…";
 "actions.more" = "More";
@@ -216,19 +215,22 @@
 "browse.watchlist_empty" = "Your Watchlist is empty. Hold Select on a movie or show and choose Add to Watchlist.";
 "browse.playlists_empty" = "No playlists yet. Make one in Arc in a browser.";
 
-"search.prompt" = "Movies, shows, people and collections";
+"search.prompt" = "Movies, shows, genres and more";
 "search.nothing" = "Nothing matches “%@”.";
 "search.movies" = "Movies";
 "search.shows" = "Shows";
 "search.episodes" = "Episodes";
 "search.collections" = "Collections";
 "search.people" = "People";
+"search.genres" = "Genres";
+"search.genre_unavailable" = "This library is no longer available.";
 
 "settings.playback" = "Playback";
 "settings.auto_play" = "Auto-Play Next Episode";
 "settings.auto_skip" = "Skip Intros Automatically";
 "settings.theme_music" = "Theme Music";
 "settings.hide_spoilers" = "Hide Spoilers";
+"settings.show_missing_episodes" = "Show Missing Episodes";
 "spoiler.hidden_description" = "Description hidden until you watch it.";
 "settings.subtitles" = "Subtitles";
 "settings.subtitles_last" = "In the language I last chose";
@@ -351,6 +353,7 @@
 "details.bitrate" = "Bitrate";
 "details.mbps" = "%.1f Mbps";
 "details.file" = "File";
+"details.file_number" = "File %@";
 "details.releases" = "Releases %@";
 "details.server" = "Server";
 "details.profile" = "Profile";
