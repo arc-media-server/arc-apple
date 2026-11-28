@@ -138,7 +138,10 @@ targets:
       - path: ArcTV/Player/NowPlaying.swift
       - path: ArcTV/Player/PlayerModel.swift
       - path: ArcTV/Together/WatchTogetherModel.swift
-      - path: ArcTV/Resources/en.lproj
+      # The TV's strings (en.lproj, so iOS finds them as a localisation), not its asset catalogue.
+      - path: ArcTV/Resources
+        excludes:
+          - Assets.xcassets
     dependencies:
       - package: ArcKit
       - package: MPVKit

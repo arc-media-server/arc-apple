@@ -40,6 +40,7 @@ jobs:
       - name: Generate the Xcode project
         run: xcodegen generate
       - name: Build the Apple TV app
+        id: tvbuild
         run: |
           set -o pipefail
           xcodebuild -project Arc.xcodeproj -scheme ArcTV -configuration Debug \
@@ -63,6 +64,7 @@ jobs:
           path: ${{ runner.temp }}/Arc-tvos-simulator.zip
           if-no-files-found: error
       - name: Start the stand-in Arc
+        if: ${{ !cancelled() }}
         env:
           # Optional: real posters, backgrounds, logos and cast photos from TMDB for the screenshots.
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
@@ -71,6 +73,7 @@ jobs:
           sleep 2
           curl -fsS http://127.0.0.1:8080/api/v1/health
       - name: Walk the app in the simulator
+        if: ${{ !cancelled() && steps.tvbuild.outcome == 'success' }}
         run: |
           set -o pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c '

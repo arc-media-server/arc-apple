@@ -303,7 +303,7 @@ struct PlayerOSD: View {
         if minutes > 0 {
             parts.append(minutes >= 60 ? L("details.runtime", minutes / 60, minutes % 60) : L("card.minutes_short", minutes))
         }
-        if let date = item.releaseDate.flatMap(PlayerOSD.day) {
+        if let date = item.releaseDate.flatMap(PlayerText.day) {
             parts.append(date)
         } else if let year = item.year {
             parts.append(String(year))
