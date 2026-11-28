@@ -114,17 +114,6 @@ final class MobileWalkThrough: XCTestCase {
             }
         }
 
-        // Search.
-        tap(app.tabBars.buttons.element(boundBy: 2))
-        pause(2)
-        let field = app.searchFields.firstMatch
-        if field.waitForExistence(timeout: 3) {
-            press(field)
-            field.typeText("the")
-            pause(4)
-            shot("m15-search")
-        }
-
         // Settings, from the profile picture in the bar.
         tap(app.tabBars.buttons.element(boundBy: 0))
         pause(2)
@@ -142,6 +131,19 @@ final class MobileWalkThrough: XCTestCase {
         pause(2)
         shot("m17-home-landscape")
         XCUIDevice.shared.orientation = .portrait
+        pause(2)
+
+        // Search, last: its field takes the tab bar's place.
+        tap(app.tabBars.buttons.element(boundBy: 2))
+        pause(2)
+        let field = app.searchFields.firstMatch
+        if field.waitForExistence(timeout: 3) {
+            press(field)
+            field.typeText("dune")
+            pause(4)
+            shot("m15-search")
+        }
+
     }
 
     /// Closes an open menu with a tap on the dimmed screen beside it (the menus open on the left,
