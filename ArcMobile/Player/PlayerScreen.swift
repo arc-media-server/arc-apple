@@ -239,7 +239,7 @@ struct MobilePlayerScreen: View {
         let duration = Double(max(model.durationMs, 1))
         let at = scrubMs ?? Double(model.positionMs)
         return VStack(spacing: 4) {
-            Slider(value: Binding(get: { min(at, duration) }, set: { scrubMs = $0 }), in: 0...duration) { editing in
+            Slider(value: Binding(get: { min(at, duration) }, set: { scrubMs = $0 }), in: 0...duration, onEditingChanged: { editing in
                 if editing {
                     hideTask?.cancel()
                 } else if let to = scrubMs {
@@ -247,7 +247,7 @@ struct MobilePlayerScreen: View {
                     scrubMs = nil
                     showControls()
                 }
-            }
+            })
             .disabled(model.loading || model.durationMs <= 0)
             .accessibilityIdentifier("player.timeline")
             HStack {
