@@ -47,37 +47,44 @@ final class MobileWalkThrough: XCTestCase {
             pause(1)
         }
 
-        // A show's or film's page from the second row.
-        let second = app.scrollViews.buttons.element(boundBy: 4)
-        if second.exists {
-            tap(second)
+        // A show's page from the Watchlist row: its seasons and episodes, then its cast.
+        let show = app.buttons["The Last of Us"].firstMatch
+        if show.waitForExistence(timeout: 4) {
+            show.tap()
             pause(4)
-            shot("m07-title-page")
+            shot("m07-show-page")
             app.swipeUp()
             pause(2)
-            shot("m08-title-page-scrolled")
+            shot("m08-show-episodes")
             app.swipeUp()
             pause(2)
-            shot("m09-title-page-foot")
-            app.swipeDown()
-            app.swipeDown()
-            pause(1)
-            // Play it: the player turns the iPhone sideways.
+            shot("m09-show-foot")
+            back(app)
+        }
+
+        // A film's page, then play it: the player turns the iPhone sideways. The stand-in's clip is
+        // short, so the player may close by itself at its end.
+        let film = app.buttons["Interstellar"].firstMatch
+        if film.waitForExistence(timeout: 4) {
+            film.tap()
+            pause(4)
+            shot("m10-film-page")
             let play = app.buttons["details.play"]
             if play.waitForExistence(timeout: 3) {
-                tap(play)
-                pause(6)
-                shot("m10-player")
+                play.tap()
+                pause(3)
+                shot("m11-player")
                 app.tap()
                 pause(1)
-                shot("m11-player-controls")
+                shot("m11a-player-controls")
                 let close = app.buttons["player.close"]
-                if !close.isHittable { app.tap(); pause(1) }
-                tap(close)
-                pause(2)
+                if close.exists && !close.isHittable { app.tap(); pause(1) }
+                if close.exists && close.isHittable { close.tap() }
+                pause(3)
+                XCUIDevice.shared.orientation = .portrait
+                pause(1)
             }
-            app.navigationBars.buttons.element(boundBy: 0).tap()
-            pause(2)
+            back(app)
         }
 
         // Libraries, then the first library's grid and its Sort menu.
@@ -127,6 +134,13 @@ final class MobileWalkThrough: XCTestCase {
         pause(2)
         shot("m17-home-landscape")
         XCUIDevice.shared.orientation = .portrait
+    }
+
+    /// The bar's back button, as a swipe from the edge would.
+    private func back(_ app: XCUIApplication) {
+        let button = app.navigationBars.buttons.element(boundBy: 0)
+        if button.exists && button.isHittable { button.tap() }
+        pause(2)
     }
 
     private func tap(_ element: XCUIElement) {
