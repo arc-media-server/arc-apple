@@ -64,6 +64,14 @@ catalogue with the Apple TV app; only the screens are its own.
 - **Settings code is a second copy** of the TV's preference saving, for now: SettingsView is
   changed by an open PR (#36), so sharing it waits until that's merged.
 
+## Trying it in a browser simulator
+
+The Build workflow now also attaches **arc-ios-simulator**: the iPhone and iPad app built for the
+iOS simulator (unsigned, arm64), packaged like the Apple TV's `arc-tvos-simulator`. Unzip the
+GitHub download once and upload the inner `Arc-ios-simulator.zip` to VibeView, choosing an
+iPhone or iPad. The owner found that only the tvOS build was offered at first, because the workflow
+packaged only the Apple TV app.
+
 ## Checks
 
 - `swift test --package-path ArcKit`: 97 tests, 1 skipped (the live server test), 0 failures.

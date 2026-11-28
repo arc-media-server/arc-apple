@@ -152,6 +152,11 @@ walks the Apple TV app in the tvOS simulator with the remote's buttons
 recorded from Arc's shared screenshot library. Every screen's screenshot is attached to the run and copied as small JPEGs to
 the `ci-screenshots` branch (`runs/<run id>/`).
 
+Each run also attaches two simulator builds to try in a browser-hosted simulator such as
+VibeView: **arc-tvos-simulator** (Apple TV) and **arc-ios-simulator** (iPhone and iPad). Unzip
+the download once and upload the `Arc-…-simulator.zip` inside it. Both are unsigned arm64 builds for the
+simulator only; they won't install on a real device.
+
 The pictures in this README come from that walk-through: simulator captures, not a real Apple TV.
 The player isn't pictured, because the stand-in plays a test clip rather than a film.
 

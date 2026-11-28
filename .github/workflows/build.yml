@@ -94,6 +94,25 @@ jobs:
           xcodebuild -project Arc.xcodeproj -scheme ArcMobile -configuration Debug \
             -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO -quiet build
           du -sh ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-iphoneos/Arc.app | sed 's/^/iOS: /' | tee -a app-size.txt
+      # The same app built for the iOS simulator, to try in a browser-hosted simulator such as
+      # VibeView (as arc-tvos-simulator is for the Apple TV's).
+      - name: Package the iPhone and iPad simulator app
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          BUILD_DIR="$RUNNER_TEMP/arc-ios-simulator"
+          xcodebuild -project Arc.xcodeproj -scheme ArcMobile -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath "$BUILD_DIR" \
+            ARCHS=arm64 CODE_SIGNING_ALLOWED=NO -quiet build
+          APP="$BUILD_DIR/Build/Products/Debug-iphonesimulator/Arc.app"
+          xcrun lipo "$APP/Arc" -verify_arch arm64
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/Arc-ios-simulator.zip"
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: arc-ios-simulator
+          path: ${{ runner.temp }}/Arc-ios-simulator.zip
+          if-no-files-found: error
       - name: Walk the iPhone app in the simulator
         if: ${{ !cancelled() }}
         run: |
