@@ -72,6 +72,12 @@ GitHub download once and upload the inner `Arc-ios-simulator.zip` to VibeView, c
 iPhone or iPad. The owner found that only the tvOS build was offered at first, because the workflow
 packaged only the Apple TV app.
 
+At the owner's suggestion the workflow now attaches both simulator builds before either
+walk-through starts, so a walk that fails or hangs can't hold them back, and it can run as
+builds only: untick "Walk the apps in the simulator" in Run workflow, or put `[apps]` in a
+commit message (`[build]` still builds and walks). A builds-only run skips the stand-in Arc,
+both walks and the screenshots.
+
 ## Checks
 
 - `swift test --package-path ArcKit`: 97 tests, 1 skipped (the live server test), 0 failures.

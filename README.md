@@ -153,9 +153,14 @@ recorded from Arc's shared screenshot library. Every screen's screenshot is atta
 the `ci-screenshots` branch (`runs/<run id>/`).
 
 Each run also attaches two simulator builds to try in a browser-hosted simulator such as
-VibeView: **arc-tvos-simulator** (Apple TV) and **arc-ios-simulator** (iPhone and iPad). Unzip
-the download once and upload the `Arc-…-simulator.zip` inside it. Both are unsigned arm64 builds for the
-simulator only; they won't install on a real device.
+VibeView: **arc-tvos-simulator** (Apple TV) and **arc-ios-simulator** (iPhone and iPad). They're
+attached before the walk-throughs start, so they're there even when a walk fails. Unzip the
+download once and upload the `Arc-…-simulator.zip` inside it. Both are unsigned arm64 builds for
+the simulator only; they won't install on a real device.
+
+For just those builds, without the walk-throughs and screenshots (much quicker), untick **Walk
+the apps in the simulator** when running the workflow, or put `[apps]` instead of `[build]` in a
+commit message.
 
 The pictures in this README come from that walk-through: simulator captures, not a real Apple TV.
 The player isn't pictured, because the stand-in plays a test clip rather than a film.
