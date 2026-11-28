@@ -1,3 +1,6 @@
+import ArcKit
+import SwiftUI
+
 /// After the profile is chosen: iOS's tab bar (Home, Libraries, Watchlist, Search), which on iPad
 /// becomes a sidebar, as Apple's TV app. On iPhone, Libraries opens a menu of the profile's
 /// libraries from its button, and the tab shows the one chosen; on iPad the sidebar lists them.
