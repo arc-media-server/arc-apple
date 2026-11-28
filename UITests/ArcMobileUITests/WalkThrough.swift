@@ -51,7 +51,7 @@ final class MobileWalkThrough: XCTestCase {
         // A show's page from the Watchlist row: its seasons and episodes, then its cast.
         let show = app.buttons["The Last of Us"].firstMatch
         if show.waitForExistence(timeout: 4) {
-            show.tap()
+            press(show)
             pause(4)
             shot("m07-show-page")
             app.swipeUp()
@@ -67,12 +67,12 @@ final class MobileWalkThrough: XCTestCase {
         // short, so the player may close by itself at its end.
         let film = app.buttons["Interstellar"].firstMatch
         if film.waitForExistence(timeout: 4) {
-            film.tap()
+            press(film)
             pause(4)
             shot("m10-film-page")
             let play = app.buttons["details.play"]
             if play.waitForExistence(timeout: 3) {
-                play.tap()
+                press(play)
                 pause(3)
                 shot("m11-player")
                 app.tap()
@@ -112,7 +112,7 @@ final class MobileWalkThrough: XCTestCase {
         pause(2)
         let field = app.searchFields.firstMatch
         if field.waitForExistence(timeout: 3) {
-            field.tap()
+            press(field)
             field.typeText("the")
             pause(4)
             shot("m15-search")
@@ -145,7 +145,13 @@ final class MobileWalkThrough: XCTestCase {
     }
 
     private func tap(_ element: XCUIElement) {
-        if element.waitForExistence(timeout: 4) { element.tap() }
+        if element.waitForExistence(timeout: 4) { press(element) }
+    }
+
+    /// Taps where the element is on screen. iOS can call a card with a touch-and-hold menu not
+    /// hittable, which would end the walk; a tap at its place works as a finger's does.
+    private func press(_ element: XCUIElement) {
+        element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
     }
 
     private func pause(_ seconds: Double) {
