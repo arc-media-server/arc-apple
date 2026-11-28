@@ -1,7 +1,7 @@
 import ArcKit
 import SwiftUI
 
-/// A library: its Recommended rows under a hero (first, as Plex opens a library), all its
+/// A library: its Recommended rows, all its
 /// titles as a poster grid with the web's sorts and filters (genre, decade, resolution,
 /// unwatched), its collections, or (Other videos, which have no Recommended) its folders.
 struct LibraryView: View {
@@ -51,7 +51,7 @@ struct LibraryView: View {
         .task { await loadFacets() }
     }
 
-    /// Recommended: the hero and rows, as Home, with the pill bar above.
+    /// Recommended: rows with the library tabs above.
     @ViewBuilder private var recommendedPage: some View {
         if loading {
             VStack(alignment: .leading) { header; Spacer() }.padding(.horizontal, 80).padding(.vertical, Self.headerTop)
@@ -69,8 +69,8 @@ struct LibraryView: View {
             }
             .padding(.horizontal, 80).padding(.vertical, Self.headerTop)
         } else {
-            HeroRows(rows: recommended, headerHeight: 90 + Self.heroHeaderNudge) {
-                header.padding(.horizontal, 80).padding(.top, Self.headerTop + Self.heroHeaderNudge)
+            HeroRows(rows: recommended, showsHero: false) {
+                header.padding(.horizontal, 80).padding(.top, Self.headerTop)
             }
         }
     }
@@ -94,10 +94,6 @@ struct LibraryView: View {
     /// The pill bar's distance from the top: close, so two rows of posters fit under it with
     /// their names and years (owner, 27 November).
     static let headerTop: CGFloat = 0
-    /// Over Recommended's hero (which reaches up under tvOS's top margin) the same bar sat 15
-    /// points higher than over Browse's grid: measured from the simulator's screenshots, so the
-    /// tabs don't jump as you move between them (owner, 27 November).
-    static let heroHeaderNudge: CGFloat = 15
 
     private var showsLetterBar: Bool {
         show == .titles && !loading && problem == nil && query.showsLetters && letters.count > 1
