@@ -77,10 +77,15 @@ final class MobileWalkThrough: XCTestCase {
                 app.tap()
                 pause(1)
                 shot("m11a-player-controls")
+                // The stand-in's clip is a few seconds long: a film closes the player at its end.
+                pause(14)
                 let close = app.buttons["player.close"]
-                if close.exists && !close.isHittable { app.tap(); pause(1) }
-                if close.exists && close.isHittable { close.tap() }
-                pause(3)
+                if close.exists {
+                    app.tap()
+                    pause(1)
+                    if close.exists { press(close) }
+                }
+                pause(2)
                 XCUIDevice.shared.orientation = .portrait
                 pause(1)
             }
