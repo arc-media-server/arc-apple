@@ -82,7 +82,7 @@ extension View {
     /// and black; the logo is white too).
     @ViewBuilder func arcGlassButton(prominent: Bool = false) -> some View {
         #if compiler(>=6.2) // Xcode 26: the tvOS 26 SDK has the glass styles
-        if #available(tvOS 26.0, *) {
+        if #available(tvOS 26.0, iOS 26.0, *) {
             if prominent {
                 buttonStyle(.glassProminent).tint(.white).foregroundStyle(.black)
             } else {
@@ -107,7 +107,7 @@ extension View {
     /// A floating glass panel (the player's controls, Up Next, the options).
     @ViewBuilder func arcGlassPanel(cornerRadius: CGFloat = 32) -> some View {
         #if compiler(>=6.2)
-        if #available(tvOS 26.0, *) {
+        if #available(tvOS 26.0, iOS 26.0, *) {
             glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
         } else {
             background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius))
@@ -129,7 +129,7 @@ struct GlassFill<S: Shape>: View {
 
     var body: some View {
         #if compiler(>=6.2)
-        if #available(tvOS 26.0, *) {
+        if #available(tvOS 26.0, iOS 26.0, *) {
             Color.clear.glassEffect(.regular, in: shape)
         } else {
             shape.fill(.ultraThinMaterial)

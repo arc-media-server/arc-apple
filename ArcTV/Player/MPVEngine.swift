@@ -114,10 +114,9 @@ final class MPVEngine: PlaybackEngine {
 
     /// Asks the TV for the stream's mode, waits while it switches (up to 6 s), then plays.
     private func startAfterModeSwitch() {
-        let criteria = hint?.criteria
-        if let criteria { DisplayMode.request(criteria, near: surface) }
+        let asked = hint != nil && DisplayMode.request(hint, near: surface)
         modeTask = Task { [weak self] in
-            if criteria != nil {
+            if asked {
                 // The switch starts a moment after the request; then wait for it to finish.
                 try? await Task.sleep(for: .milliseconds(300))
                 var waited = 0

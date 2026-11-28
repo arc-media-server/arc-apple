@@ -63,6 +63,10 @@ struct TitleLogo: View {
     @Environment(AppModel.self) private var app
     let path: String?
     let title: String
+    /// The logo's room, and the name's size without one (the TV's sizes unless given).
+    var maxWidth: CGFloat = 640
+    var maxHeight: CGFloat = 200
+    var fontSize: CGFloat = 64
     @State private var image: UIImage?
     @State private var failed = false
 
@@ -70,12 +74,12 @@ struct TitleLogo: View {
         ZStack(alignment: .leading) {
             if let image {
                 Image(uiImage: image).resizable().aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 640, maxHeight: 200, alignment: .leading)
+                    .frame(maxWidth: maxWidth, maxHeight: maxHeight, alignment: .leading)
             } else if failed || path == nil {
-                Text(title).font(.system(size: 64, weight: .bold))
+                Text(title).font(.system(size: fontSize, weight: .bold))
             } else {
                 // Loading: keep the logo's room so the page doesn't jump when it arrives.
-                Color.clear.frame(width: 640, height: 200)
+                Color.clear.frame(width: maxWidth, height: maxHeight)
             }
         }
         .task(id: path) {

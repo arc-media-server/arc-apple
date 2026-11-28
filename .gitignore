@@ -13,3 +13,5 @@ ArcTV/Info.plist
 ArcTopShelf/Info.plist
 ArcTV/ArcTV.entitlements
 ArcTopShelf/ArcTopShelf.entitlements
+ArcMobile/Info.plist
+ArcMobile/ArcMobile.entitlements

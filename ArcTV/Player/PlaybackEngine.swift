@@ -85,6 +85,7 @@ struct DisplayHint: Equatable {
         height = Int32(video.height ?? 2160)
     }
 
+    #if os(tvOS)
     /// The criteria the TV switches to: a format description with the range's colour tags (Dolby
     /// Vision as dvh1) and the frame rate. Nil when there's nothing to match.
     var criteria: AVDisplayCriteria? {
@@ -115,12 +116,29 @@ struct DisplayHint: Equatable {
         guard let description else { return nil }
         return AVDisplayCriteria(refreshRate: Float(frameRate ?? 0), formatDescription: description)
     }
+    #endif
 }
 
-/// Match Content: asks the TV for a picture mode (nil goes back to the usual one).
+/// Match Content: asks the TV for a picture mode (nil goes back to the usual one). iPhone and
+/// iPad have no display modes to switch, so there it does nothing.
 enum DisplayMode {
+    /// Asks for the hint's mode; true when a mode was asked for (so it's worth waiting for).
     @MainActor
-    static func request(_ criteria: AVDisplayCriteria?, near view: UIView) {
+    @discardableResult
+    static func request(_ hint: DisplayHint?, near view: UIView) -> Bool {
+        #if os(tvOS)
+        let criteria = hint?.criteria
+        if hint != nil && criteria == nil { return false }
+        apply(criteria, near: view)
+        return criteria != nil
+        #else
+        return false
+        #endif
+    }
+
+    #if os(tvOS)
+    @MainActor
+    static func apply(_ criteria: AVDisplayCriteria?, near view: UIView) {
         // Windows without a display manager (the simulator's) don't answer avDisplayManager at
         // all, and asking stops the app: check first, and play without Match Content there.
         let selector = NSSelectorFromString("avDisplayManager")
@@ -128,13 +146,18 @@ enum DisplayMode {
         guard let manager = window?.avDisplayManager, manager.isDisplayCriteriaMatchingEnabled else { return }
         manager.preferredDisplayCriteria = criteria
     }
+    #endif
 
     /// Whether the TV is still switching mode (the picture would be lost if it started now).
     @MainActor
     static func switching(near view: UIView) -> Bool {
+        #if os(tvOS)
         let selector = NSSelectorFromString("avDisplayManager")
         let window = [view.window, keyWindow].compactMap { $0 }.first { $0.responds(to: selector) }
         return window?.avDisplayManager.isDisplayModeSwitchInProgress ?? false
+        #else
+        return false
+        #endif
     }
 
     @MainActor

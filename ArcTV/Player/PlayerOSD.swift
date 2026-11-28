@@ -168,13 +168,13 @@ struct PlayerOSD: View {
                     .position(x: x, y: 11)
                 // The time played, under the marker, and the time left at the end.
                 HStack(spacing: 10) {
-                    Text(PlayerOSD.time(shownMs)).monospacedDigit()
+                    Text(PlayerText.time(shownMs)).monospacedDigit()
                     Image(systemName: model.playing ? "pause.circle.fill" : "play.circle.fill")
                 }
                 .font(.callout.weight(.semibold))
                 .fixedSize()
                 .position(x: min(max(x, 60), width - 260), y: 48)
-                Text("-" + PlayerOSD.time(max(0, model.durationMs - shownMs)))
+                Text("-" + PlayerText.time(max(0, model.durationMs - shownMs)))
                     .font(.callout.weight(.semibold)).monospacedDigit()
                     .frame(width: width, alignment: .trailing)
                     .position(x: width / 2, y: 48)
@@ -321,7 +321,7 @@ struct PlayerOSD: View {
                             Text((c.title?.isEmpty == false ? c.title : nil) ?? L("player.chapter", i + 1))
                                 .font(.caption.weight(.semibold)).lineLimit(2)
                             HStack(spacing: 8) {
-                                Text(PlayerOSD.time(c.startMs)).font(.caption).monospacedDigit()
+                                Text(PlayerText.time(c.startMs)).font(.caption).monospacedDigit()
                                 if model.chapter?.startMs == c.startMs {
                                     Image(systemName: "play.fill").font(.caption2)
                                 }
@@ -426,59 +426,6 @@ struct PlayerOSD: View {
     }
 
     static let speeds: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 2]
-
-    // MARK: Words
-
-    static func time(_ ms: Int64) -> String {
-        let s = Int(ms / 1000)
-        return s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)
-    }
-
-    static func speedName(_ speed: Float) -> String {
-        speed.formatted(.number.precision(.fractionLength(0...2)))
-    }
-
-    /// "24 Oct 2026", from the server's yyyy-MM-dd.
-    static func day(_ iso: String) -> String? {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.dateFormat = "yyyy-MM-dd"
-        guard let d = f.date(from: iso) else { return nil }
-        let out = DateFormatter()
-        out.setLocalizedDateFormatFromTemplate("d MMM yyyy")
-        return out.string(from: d)
-    }
-
-    /// "Timing: +1.5s (later)", "Timing: −0.5s (earlier)" or "Timing: 0.0s".
-    static func timingName(_ ms: Int64) -> String {
-        let seconds = SubtitleTiming.seconds(ms)
-        return ms > 0 ? L("player.timing_later", seconds) : ms < 0 ? L("player.timing_earlier", seconds) : L("player.timing_zero")
-    }
-
-    static func trackName(_ t: SubtitleTrack) -> String {
-        var parts = [languageName(t.language) ?? t.title ?? L("player.unknown_language")]
-        if let title = t.title, !title.isEmpty, parts.first != title { parts.append(title) }
-        if t.forced { parts.append(L("player.forced")) }
-        if t.hearingImpaired { parts.append(L("player.sdh")) }
-        return parts.joined(separator: " · ")
-    }
-
-    static func audioName(_ a: AudioTrack) -> String {
-        var parts = [languageName(a.language) ?? a.title ?? L("player.unknown_language")]
-        if !a.codec.isEmpty { parts.append(a.codec.uppercased()) }
-        switch a.channels {
-        case 0: break
-        case 1: parts.append(L("player.mono"))
-        case 2: parts.append(L("player.stereo"))
-        default: parts.append("\(a.channels - 1).1")
-        }
-        return parts.joined(separator: " · ")
-    }
-
-    private static func languageName(_ code: String?) -> String? {
-        guard let code, !code.isEmpty, code != "und" else { return nil }
-        return Locale.current.localizedString(forLanguageCode: code) ?? code
-    }
 }
 
 /// A small round glass button with an icon: white with a black icon when focused.
@@ -590,7 +537,7 @@ struct OSDTrackButtons: View {
             // In a room the room sets the pace.
             if room == nil {
                 Picker(L("player.speed"), selection: Binding(get: { model.speed }, set: { model.chooseSpeed($0) })) {
-                    ForEach(PlayerOSD.speeds, id: \.self) { Text(L("player.speed_value", PlayerOSD.speedName($0))).tag($0) }
+                    ForEach(PlayerOSD.speeds, id: \.self) { Text(L("player.speed_value", PlayerText.speedName($0))).tag($0) }
                 }
                 .pickerStyle(.menu)
             }
@@ -610,7 +557,7 @@ struct OSDTrackButtons: View {
             Toggle(L("player.playback_info"), isOn: Binding(get: { model.showsInfo }, set: { model.showsInfo = $0 }))
         case .audio:
             Picker(L("player.audio"), selection: Binding(get: { model.audioStream }, set: { model.chooseAudio($0) })) {
-                ForEach(model.audioTracks) { Text(PlayerOSD.audioName($0)).tag($0.index) }
+                ForEach(model.audioTracks) { Text(PlayerText.audioName($0)).tag($0.index) }
             }
             .pickerStyle(.inline)
         case .subtitles:
@@ -618,13 +565,13 @@ struct OSDTrackButtons: View {
                 model.chooseSubtitle(model.subtitleTracks.first { $0.id == id })
             })) {
                 Text(L("player.off")).tag("")
-                ForEach(model.subtitleTracks) { Text(PlayerOSD.trackName($0)).tag($0.id) }
+                ForEach(model.subtitleTracks) { Text(PlayerText.trackName($0)).tag($0.id) }
             }
             .pickerStyle(.inline)
             // Timing (arc-media-server#479): the menu's heading already says Subtitles.
             if model.subtitleTimingAdjustable {
                 let offset = model.subtitleOffsetMs
-                Section(PlayerOSD.timingName(offset)) {
+                Section(PlayerText.timingName(offset)) {
                     Button(L("player.timing_show_earlier")) { model.shiftSubtitles(-SubtitleTiming.stepMs) }
                         .disabled(offset <= -SubtitleTiming.maxMs)
                     Button(L("player.timing_show_later")) { model.shiftSubtitles(SubtitleTiming.stepMs) }
