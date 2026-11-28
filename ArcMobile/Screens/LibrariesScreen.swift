@@ -1,8 +1,9 @@
 import ArcKit
 import SwiftUI
 
-/// Libraries: the profile's libraries in its order (Arrange libraries on the web), then the
-/// Watchlist and Playlists, as an iOS list, the way the Apple TV's sidebar lists them.
+/// Libraries as a list: the profile's libraries in its order (Arrange libraries on the web), then
+/// Playlists. The iPad's Libraries tab in its tab bar layout, and the iPhone's before a library is
+/// chosen from the Libraries menu.
 struct MobileLibrariesScreen: View {
     @Environment(AppModel.self) private var app
     @State private var libraries: [Library] = []
@@ -23,13 +24,6 @@ struct MobileLibrariesScreen: View {
                 }
             }
             Section {
-                NavigationLink {
-                    MobileItemsScreen(title: L("tab.watchlist"), empty: L("mobile.watchlist_empty")) { api in
-                        try await api.watchlist().map { MediaCard(item: $0) }
-                    }
-                } label: {
-                    Label(L("tab.watchlist"), systemImage: "bookmark")
-                }
                 NavigationLink {
                     MobilePlaylistsScreen()
                 } label: {
@@ -230,6 +224,15 @@ struct MobileCollectionGrid: View {
             }
         }
         .padding(.horizontal, Metrics.margin(wide))
+    }
+}
+
+/// The Watchlist tab: the profile's Watchlist.
+struct MobileWatchlistScreen: View {
+    var body: some View {
+        MobileItemsScreen(title: L("tab.watchlist"), empty: L("mobile.watchlist_empty")) { api in
+            try await api.watchlist().map { MediaCard(item: $0) }
+        }
     }
 }
 

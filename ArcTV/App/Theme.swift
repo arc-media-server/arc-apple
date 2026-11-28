@@ -18,6 +18,8 @@ enum ArcColor {
     static let error = Color(hex: 0xFF6B6B)
     /// Subtitles in the profile's yellow (the web's subtitle style).
     static let subtitleYellow = Color(hex: 0xFFE14D)
+    /// Behind a popup menu (the iPhone's Libraries menu): dims the screen a little.
+    static let scrim = Color.black.opacity(0.3)
 
 
     /// A profile's colour (web/src/components/Avatar.tsx), as a gradient's two ends.

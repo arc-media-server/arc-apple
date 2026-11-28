@@ -95,13 +95,13 @@ final class MobileWalkThrough: XCTestCase {
             back(app)
         }
 
-        // Libraries, then the first library's grid and its Sort menu.
-        tap(app.tabBars.buttons.element(boundBy: 1))
-        pause(3)
+        // Libraries: its button opens the menu of libraries; the first one's grid, and its Sort menu.
+        tap(app.tabBars.buttons["Libraries"])
+        pause(2)
         shot("m12-libraries")
-        let firstLibrary = app.collectionViews.cells.element(boundBy: 0)
-        if firstLibrary.waitForExistence(timeout: 3) {
-            tap(firstLibrary)
+        let firstLibrary = app.buttons["libraries.menu.0"]
+        if firstLibrary.waitForExistence(timeout: 4) {
+            press(firstLibrary)
             pause(4)
             shot("m13-library")
             let sort = app.buttons["library.sort"]
@@ -114,8 +114,13 @@ final class MobileWalkThrough: XCTestCase {
             }
         }
 
+        // The Watchlist, a tab of its own.
+        tap(app.tabBars.buttons["Watchlist"])
+        pause(3)
+        shot("m14a-watchlist")
+
         // Settings, from the profile picture in the bar.
-        tap(app.tabBars.buttons.element(boundBy: 0))
+        tap(app.tabBars.buttons["Home"])
         pause(2)
         let settings = app.buttons["settings.open"]
         if settings.waitForExistence(timeout: 3) {
@@ -134,7 +139,7 @@ final class MobileWalkThrough: XCTestCase {
         pause(2)
 
         // Search, last: its field takes the tab bar's place.
-        tap(app.tabBars.buttons.element(boundBy: 2))
+        tap(app.tabBars.buttons["Search"])
         pause(2)
         let field = app.searchFields.firstMatch
         if field.waitForExistence(timeout: 3) {

@@ -10,8 +10,12 @@ catalogue with the Apple TV app; only the screens are its own.
 - **Sign-in:** the server screen (address field and the servers found on the network), the link
   code (with **Open Link a Device**, which opens the server's `/link` page on the device itself),
   Who's Watching and the PIN sheet (number pad, four boxes, a shake on a wrong PIN).
-- **Tabs:** Home, Libraries and Search in a tab bar that becomes a sidebar on iPad
-  (`.sidebarAdaptable`). The profile picture in each page's bar opens Settings.
+- **Tabs:** Home, Libraries, Watchlist and Search in a tab bar that becomes a sidebar on iPad
+  (`.sidebarAdaptable`). On iPhone, **Libraries** opens a menu that grows from its button with
+  the profile's libraries (in its order) and Playlists, a tick on the one showing; choosing one
+  shows it in the tab, remembered between launches, and touching Libraries again reopens the menu.
+  On iPad the sidebar lists the libraries and Playlists under Libraries instead. The profile
+  picture in each page's bar opens Settings.
 - **Home:** the profile's rows as arranged on the web (the same `HomeModel` as the Apple TV's),
   each scrolling sideways and snapping to cards, then the play queue's row. Pull to refresh.
 - **Cards:** artwork with progress, the white count badge or watched tick, the name and its line
@@ -22,7 +26,7 @@ catalogue with the Apple TV app; only the screens are its own.
   (tap for all of it), a show's season menu and episodes (still, progress, `S1 · E4 · Title`,
   length, overview; dimmed with the release day when not out), the season's ⋯ (mark watched,
   shuffle), Starring and More Like This.
-- **Libraries:** the libraries in the profile's order, the Watchlist and Playlists; a library's
+- **Libraries:** the libraries in the profile's order and Playlists; a library's
   grid with Titles/Collections, a Sort menu (the TV's sorts, Reverse Order, Unwatched Only, Clear
   Filters) and paging; collections, playlists, people, genres and Videos folders.
 - **Search:** iOS's search field, following the typing, with films, shows, episodes,
@@ -50,10 +54,14 @@ catalogue with the Apple TV app; only the screens are its own.
   pushes with swipe-back; menus on touch and hold; Settings as a sheet. Plex for iOS and Apple's TV
   app do the same. Arc stays Arc through its look: dark only, white controls with black text, no
   colour but the logo's, the same words and episode format as every Arc app.
-- **Three tabs (Home, Libraries, Search):** Plex for iOS has Home, Library and Search too (with
-  more for Live TV and downloads, which Arc's apps don't have yet). Watchlist and Playlists sit in
-  Libraries rather than taking tabs. The alternative is a tab per library, as the TV's sidebar
-  lists them; that crowds the bar on iPhone.
+- **Four tabs (Home, Libraries, Watchlist, Search), and a Libraries menu (owner, 28 November):**
+  Plex for iOS has Home, Library and Search (with more for Live TV and downloads, which Arc's apps
+  don't have yet), and chooses the library from a menu. The owner asked for the libraries to pop
+  out of the Libraries button and for the Watchlist to have its own button. SwiftUI's tab bar
+  can't hang a menu off a tab, so the Libraries tab opens Arc's own menu just above it (a glass
+  panel that grows from the button, over a lightly dimmed screen) rather than switching. The
+  alternative was a tab per library, as the TV's sidebar lists them; that crowds the bar on
+  iPhone, so only the iPad's sidebar does it.
 - **One player, same engines:** the mpv engine is the default, as on Apple TV; Apple's player is
   in Settings. Picture in Picture and AirPlay aren't in this version (they need Apple's player's
   layer or route picker and their own work).

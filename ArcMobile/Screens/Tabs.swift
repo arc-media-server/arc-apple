@@ -1,32 +1,58 @@
-import ArcKit
-import SwiftUI
-
-/// After the profile is chosen: iOS's tab bar (Home, Libraries, Search), which on iPad becomes a
-/// sidebar, as Apple's TV app. The profile button at the top of each tab opens Settings, as the
-/// account button in Apple's apps. The player covers the whole screen.
+/// After the profile is chosen: iOS's tab bar (Home, Libraries, Watchlist, Search), which on iPad
+/// becomes a sidebar, as Apple's TV app. On iPhone, Libraries opens a menu of the profile's
+/// libraries from its button, and the tab shows the one chosen; on iPad the sidebar lists them.
+/// The profile button at the top of each tab opens Settings, as the account button in Apple's
+/// apps. The player covers the whole screen.
 struct MobileTabs: View {
     @Environment(AppModel.self) private var app
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var browse = Browse()
     @State private var tab = "home"
     @State private var settings = false
     /// A title's page to open on Home (a link from outside the app).
     @State private var homeLink: Route?
+    /// The profile's libraries in its order, for the Libraries menu and the iPad's sidebar.
+    @State private var libraries: [Library] = []
+    @State private var libraryMenu = false
+    /// The Libraries tab's page on iPhone: "lib:<id>" or "playlists", kept between launches.
+    @AppStorage("mobile.libraries.chosen") private var chosen = ""
 
     var body: some View {
-        TabView(selection: $tab) {
+        TabView(selection: Binding(get: { tab }, set: select)) {
             Tab(L("tab.home"), systemImage: "house", value: "home") {
                 MobileStack(link: $homeLink, settings: $settings) { MobileHomeScreen() }
             }
             Tab(L("mobile.tab_libraries"), systemImage: "rectangle.stack", value: "libraries") {
-                MobileStack(link: .constant(nil), settings: $settings) { MobileLibrariesScreen() }
+                MobileStack(link: .constant(nil), settings: $settings) {
+                    MobileChosenLibrary(libraries: libraries, chosen: sizeClass == .compact ? chosen : "")
+                }
+                .id(sizeClass == .compact ? chosen : "")
+            }
+            .defaultVisibility(.hidden, for: .sidebar)
+            Tab(L("tab.watchlist"), systemImage: "bookmark", value: "watchlist") {
+                MobileStack(link: .constant(nil), settings: $settings) { MobileWatchlistScreen() }
             }
             Tab(L("tab.search"), systemImage: "magnifyingglass", value: "search", role: .search) {
                 MobileStack(link: .constant(nil), settings: $settings) { MobileSearchScreen() }
             }
+            // The iPad's sidebar: each library, then Playlists, under Libraries.
+            TabSection(L("mobile.tab_libraries")) {
+                ForEach(libraries) { lib in
+                    Tab(lib.name, systemImage: MobileLibrariesScreen.icon(lib), value: "lib:\(lib.id)") {
+                        MobileStack(link: .constant(nil), settings: $settings) { MobileLibraryScreen(library: lib) }
+                    }
+                    .defaultVisibility(.hidden, for: .tabBar)
+                }
+                Tab(L("tab.playlists"), systemImage: "list.bullet.rectangle", value: "playlists") {
+                    MobileStack(link: .constant(nil), settings: $settings) { MobilePlaylistsScreen() }
+                }
+                .defaultVisibility(.hidden, for: .tabBar)
+            }
         }
         .tabViewStyle(.sidebarAdaptable)
         .environment(browse)
+        .overlay(alignment: .bottomLeading) { libraryMenuLayer }
         .sheet(isPresented: $settings) {
             MobileSettingsScreen().environment(browse)
         }
@@ -43,11 +69,67 @@ struct MobileTabs: View {
         }
         .animation(.easeInOut(duration: 0.25), value: browse.notice)
         .task(id: app.pendingLink) { await followLink() }
+        .task(id: browse.changes) { await loadLibraries() }
+        .onChange(of: browse.playing) { _, playing in if playing != nil { libraryMenu = false } }
+        // From iPad's sidebar to an iPhone-width window (Split View): a library chosen in the
+        // sidebar becomes the Libraries tab's page.
+        .onChange(of: sizeClass) { _, size in
+            if size == .compact, tab.hasPrefix("lib:") || tab == "playlists" {
+                chosen = tab
+                tab = "libraries"
+            }
+        }
         // Arc's live updates while the app is open.
         .onChange(of: scenePhase, initial: true) { _, phase in
             if phase == .active { app.live.start() } else { app.live.stop() }
         }
         .onDisappear { app.live.stop() }
+    }
+
+    /// A tab chosen in the bar. On iPhone, Libraries opens its menu instead (and closes it when
+    /// it's open); the tab itself shows once a library is chosen.
+    private func select(_ new: String) {
+        if new == "libraries" && sizeClass == .compact {
+            withAnimation(.spring(duration: 0.3, bounce: 0.15)) { libraryMenu.toggle() }
+            return
+        }
+        if libraryMenu { withAnimation(.easeOut(duration: 0.2)) { libraryMenu = false } }
+        tab = new
+    }
+
+    private func choose(_ value: String) {
+        chosen = value
+        tab = "libraries"
+        withAnimation(.easeOut(duration: 0.2)) { libraryMenu = false }
+    }
+
+    /// The Libraries menu, grown from its button above the tab bar, over a dimmed screen that
+    /// closes it when touched.
+    @ViewBuilder private var libraryMenuLayer: some View {
+        ZStack(alignment: .bottomLeading) {
+            if libraryMenu {
+                ArcColor.scrim
+                    .ignoresSafeArea()
+                    .onTapGesture { withAnimation(.easeOut(duration: 0.2)) { libraryMenu = false } }
+                    .accessibilityLabel(Text(L("common.cancel")))
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityIdentifier("libraries.menu.close")
+                    .transition(.opacity)
+                MobileLibraryMenu(libraries: libraries, chosen: tab == "libraries" ? chosen : "", choose: choose)
+                    .padding(.leading, 16)
+                    .padding(.bottom, 72)
+                    .transition(.scale(scale: 0.2, anchor: .bottom).combined(with: .opacity))
+            }
+        }
+    }
+
+    private func loadLibraries() async {
+        let (answer, _) = await loadPage(app, "libraries") { api in
+            async let prefs = api.prefs()
+            async let libs = api.libraries()
+            return orderedLibraries(try await libs, order: try await prefs.libraryOrder)
+        }
+        if let answer { libraries = answer }
     }
 
     /// arcmediaserver://open/<id> opens the title's page on Home; arcmediaserver://play/<id> plays it.
@@ -69,6 +151,67 @@ struct MobileTabs: View {
             homeLink = .item(item)
         case .play:
             browse.play(PlayRequest(item: item, startMs: item.resumeMs))
+        }
+    }
+}
+
+/// The Libraries menu's rows: each library with its icon, a tick on the one showing, then
+/// Playlists.
+struct MobileLibraryMenu: View {
+    let libraries: [Library]
+    let chosen: String
+    let choose: (String) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if libraries.isEmpty {
+                ProgressView().frame(maxWidth: .infinity).padding(.vertical, 12)
+            }
+            ForEach(Array(libraries.enumerated()), id: \.element.id) { index, lib in
+                row(lib.name, icon: MobileLibrariesScreen.icon(lib), value: "lib:\(lib.id)")
+                    .accessibilityIdentifier("libraries.menu.\(index)")
+            }
+            Divider().padding(.vertical, 4).padding(.horizontal, 12)
+            row(L("tab.playlists"), icon: "list.bullet.rectangle", value: "playlists")
+                .accessibilityIdentifier("libraries.menu.playlists")
+        }
+        .padding(.vertical, 6)
+        .frame(width: 250)
+        .arcGlassPanel(cornerRadius: 26)
+    }
+
+    private func row(_ name: String, icon: String, value: String) -> some View {
+        Button { choose(value) } label: {
+            HStack(spacing: 12) {
+                Image(systemName: icon).frame(width: 24)
+                Text(name).lineLimit(1)
+                Spacer(minLength: 8)
+                if chosen == value { Image(systemName: "checkmark").font(.footnote.weight(.semibold)) }
+            }
+            .font(.body)
+            .foregroundStyle(ArcColor.foreground)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 11)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(chosen == value ? .isSelected : [])
+    }
+}
+
+/// The Libraries tab's page: on iPhone the library chosen from its menu (or Playlists); otherwise,
+/// or before one is chosen, the list of libraries.
+struct MobileChosenLibrary: View {
+    let libraries: [Library]
+    let chosen: String
+
+    var body: some View {
+        if chosen == "playlists" {
+            MobilePlaylistsScreen()
+        } else if let lib = libraries.first(where: { "lib:\($0.id)" == chosen }) {
+            MobileLibraryScreen(library: lib)
+        } else {
+            MobileLibrariesScreen()
         }
     }
 }
