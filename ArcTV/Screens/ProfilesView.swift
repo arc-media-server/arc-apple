@@ -268,32 +268,3 @@ struct PadKeyStyle: ButtonStyle {
     }
 }
 
-/// A profile's picture: its initial on its colour (web/src/components/Avatar.tsx).
-struct Avatar: View {
-    let name: String
-    let color: String
-    let size: CGFloat
-
-    init(profile: Profile, size: CGFloat) {
-        self.init(name: profile.name, color: profile.color, size: size)
-    }
-
-    /// Anyone's picture by name and colour (people in a Watch Together room).
-    init(name: String, color: String, size: CGFloat) {
-        self.name = name
-        self.color = color
-        self.size = size
-    }
-
-    var body: some View {
-        let initial = String(name.trimmingCharacters(in: .whitespaces).prefix(1)).uppercased()
-        Circle()
-            .fill(LinearGradient(colors: ArcColor.profile(color), startPoint: .topLeading, endPoint: .bottomTrailing))
-            .frame(width: size, height: size)
-            .overlay {
-                Text(initial.isEmpty ? "?" : initial)
-                    .font(.system(size: size * 0.36, weight: .semibold))
-                    .foregroundStyle(.white)
-            }
-    }
-}

@@ -1,6 +1,6 @@
-# Builds ArcKit (with its tests) and the tvOS app on macOS, then walks the app in the tvOS
-# simulator against a stand-in Arc (UITests/) and keeps a screenshot of each screen as the
-# "screenshots" artifact. It runs only when asked (the repository is public, so runs are free, but
+# Builds ArcKit (with its tests), the tvOS app and the iPhone/iPad app on macOS, then walks each
+# in its simulator (Apple TV 4K, then an iPhone) against a stand-in Arc (UITests/) and keeps a
+# screenshot of each screen as the "screenshots" artifact. It runs only when asked (the repository is public, so runs are free, but
 # a run takes a while): from the Actions tab, or for a push to an agent's branch whose commit
 # message contains [build]. Pushes that only change Markdown never run it, and a
 # newer run on the same branch cancels an older one.
@@ -40,6 +40,7 @@ jobs:
       - name: Generate the Xcode project
         run: xcodegen generate
       - name: Build the Apple TV app
+        id: tvbuild
         run: |
           set -o pipefail
           xcodebuild -project Arc.xcodeproj -scheme ArcTV -configuration Debug \
@@ -63,6 +64,7 @@ jobs:
           path: ${{ runner.temp }}/Arc-tvos-simulator.zip
           if-no-files-found: error
       - name: Start the stand-in Arc
+        if: ${{ !cancelled() }}
         env:
           # Optional: real posters, backgrounds, logos and cast photos from TMDB for the screenshots.
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
@@ -71,6 +73,7 @@ jobs:
           sleep 2
           curl -fsS http://127.0.0.1:8080/api/v1/health
       - name: Walk the app in the simulator
+        if: ${{ !cancelled() && steps.tvbuild.outcome == 'success' }}
         run: |
           set -o pipefail
           DEVICE=$(xcrun simctl list devices available -j | python3 -c '
@@ -82,6 +85,29 @@ jobs:
           echo "simulator: $DEVICE"
           xcodebuild -project Arc.xcodeproj -scheme ArcTV -destination "id=$DEVICE" \
             -resultBundlePath walk.xcresult -quiet test
+      # The iPhone and iPad app: built and walked even when the Apple TV's steps failed, so
+      # each platform's problems show on their own.
+      - name: Build the iPhone and iPad app
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          xcodebuild -project Arc.xcodeproj -scheme ArcMobile -configuration Debug \
+            -destination 'generic/platform=iOS' CODE_SIGNING_ALLOWED=NO -quiet build
+          du -sh ~/Library/Developer/Xcode/DerivedData/*/Build/Products/Debug-iphoneos/Arc.app | sed 's/^/iOS: /' | tee -a app-size.txt
+      - name: Walk the iPhone app in the simulator
+        if: ${{ !cancelled() }}
+        run: |
+          set -o pipefail
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          ph = [(r, x) for r, xs in d.items() if "iOS" in r for x in xs
+                if x["name"].startswith("iPhone") and "Pro" in x["name"] and "Max" not in x["name"]]
+          ph.sort(key=lambda p: (p[0], p[1]["name"]))
+          print(ph[-1][1]["udid"])')
+          echo "simulator: $DEVICE"
+          xcodebuild -project Arc.xcodeproj -scheme ArcMobile -destination "id=$DEVICE" \
+            -resultBundlePath walk-iphone.xcresult -quiet test
       - name: Export the screenshots
         if: always()
         run: |
@@ -89,6 +115,14 @@ jobs:
           if [ -d walk.xcresult ]; then
             xcrun xcresulttool export attachments --path walk.xcresult --output-path screenshots || true
           fi
+          if [ -d walk-iphone.xcresult ]; then
+            mkdir -p screenshots/iphone
+            xcrun xcresulttool export attachments --path walk-iphone.xcresult --output-path screenshots/iphone || true
+          fi
+          # Why a walk failed, in words: each failed check's message.
+          for r in walk walk-iphone; do
+            [ -d "$r.xcresult" ] && xcrun xcresulttool get test-results summary --path "$r.xcresult" --compact > "screenshots/$r-summary.json" 2>/dev/null || true
+          done
           cp standin.log screenshots/ 2>/dev/null || true
           # The app's crash reports from the simulator, if it crashed.
           find ~/Library/Logs/DiagnosticReports -name 'Arc*' -newer standin.log -exec cp {} screenshots/ \; 2>/dev/null || true
@@ -102,19 +136,23 @@ jobs:
           mkdir -p small
           python3 - <<'PY'
           import json, os, shutil
-          m = json.load(open("screenshots/manifest.json")) if os.path.exists("screenshots/manifest.json") else []
-          for test in m:
-              for i, a in enumerate(test.get("attachments", [])):
-                  name = a.get("suggestedHumanReadableName", a["exportedFileName"]).split("_")[0]
-                  ext = os.path.splitext(a["exportedFileName"])[1].lower()
-                  # Screenshots become small JPEGs; text (failure details) is kept; recordings are left out.
-                  if ext == ".png":
-                      shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", name + ".png"))
-                  elif ext == ".txt":
-                      shutil.copy(os.path.join("screenshots", a["exportedFileName"]), os.path.join("small", f"{name}-{i}.txt"))
+          # The Apple TV's walk, then the iPhone's (its names start with "m").
+          for folder, prefix in (("screenshots", ""), ("screenshots/iphone", "iphone-")):
+              path = os.path.join(folder, "manifest.json")
+              m = json.load(open(path)) if os.path.exists(path) else []
+              for test in m:
+                  for i, a in enumerate(test.get("attachments", [])):
+                      name = a.get("suggestedHumanReadableName", a["exportedFileName"]).split("_")[0]
+                      ext = os.path.splitext(a["exportedFileName"])[1].lower()
+                      # Screenshots become small JPEGs; text (failure details) is kept; recordings are left out.
+                      if ext == ".png":
+                          shutil.copy(os.path.join(folder, a["exportedFileName"]), os.path.join("small", name + ".png"))
+                      elif ext == ".txt":
+                          shutil.copy(os.path.join(folder, a["exportedFileName"]), os.path.join("small", f"{prefix}{name}-{i}.txt"))
           PY
           for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 80 -Z 1280 "$f" --out "${f%.png}.jpg" >/dev/null || true; rm "$f"; done
           cp standin.log small/ 2>/dev/null || true
+          cp screenshots/*-summary.json small/ 2>/dev/null || true
           cp screenshots/*.ips small/ 2>/dev/null || true
           cp app-size.txt small/ 2>/dev/null || true
           git config user.name "github-actions[bot]"

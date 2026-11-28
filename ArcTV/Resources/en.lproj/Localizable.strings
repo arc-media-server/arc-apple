@@ -422,3 +422,16 @@
 "settings.automatic_sign_in" = "Sign in automatically";
 "settings.automatic_sign_in_hint" = "Open as %@ on this device, without asking who's watching.";
 "settings.automatic_sign_in_pin" = "Not available for a profile with a PIN: it's asked for each time.";
+
+/* iPhone and iPad */
+"mobile.server_unreachable" = "Nothing answered at that address. Check it, and that this device is on the same network.";
+"mobile.signin_body" = "On a phone or computer signed in to Arc, open Link a Device and enter this code. Or open it on this device if you're signed in to Arc here.";
+"mobile.signin_open_link" = "Open Link a Device";
+"mobile.tab_libraries" = "Libraries";
+"mobile.watchlist_empty" = "Nothing on your Watchlist yet. Add titles from their menu.";
+"mobile.sort" = "Sort";
+"mobile.sort_reversed" = "Reverse Order";
+"mobile.pause" = "Pause";
+"mobile.done" = "Done";
+"mobile.about_name" = "Arc for iPhone and iPad";
+"mobile.licences_note" = "Arc for iPhone and iPad is free software. Its source, and the source of the open source code it is built with, is at github.com/arc-media-server.";

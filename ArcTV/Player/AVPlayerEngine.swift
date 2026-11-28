@@ -35,11 +35,15 @@ final class AVPlayerEngine: PlaybackEngine {
         let options: [String: Any] = headers.isEmpty ? [:] : ["AVURLAssetHTTPHeaderFieldsKey": headers]
         let asset = AVURLAsset(url: url, options: options)
         loadTask = Task { [weak self] in
+            #if os(tvOS)
             // Match Content: the TV switches to the title's dynamic range and frame rate before
             // the picture starts, as Apple's own player does. A custom layer has to ask for it.
             let criteria = try? await asset.load(.preferredDisplayCriteria)
             guard let self, !Task.isCancelled else { return }
             self.applyDisplayCriteria(criteria)
+            #else
+            guard let self, !Task.isCancelled else { return }
+            #endif
             self.attach(AVPlayerItem(asset: asset))
         }
     }
@@ -151,7 +155,9 @@ final class AVPlayerEngine: PlaybackEngine {
 
     func stop() {
         reset()
+        #if os(tvOS)
         applyDisplayCriteria(nil)
+        #endif
     }
 
     private func reset() {
@@ -167,18 +173,11 @@ final class AVPlayerEngine: PlaybackEngine {
         waiting = false
     }
 
+    #if os(tvOS)
     private func applyDisplayCriteria(_ criteria: AVDisplayCriteria?) {
-        // Windows without a display manager (the simulator's) don't answer avDisplayManager at
-        // all, and asking stops the app: check first, and play without Match Content there.
-        let selector = NSSelectorFromString("avDisplayManager")
-        let window = [surface.window, Self.keyWindow].compactMap { $0 }.first { $0.responds(to: selector) }
-        guard let manager = window?.avDisplayManager, manager.isDisplayCriteriaMatchingEnabled else { return }
-        manager.preferredDisplayCriteria = criteria
+        DisplayMode.apply(criteria, near: surface)
     }
-
-    private static var keyWindow: UIWindow? {
-        UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows).first(where: \.isKeyWindow)
-    }
+    #endif
 }
 
 /// A view whose layer is the player's picture.

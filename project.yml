@@ -5,6 +5,7 @@ options:
   bundleIdPrefix: org.arcmediaserver
   deploymentTarget:
     tvOS: "18.0"
+    iOS: "18.0"
   developmentLanguage: en
 packages:
   ArcKit:
@@ -113,6 +114,98 @@ targets:
         TARGETED_DEVICE_FAMILY: "3"
         TEST_TARGET_NAME: ArcTV
         GENERATE_INFOPLIST_FILE: YES
+  # iPhone and iPad: their own screens (ArcMobile/), sharing the Apple TV's player, Arc's
+  # sign-in and data, the title actions and the text (each shared file is listed).
+  ArcMobile:
+    type: application
+    platform: iOS
+    sources:
+      - path: ArcMobile
+      - path: ArcTV/App/AppModel.swift
+      - path: ArcTV/App/Theme.swift
+      - path: ArcTV/App/LocalNetwork.swift
+      - path: ArcTV/Shared
+      - path: ArcTV/Models
+      - path: ArcTV/Components/Artwork.swift
+      - path: ArcTV/Components/TitleActions.swift
+      - path: ArcTV/Components/Brand.swift
+      - path: ArcTV/Player/PlayerText.swift
+      - path: ArcTV/Player/PlaybackEngine.swift
+      - path: ArcTV/Player/AVPlayerEngine.swift
+      - path: ArcTV/Player/MPVEngine.swift
+      - path: ArcTV/Player/MPVLinkShim.c
+      - path: ArcTV/Player/DeviceCaps.swift
+      - path: ArcTV/Player/NowPlaying.swift
+      - path: ArcTV/Player/PlayerModel.swift
+      - path: ArcTV/Together/WatchTogetherModel.swift
+      # The TV's strings (en.lproj, so iOS finds them as a localisation), not its asset catalogue.
+      - path: ArcTV/Resources
+        excludes:
+          - Assets.xcassets
+    dependencies:
+      - package: ArcKit
+      - package: MPVKit
+        product: MPVKit
+    entitlements:
+      path: ArcMobile/ArcMobile.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.org.arcmediaserver.apple
+        keychain-access-groups:
+          - $(AppIdentifierPrefix)org.arcmediaserver.apple.shared
+    info:
+      path: ArcMobile/Info.plist
+      properties:
+        CFBundleDisplayName: Arc
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        CFBundleURLTypes:
+          - CFBundleURLName: org.arcmediaserver.apple
+            CFBundleURLSchemes:
+              - arcmediaserver
+        UILaunchScreen: {}
+        UIUserInterfaceStyle: Dark
+        # Sound keeps playing with the screen locked or in another app.
+        UIBackgroundModes:
+          - audio
+        UIRequiresFullScreen: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: true
+        NSLocalNetworkUsageDescription: Arc connects to your Arc server on your home network.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.arcmediaserver.apple
+        PRODUCT_NAME: Arc
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_USER_SCRIPT_SANDBOXING: YES
+  # Walks the iPhone app in the simulator against the stand-in Arc and keeps screenshots.
+  ArcMobileUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests/ArcMobileUITests
+    dependencies:
+      - target: ArcMobile
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.arcmediaserver.apple.uitests
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        TEST_TARGET_NAME: ArcMobile
+        GENERATE_INFOPLIST_FILE: YES
 schemes:
   ArcTV:
     build:
@@ -121,5 +214,14 @@ schemes:
     test:
       targets:
         - ArcTVUITests
+      environmentVariables:
+        ARC_STANDIN_URL: http://127.0.0.1:8080
+  ArcMobile:
+    build:
+      targets:
+        ArcMobile: all
+    test:
+      targets:
+        - ArcMobileUITests
       environmentVariables:
         ARC_STANDIN_URL: http://127.0.0.1:8080
