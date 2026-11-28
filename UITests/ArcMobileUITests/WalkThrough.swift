@@ -37,14 +37,17 @@ final class MobileWalkThrough: XCTestCase {
         app.swipeDown()
         pause(1)
 
-        // A title's actions, from touching and holding its card.
-        let card = app.scrollViews.buttons.element(boundBy: 0)
+        // A title's actions, from touching and holding a film's card on the Watchlist row (a
+        // Continue Watching card would play if the simulator took the hold for a tap).
+        let card = app.buttons["Arrival"].firstMatch
         if card.waitForExistence(timeout: 3) {
-            card.press(forDuration: 1.2)
+            card.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 1.5)
             pause(2)
             shot("m06-card-menu")
-            closeMenu(app, item: "Play from Beginning")
+            closeMenu(app, item: "Add to Playlist…")
             pause(1)
+            // Taken for a tap: the film's page opened instead.
+            if app.buttons["details.play"].exists { back(app) }
         }
 
         // A show's page from the Watchlist row: its seasons and episodes, then its cast.
