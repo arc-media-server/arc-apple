@@ -43,8 +43,7 @@ final class MobileWalkThrough: XCTestCase {
             card.press(forDuration: 1.2)
             pause(2)
             shot("m06-card-menu")
-            // Away from the menu's items: a tap in the middle could choose one.
-            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.04)).tap()
+            closeMenu(app, item: "Play from Beginning")
             pause(1)
         }
 
@@ -102,7 +101,7 @@ final class MobileWalkThrough: XCTestCase {
                 tap(sort)
                 pause(1)
                 shot("m14-library-sort")
-                app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.04)).tap()
+                closeMenu(app, item: "Reverse Order")
                 pause(1)
             }
         }
@@ -135,6 +134,16 @@ final class MobileWalkThrough: XCTestCase {
         pause(2)
         shot("m17-home-landscape")
         XCUIDevice.shared.orientation = .portrait
+    }
+
+    /// Closes an open menu with a tap on the dimmed screen beside it (the menus open on the left,
+    /// under what was held), checking it went: a tap on one of its items would choose it.
+    private func closeMenu(_ app: XCUIApplication, item: String) {
+        for spot in [CGVector(dx: 0.9, dy: 0.86), CGVector(dx: 0.9, dy: 0.3), CGVector(dx: 0.1, dy: 0.95)] {
+            guard app.buttons[item].exists else { break }
+            app.coordinate(withNormalizedOffset: spot).tap()
+            pause(1.5)
+        }
     }
 
     /// The bar's back button, as a swipe from the edge would.
