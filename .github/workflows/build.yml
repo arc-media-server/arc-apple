@@ -119,6 +119,10 @@ jobs:
             mkdir -p screenshots/iphone
             xcrun xcresulttool export attachments --path walk-iphone.xcresult --output-path screenshots/iphone || true
           fi
+          # Why a walk failed, in words: each failed check's message.
+          for r in walk walk-iphone; do
+            [ -d "$r.xcresult" ] && xcrun xcresulttool get test-results summary --path "$r.xcresult" --compact > "screenshots/$r-summary.json" 2>/dev/null || true
+          done
           cp standin.log screenshots/ 2>/dev/null || true
           # The app's crash reports from the simulator, if it crashed.
           find ~/Library/Logs/DiagnosticReports -name 'Arc*' -newer standin.log -exec cp {} screenshots/ \; 2>/dev/null || true
@@ -148,6 +152,7 @@ jobs:
           PY
           for f in small/*.png; do [ -e "$f" ] || continue; sips -s format jpeg -s formatOptions 80 -Z 1280 "$f" --out "${f%.png}.jpg" >/dev/null || true; rm "$f"; done
           cp standin.log small/ 2>/dev/null || true
+          cp screenshots/*-summary.json small/ 2>/dev/null || true
           cp screenshots/*.ips small/ 2>/dev/null || true
           cp app-size.txt small/ 2>/dev/null || true
           git config user.name "github-actions[bot]"

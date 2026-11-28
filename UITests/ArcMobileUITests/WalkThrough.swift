@@ -43,7 +43,8 @@ final class MobileWalkThrough: XCTestCase {
             card.press(forDuration: 1.2)
             pause(2)
             shot("m06-card-menu")
-            app.tap()
+            // Away from the menu's items: a tap in the middle could choose one.
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.04)).tap()
             pause(1)
         }
 
@@ -101,7 +102,7 @@ final class MobileWalkThrough: XCTestCase {
                 tap(sort)
                 pause(1)
                 shot("m14-library-sort")
-                app.tap()
+                app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.04)).tap()
                 pause(1)
             }
         }
