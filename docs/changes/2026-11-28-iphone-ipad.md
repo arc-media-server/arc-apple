@@ -67,7 +67,12 @@ catalogue with the Apple TV app; only the screens are its own.
 ## Checks
 
 - `swift test --package-path ArcKit`: 97 tests, 1 skipped (the live server test), 0 failures.
-- The Build workflow (macOS): see the PR for the run and its results.
+- The Build workflow (macOS), run 46100550479: the Apple TV app and the iPhone/iPad app both build;
+  the iPhone walk-through (iPhone 17 Pro simulator, iOS 26.2) passes and reached every screen
+  (screenshots in `2026-11-28-iphone-ipad/`). The Apple TV walk still stops at its Search keyboard
+  step ("Expected to focus the D key"), as it did on main before this change; its other screens are
+  unchanged.
+- Not walked: the iPad layout (sidebar), which uses the same screens by size class.
 - Not checked: anything on a real iPhone or iPad (playback, audio, HDR, rotation, Control Center).
   No device was available.
 
