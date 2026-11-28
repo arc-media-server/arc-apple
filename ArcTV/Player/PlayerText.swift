@@ -3,6 +3,9 @@ import Foundation
 
 /// How the player writes times, speeds and tracks, on Apple TV and iPhone and iPad alike.
 enum PlayerText {
+    /// The playback speeds offered, as every Arc player.
+    static let speeds: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 2]
+
     static func time(_ ms: Int64) -> String {
         let s = Int(ms / 1000)
         return s >= 3600 ? String(format: "%d:%02d:%02d", s / 3600, s / 60 % 60, s % 60) : String(format: "%d:%02d", s / 60, s % 60)

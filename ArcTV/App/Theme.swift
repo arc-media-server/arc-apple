@@ -16,6 +16,8 @@ enum ArcColor {
     static let muted = Color(hex: 0xA1A1AD)
     static let subtle = Color(hex: 0x6B6B78)
     static let error = Color(hex: 0xFF6B6B)
+    /// Subtitles in the profile's yellow (the web's subtitle style).
+    static let subtitleYellow = Color(hex: 0xFFE14D)
 
 
     /// A profile's colour (web/src/components/Avatar.tsx), as a gradient's two ends.

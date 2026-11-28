@@ -425,7 +425,7 @@ struct PlayerOSD: View {
         }
     }
 
-    static let speeds: [Float] = [0.5, 0.75, 1, 1.25, 1.5, 2]
+    static let speeds = PlayerText.speeds
 }
 
 /// A small round glass button with an icon: white with a black icon when focused.
