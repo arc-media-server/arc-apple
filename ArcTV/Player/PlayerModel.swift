@@ -172,6 +172,7 @@ final class PlayerModel {
                 plan = p
                 settleSubtitles()
                 if fileChanged { loadTrickplay(p) }
+                DeviceLogs.shared.record(.debug, .playbackStarted)
                 log.info("playing by \(p.method)" + (p.reasons.isEmpty ? "" : " (\(p.reasons.joined(separator: ", ")))"))
                 // Apple's player fetches a converted stream's pieces itself, without the app's
                 // header: a cast link carries its own token. An older Arc without them gets the header.
@@ -192,9 +193,11 @@ final class PlayerModel {
             } catch let error as APIError where error.status == 401 {
                 onRefused()
             } catch let error as APIError {
+                DeviceLogs.shared.record(.error, .playbackFailed)
                 log.warn("playback refused: \(error.status)")
                 fail(error.message)
             } catch {
+                DeviceLogs.shared.record(.error, .playbackFailed)
                 log.warn("playback failed to start: \(type(of: error))")
                 fail(L("player.failed"))
             }

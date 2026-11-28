@@ -276,6 +276,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     {"id": "because", "type": "because_you_watched", "title": "Because you watched", "name": titles[0]["title"] if titles else "", "items": list(reversed(titles))},
                     {"id": "top", "type": "top_rated", "title": "Top Rated", "items": titles[1:] + titles[:1]}]
             return self.json(200, {"rows": [r for r in rows if r["items"]]})
+        if method == "POST" and path == "client-logs":
+            entries = body.get("entries", []) if isinstance(body, dict) else []
+            safe = body.get("platform") == "apple" and 0 < len(entries) <= 3000 and all(
+                set(entry) == {"time_ms", "level", "event"} for entry in entries
+            )
+            return self.json(204 if safe else 400, None)
         if path == "search" and "q" in query:
             query["q"] = query["q"].strip().casefold()
         k = key(method, path, query)

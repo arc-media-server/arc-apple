@@ -107,6 +107,7 @@ final class AppModel {
 
     func launch() async {
         guard stage == .launching else { return }
+        DeviceLogs.shared.record(.info, .launched)
         serverName = UserDefaults.standard.string(forKey: Self.serverNameKey)
         guard let saved = UserDefaults.standard.string(forKey: Self.serverKey), let url = URL(string: saved) else {
             stage = .server
@@ -138,6 +139,7 @@ final class AppModel {
                         try await client.chooseProfile(id: selected.id, pin: nil)
                     }
                     log.info("signing in automatically as the saved profile")
+                    DeviceLogs.shared.record(.info, .automaticSignIn)
                     chose(chosen)
                     return
                 }
@@ -150,6 +152,7 @@ final class AppModel {
             }
         }
         log.info("starting at Who's watching")
+        DeviceLogs.shared.record(.info, .profilePicker)
         stage = .profiles
     }
 
@@ -159,6 +162,7 @@ final class AppModel {
         let health = try await candidate.health()
         guard health.apiVersion >= 1 else { throw NotArc() }
         if serverAddress != ServerAddress.display(url) {
+            DeviceLogs.shared.clear()
             forgetServerName()
             Keychain.delete()
             saveAutomaticProfile(nil)
@@ -197,6 +201,7 @@ final class AppModel {
     /// A refused token (401): it was signed out from Arc, so ask for a new code.
     func tokenRefused() {
         log.info("the server refused this device's sign-in; asking for a new code")
+        DeviceLogs.shared.clear()
         Keychain.delete()
         saveAutomaticProfile(nil)
         token.set(nil)
@@ -206,6 +211,7 @@ final class AppModel {
 
     func signOut() async {
         await api?.signOut()
+        DeviceLogs.shared.clear()
         Keychain.delete()
         saveAutomaticProfile(nil)
         token.set(nil)
@@ -214,6 +220,7 @@ final class AppModel {
     }
 
     func changeServer() {
+        DeviceLogs.shared.clear()
         Keychain.delete()
         saveAutomaticProfile(nil)
         token.set(nil)

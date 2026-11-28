@@ -207,7 +207,7 @@ public final class ArcAPI: Sendable {
         let obj = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
         let message = obj?["error"] as? String ?? "the server answered \(status)"
         // Signed out, a wrong PIN or a missing profile are expected; a server error is worth a warning.
-        if status >= 500 { log.warn("\(route) failed: \(status) \(message)") } else { log.debug("\(route) answered \(status)") }
+        if status >= 500 { log.warn("\(route) failed: \(status)") } else { log.debug("\(route) answered \(status)") }
         return APIError(status: status, message: message, needs: obj?["needs"] as? String)
     }
 
@@ -233,13 +233,19 @@ public final class ArcAPI: Sendable {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
         do {
-            let (data, response) = try await session.data(for: request)
-            return ((response as? HTTPURLResponse)?.statusCode ?? 0, data)
+            let delegate = route == "client-logs" ? DeviceLogRedirectPolicy.shared : nil
+            let (data, response) = try await session.data(for: request, delegate: delegate)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            if status >= 500 && route != "client-logs" { DeviceLogs.shared.record(.warn, .requestFailed) }
+            return (status, data)
         } catch is CancellationError {
             throw CancellationError()
         } catch let error as URLError where error.code == .cancelled {
             throw CancellationError()
         } catch {
+            if route != "client-logs" {
+                DeviceLogs.shared.record(.warn, (error as? URLError)?.code == .timedOut ? .requestTimeout : .requestFailed)
+            }
             log.warn("\(route): can't reach the server (\(type(of: error)))")
             throw error
         }
