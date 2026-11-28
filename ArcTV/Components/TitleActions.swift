@@ -129,14 +129,11 @@ struct TitleActions: View {
                 Label(L("actions.more"), systemImage: "ellipsis")
             }
         }
-        // Watch Together is on Apple TV for now; iPhone and iPad join later.
-        #if os(tvOS)
         if item.kind == "movie" || item.isEpisode {
             Button { browse.together.inviting = .init(itemId: item.id, title: item.title) } label: {
                 Label(L("together.menu"), systemImage: "person.2")
             }
         }
-        #endif
         if !onPage, item.isEpisode, let show = item.parentId {
             Button { openRoute(.item(Item(id: show, kind: "series", title: item.seriesTitle ?? item.title))) } label: {
                 Label(L("actions.go_to_show"), systemImage: "tv")

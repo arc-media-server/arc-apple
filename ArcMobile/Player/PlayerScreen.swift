@@ -23,6 +23,18 @@ struct MobilePlayerScreen: View {
     @State private var scrubMs: Double?
     @State private var countdown: Int?
     @State private var upNextDismissed = false
+    /// Watch Together: the lobby has gone (the room has played), the loop that follows the room,
+    /// and the room's sheet.
+    @State private var lobbyDone = false
+    @State private var follow: Task<Void, Never>?
+    @State private var roomSheet = false
+    @State private var owner = UUID()
+
+    private var together: WatchTogetherModel { browse.together }
+    /// The room this player plays for (only a player opened by joining one).
+    private var room: WatchRoom? { request.together ? together.room : nil }
+    /// The lobby shows until the room first plays (or was under way when this player joined).
+    private var lobby: Bool { room.map { $0.available && !lobbyDone } ?? false }
 
     var body: some View {
         ZStack {
@@ -38,6 +50,11 @@ struct MobilePlayerScreen: View {
                 if model.busy && model.problem == nil { ProgressView().controlSize(.large).tint(ArcColor.foreground) }
                 if let problem = model.problem {
                     problemPane(problem, model)
+                } else if let room, lobby {
+                    MobileLobby(room: room, code: together.lobbyCode,
+                                start: { Task { await together.play() } },
+                                invite: { inviteMore(room) },
+                                leave: close)
                 } else {
                     overlay(model)
                         .opacity(controls ? 1 : 0)
@@ -46,6 +63,14 @@ struct MobilePlayerScreen: View {
                     corner(model)
                 }
             }
+            if request.together, let notice = together.notice { MobileNotice(text: notice) }
+        }
+        .animation(.easeInOut(duration: 0.25), value: together.notice)
+        .sheet(item: Binding(get: { request.together ? together.inviting : nil }, set: { together.inviting = $0 })) { target in
+            MobileInviteSheet(target: target).environment(browse).preferredColorScheme(.dark)
+        }
+        .sheet(isPresented: $roomSheet) {
+            MobileRoomSheet(invite: { if let room { inviteMore(room) } }, leave: close).environment(browse)
         }
         .statusBarHidden(!controls)
         .persistentSystemOverlays(.hidden)
@@ -53,6 +78,8 @@ struct MobilePlayerScreen: View {
         .onAppear(perform: begin)
         .onDisappear {
             hideTask?.cancel()
+            follow?.cancel()
+            if together.reporterOwner == owner { together.reporter = nil }
             nowPlaying.stop()
             model?.close()
             Orientation.release()
@@ -62,6 +89,11 @@ struct MobilePlayerScreen: View {
         .onChange(of: model?.playing ?? false) { _, playing in if playing { scheduleHide() } else { hideTask?.cancel() } }
         .onChange(of: model?.ended ?? false) { _, ended in
             guard ended else { return }
+            if let room {
+                // In a room the host's Up Next moves everyone on; the others wait for the room.
+                if room.isHost, let next = model?.next, model?.prefs?.autoPlay != false, !upNextDismissed { playNext(next) }
+                return
+            }
             if let next = model?.next, playsOn, !upNextDismissed {
                 playNext(next)
             } else {
@@ -70,8 +102,15 @@ struct MobilePlayerScreen: View {
             }
         }
         .onChange(of: model?.upNextDue ?? false) { _, due in
-            guard due, !upNextDismissed, playsOn else { return }
+            guard due, !upNextDismissed, playsOn, room?.isHost ?? true else { return }
             startCountdown()
+        }
+        .onChange(of: together.room) { _, now in
+            guard request.together, let now else { return }
+            if !lobbyDone && (now.state != "paused" || now.positionMs > 0) {
+                lobbyDone = true
+                showControls()
+            }
         }
     }
 
@@ -89,12 +128,13 @@ struct MobilePlayerScreen: View {
         m.start()
         Task { await syncQueue(m) }
         nowPlaying.start(m.item, durationMs: m.durationMs, api: api, actions: .init(
-            toggle: { model?.togglePlay() },
-            play: { if model?.playing == false { model?.togglePlay() } },
-            pause: { if model?.playing == true { model?.togglePlay() } },
-            skip: { model?.seek(by: $0) },
-            seek: { model?.seek(toMs: $0) }))
+            toggle: { togglePlay() },
+            play: { if model?.playing == false { togglePlay() } },
+            pause: { if model?.playing == true { togglePlay() } },
+            skip: { seek(by: $0) },
+            seek: { seek(toMs: $0) }))
         showControls()
+        if request.together { startFollowing(m) }
     }
 
     // MARK: Touch
@@ -107,9 +147,9 @@ struct MobilePlayerScreen: View {
                 .contentShape(Rectangle())
                 .gesture(SpatialTapGesture(count: 2).onEnded { tap in
                     let x = tap.location.x
-                    if x < g.size.width / 3 { model.seek(by: -10_000); showControls() }
-                    else if x > g.size.width * 2 / 3 { model.seek(by: 10_000); showControls() }
-                    else { model.togglePlay(); showControls() }
+                    if x < g.size.width / 3 { seek(by: -10_000); showControls() }
+                    else if x > g.size.width * 2 / 3 { seek(by: 10_000); showControls() }
+                    else { togglePlay(); showControls() }
                 }.exclusively(before: TapGesture().onEnded {
                     if controls { controls = false; hideTask?.cancel() } else { showControls() }
                 }))
@@ -157,6 +197,12 @@ struct MobilePlayerScreen: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            if let room {
+                Button { roomSheet = true } label: { roundIcon("person.2.fill") }
+                    .accessibilityLabel(Text(L("together.title")))
+                    .accessibilityValue(Text(L("together.here", room.participants.count)))
+                    .accessibilityIdentifier("player.together")
+            }
             tracksMenu(model)
             moreMenu(model)
         }
@@ -195,16 +241,19 @@ struct MobilePlayerScreen: View {
     /// Speed and zoom, under ⋯.
     private func moreMenu(_ model: PlayerModel) -> some View {
         Menu {
-            Picker(L("player.speed"), selection: Binding(get: { model.speed }, set: { model.chooseSpeed($0); showControls() })) {
-                ForEach(PlayerText.speeds, id: \.self) { Text(L("player.speed_value", PlayerText.speedName($0))).tag($0) }
+            // In Watch Together the room sets the speed.
+            if room == nil {
+                Picker(L("player.speed"), selection: Binding(get: { model.speed }, set: { model.chooseSpeed($0); showControls() })) {
+                    ForEach(PlayerText.speeds, id: \.self) { Text(L("player.speed_value", PlayerText.speedName($0))).tag($0) }
+                }
+                .pickerStyle(.menu)
             }
-            .pickerStyle(.menu)
             Picker(L("player.zoom_mode"), selection: Binding(get: { model.zoomed }, set: { model.chooseZoom($0); showControls() })) {
                 Text(L("player.zoom_normal")).tag(false)
                 Text(L("player.zoom_fill")).tag(true)
             }
             .pickerStyle(.menu)
-            if model.positionMs > 5_000 {
+            if model.positionMs > 5_000, room == nil {
                 Button { model.restart() } label: { Label(L("details.from_beginning"), systemImage: "arrow.counterclockwise") }
             }
         } label: {
@@ -215,17 +264,17 @@ struct MobilePlayerScreen: View {
 
     private func centre(_ model: PlayerModel) -> some View {
         HStack(spacing: 56) {
-            Button { model.seek(by: -10_000); showControls() } label: {
+            Button { seek(by: -10_000); showControls() } label: {
                 Image(systemName: "gobackward.10").font(.system(size: 30, weight: .medium))
             }
             .accessibilityIdentifier("player.back10")
-            Button { model.togglePlay(); showControls() } label: {
+            Button { togglePlay(); showControls() } label: {
                 Image(systemName: model.playing ? "pause.fill" : "play.fill").font(.system(size: 46))
                     .frame(width: 64, height: 64)
             }
             .accessibilityLabel(Text(model.playing ? L("mobile.pause") : L("details.play")))
             .accessibilityIdentifier("player.play")
-            Button { model.seek(by: 10_000); showControls() } label: {
+            Button { seek(by: 10_000); showControls() } label: {
                 Image(systemName: "goforward.10").font(.system(size: 30, weight: .medium))
             }
             .accessibilityIdentifier("player.forward10")
@@ -243,7 +292,7 @@ struct MobilePlayerScreen: View {
                 if editing {
                     hideTask?.cancel()
                 } else if let to = scrubMs {
-                    model.seek(toMs: Int64(to))
+                    seek(toMs: Int64(to))
                     scrubMs = nil
                     showControls()
                 }
@@ -360,10 +409,20 @@ struct MobilePlayerScreen: View {
         nowPlaying.update(positionMs: model.positionMs, durationMs: model.durationMs, playing: model.playing)
     }
 
-    private func close() { dismiss() }
+    /// Closing the player leaves the room (the others carry on).
+    private func close() {
+        if request.together { together.leave() }
+        dismiss()
+    }
 
     private func playNext(_ next: Item) {
         countdown = nil
+        if room != nil {
+            // The room moves on, and every player in it follows (this one included).
+            ArcLogApp.info("moving the room to the next episode")
+            Task { await together.changeItem(next.id) }
+            return
+        }
         ArcLogApp.info("playing the next episode")
         let entry = model?.queued.flatMap { $0.item.id == next.id ? $0.entry : nil }
         browse.play(PlayRequest(item: next, startMs: next.resumeMs, playingOn: true, queueEntry: entry))
@@ -384,9 +443,10 @@ struct MobilePlayerScreen: View {
         }
     }
 
-    /// Keeps Arc's play queue in step with what's playing, as the Apple TV's player does.
+    /// Keeps Arc's play queue in step with what's playing, as the Apple TV's player does. (Not in
+    /// Watch Together, where the room decides.)
     private func syncQueue(_ m: PlayerModel) async {
-        guard let api = app.api else { return }
+        guard !request.together, let api = app.api else { return }
         let item = request.item
         await browse.withQueue { queues in
             if let entry = request.queueEntry {
@@ -402,9 +462,81 @@ struct MobilePlayerScreen: View {
     }
 
     private func endQueue() {
-        guard let api = app.api else { return }
+        guard !request.together, let api = app.api else { return }
         let browse = browse
         Task { await browse.withQueue { await $0.end(api) } }
+    }
+
+    // MARK: Watch Together
+
+    /// Play/Pause: in a room it goes to the room (and plays or pauses here at once).
+    private func togglePlay() {
+        guard let model else { return }
+        guard let room else { model.togglePlay(); return }
+        if room.state == "playing" {
+            model.setPlaying(false)
+            Task { await together.pause() }
+        } else {
+            model.setPlaying(true)
+            Task { await together.play() }
+        }
+    }
+
+    /// Moves here at once, and takes the room there.
+    private func seek(by deltaMs: Int64) {
+        guard !lobby else { return }
+        model?.seek(by: deltaMs)
+        sendSeek()
+    }
+
+    private func seek(toMs ms: Int64) {
+        guard !lobby else { return }
+        model?.seek(toMs: ms)
+        sendSeek()
+    }
+
+    private func sendSeek() {
+        guard room != nil, let ms = model?.positionMs else { return }
+        Task { await together.seek(toMs: ms) }
+    }
+
+    private func inviteMore(_ room: WatchRoom) {
+        guard let id = room.itemId else { return }
+        together.inviting = .init(itemId: id, title: room.item?.title ?? model?.item.title ?? "", roomId: room.id)
+    }
+
+    /// Reports this player to the room, and keeps it in step: plays and pauses with the room,
+    /// plays a little faster or slower to catch up, and jumps when it's far out (as the Apple
+    /// TV's player).
+    private func startFollowing(_ m: PlayerModel) {
+        if room.map({ $0.state != "paused" || $0.positionMs > 0 }) == true { lobbyDone = true }
+        together.reporterOwner = owner
+        together.reporter = {
+            RoomReport(positionMs: m.positionMs, state: m.busy ? "waiting" : (m.playing ? "playing" : "paused"), ready: !m.loading)
+        }
+        let together = self.together, itemId = request.item.id
+        follow = Task { @MainActor in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let room = together.room, room.available, room.itemId == itemId, !m.loading else { continue }
+                let expected = together.expectedMs()
+                if room.state == "playing" {
+                    if !m.playing { m.setPlaying(true) }
+                    switch WatchSync.correction(localMs: Double(m.positionMs), expectedMs: expected) {
+                    case .none: m.setRate(1)
+                    case .rate(let rate): m.setRate(Float(rate))
+                    case .seek(let to):
+                        m.setRate(1)
+                        m.seek(toMs: Int64(to))
+                    }
+                } else {
+                    // Paused, or waiting for someone to load: hold here, at the room's place.
+                    if m.playing { m.setPlaying(false) }
+                    m.setRate(1)
+                    if abs(Double(m.positionMs) - expected) > 1500 { m.seek(toMs: Int64(expected)) }
+                }
+            }
+        }
     }
 }
 

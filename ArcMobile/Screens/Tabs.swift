@@ -59,6 +59,17 @@ struct MobileTabs: View {
         .sheet(isPresented: $settings) {
             MobileSettingsScreen().environment(browse)
         }
+        // Watch Together's invite sheet, from a title's menu. (Inside the player the player shows
+        // it itself: one presentation at a time.)
+        .sheet(item: Binding(get: { browse.playing == nil ? browse.together.inviting : nil }, set: { browse.together.inviting = $0 })) { target in
+            MobileInviteSheet(target: target).environment(browse)
+        }
+        .sheet(isPresented: Binding(get: { browse.playing == nil && browse.together.enteringCode },
+                                    set: { browse.together.enteringCode = $0 })) {
+            NavigationStack { MobileJoinCodeScreen { browse.together.enteringCode = false } }
+                .environment(browse)
+                .presentationDetents([.medium])
+        }
         .sheet(item: Binding(get: { browse.playing == nil ? browse.addingToPlaylist : nil }, set: { browse.addingToPlaylist = $0 })) { item in
             MobilePlaylistSheet(item: item)
                 .environment(browse)
@@ -68,9 +79,25 @@ struct MobileTabs: View {
             MobilePlayerScreen(request: request).environment(browse)
         }
         .overlay {
-            if browse.playing == nil, let notice = browse.notice { MobileNotice(text: notice) }
+            if browse.playing == nil, let notice = browse.together.notice ?? browse.notice { MobileNotice(text: notice) }
         }
         .animation(.easeInOut(duration: 0.25), value: browse.notice)
+        .animation(.easeInOut(duration: 0.25), value: browse.together.notice)
+        .task {
+            // Joining a room, or the room moving to another title, opens the player on it.
+            // Settings or the code sheet (where a code is typed) closes first: one presentation
+            // at a time.
+            browse.together.openPlayer = { item, startMs in
+                let request = PlayRequest(item: item, startMs: startMs, together: true)
+                guard settings || browse.together.enteringCode else { browse.playing = request; return }
+                settings = false
+                browse.together.enteringCode = false
+                Task { @MainActor in
+                    try? await Task.sleep(for: .milliseconds(600))
+                    browse.playing = request
+                }
+            }
+        }
         .task(id: app.pendingLink) { await followLink() }
         .task(id: browse.changes) { await loadLibraries() }
         .onChange(of: browse.playing) { _, playing in if playing != nil { libraryMenu = false } }

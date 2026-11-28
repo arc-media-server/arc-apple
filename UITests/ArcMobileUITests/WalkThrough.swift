@@ -119,6 +119,45 @@ final class MobileWalkThrough: XCTestCase {
         pause(3)
         shot("m14a-watchlist")
 
+        // Watch Together (the stand-in has a room this profile hosts and one Jo invited it to):
+        // Home's row under Continue Watching, the host's lobby (Leave closes it), then inviting
+        // from a film's menu.
+        tap(app.tabBars.buttons["Home"])
+        pause(3)
+        let room = app.buttons["together.room"].firstMatch
+        for _ in 0..<3 where !(room.exists && room.isHittable) { app.swipeUp(); pause(1) }
+        if room.exists {
+            shot("m18-home-watch-together")
+            press(room)
+            pause(5)
+            shot("m19-lobby-host")
+            let leave = app.buttons["Leave"]
+            if leave.waitForExistence(timeout: 3) { press(leave) } else { app.buttons["player.close"].tap() }
+            pause(3)
+            XCUIDevice.shared.orientation = .portrait
+            pause(1)
+        }
+        app.swipeDown()
+        app.swipeDown()
+        pause(1)
+        let invitee = app.buttons["Arrival"].firstMatch
+        if invitee.waitForExistence(timeout: 3) {
+            invitee.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).press(forDuration: 1.5)
+            pause(2)
+            let together = app.buttons["Watch Together…"]
+            if together.waitForExistence(timeout: 2) {
+                press(together)
+                pause(3)
+                shot("m20-invite")
+                let cancel = app.navigationBars.buttons["Cancel"]
+                if cancel.exists { press(cancel) }
+                pause(1)
+            } else {
+                closeMenu(app, item: "Add to Playlist…")
+            }
+            if app.buttons["details.play"].exists { back(app) }
+        }
+
         // Settings, from the profile picture in the bar.
         tap(app.tabBars.buttons["Home"])
         pause(2)

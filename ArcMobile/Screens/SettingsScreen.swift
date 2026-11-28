@@ -58,6 +58,10 @@ struct MobileSettingsScreen: View {
                         Text(L("player.engine_apple")).tag("apple")
                     }
                 }
+                Section(L("together.title")) {
+                    NavigationLink(L("together.join_with_code")) { MobileJoinCodeScreen { dismiss() } }
+                        .accessibilityIdentifier("settings.join_code")
+                }
                 Section(L("settings.account")) {
                     if let profile = app.profile {
                         Toggle(isOn: Binding(
