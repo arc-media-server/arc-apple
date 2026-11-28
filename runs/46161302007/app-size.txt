@@ -1,0 +1,2 @@
+ 71M	/Users/runner/Library/Developer/Xcode/DerivedData/Arc-gwcqtbijntvvltccopositfatvmh/Build/Products/Debug-appletvos/Arc.app
+1.3M	/Users/runner/Library/Developer/Xcode/DerivedData/Arc-gwcqtbijntvvltccopositfatvmh/Build/Products/Debug-appletvos/Arc.app/Frameworks
