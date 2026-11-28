@@ -30,8 +30,9 @@ on tvOS: the focus engine, Liquid Glass, Top Shelf, Control Center's Now Playing
 Content all work as they do in Apple's own apps.
 
 Everything comes from your Arc server through its stable `/api/v1`, so your watch history, resume
-points and settings are the same as on every other Arc app. iPhone and iPad will follow in this
-same repository, sharing ArcKit (the API client, models and playback logic).
+points and settings are the same as on every other Arc app. An iPhone and iPad app (early, see
+[below](#iphone-and-ipad)) lives in this same repository, sharing ArcKit (the API client, models
+and playback logic), the player and the data behind the screens.
 
 > **Alpha software, not yet on the App Store or TestFlight.** You build it yourself with Xcode
 > (below). Its screens are checked in the tvOS simulator on every build. Playback, HDR, Dolby
@@ -119,6 +120,17 @@ Apple TV yourself.
 With a free Apple Account the app stops opening after 7 days; run it from Xcode again to renew
 it. A paid Apple Developer membership makes that a year.
 
+### iPhone and iPad
+
+The **ArcMobile** target is the same app for iPhone and iPad (iOS 18 or newer), early and not yet
+checked on a real device. It follows iOS's own conventions (a tab bar for Home, Libraries and
+Search that becomes a sidebar on iPad, pages that push and swipe back, touch-and-hold menus on
+titles, Settings as a sheet, a full-screen touch player) in Arc's dark, colourless look, with the
+same words as the other Arc apps. Build it the same way: choose the **ArcMobile** target and your
+iPhone or iPad as the destination (turn on Developer Mode on the device when iOS asks). Signing in
+works as on the TV: a code to enter in Link a Device, or **Open Link a Device** on the phone itself
+if you're signed in to Arc's web app there.
+
 ## For developers
 
 You need a Mac with Xcode 16 or newer (Xcode 26 for tvOS 26's Liquid Glass) and XcodeGen.
@@ -133,10 +145,11 @@ open Arc.xcodeproj                   # run the ArcTV scheme in the Apple TV simu
 ### Builds and screenshots on GitHub
 
 GitHub's **Build** workflow (Actions → Build → Run workflow, or a push whose commit message
-contains `[build]`) runs ArcKit's tests and builds the app. It then walks the app in the tvOS
-simulator with the remote's buttons (`UITests/ArcTVUITests/WalkThrough.swift`) against a stand-in
-Arc (`UITests/StandIn/serve.py`), which answers from responses recorded from Arc's shared
-screenshot library. Every screen's screenshot is attached to the run and copied as small JPEGs to
+contains `[build]`) runs ArcKit's tests and builds the Apple TV and iPhone/iPad apps. It then
+walks the Apple TV app in the tvOS simulator with the remote's buttons
+(`UITests/ArcTVUITests/WalkThrough.swift`), and the iPhone app in an iPhone simulator by touch
+(`UITests/ArcMobileUITests/WalkThrough.swift`), against a stand-in Arc (`UITests/StandIn/serve.py`), which answers from responses
+recorded from Arc's shared screenshot library. Every screen's screenshot is attached to the run and copied as small JPEGs to
 the `ci-screenshots` branch (`runs/<run id>/`).
 
 The pictures in this README come from that walk-through: simulator captures, not a real Apple TV.
@@ -161,7 +174,9 @@ ArcTV/Player/    PlaybackEngine with the mpv and Apple engines, the player's scr
 ArcTV/Components/  shared cards, artwork, grids and Home's hero rows
 ArcTV/Together/  Watch Together's rooms, lobby and invites
 ArcTV/Shared/    what the app and the Top Shelf share (the sign-in, through an app group)
+ArcTV/Models/    the data behind screens, shared with iPhone and iPad (Home's rows, routes)
 ArcTopShelf/     the Top Shelf extension
+ArcMobile/       the iPhone and iPad app's entry, screens, cards and touch player
 ArcTV/Resources/en.lproj/Localizable.strings   every word the app shows
 UITests/         the simulator walk-through and the stand-in Arc
 ```
