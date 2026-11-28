@@ -1,0 +1,1 @@
+iOS:  61M	/Users/runner/Library/Developer/Xcode/DerivedData/Arc-gwcqtbijntvvltccopositfatvmh/Build/Products/Debug-iphoneos/Arc.app
